@@ -5,6 +5,7 @@ Shader "Egret3D/Particles_Additive"
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+        _TintColor ("Tint Color", Color) = (1.0,1.0,1.0,1.0)
 	}
 	SubShader
 	{
@@ -38,6 +39,7 @@ Shader "Egret3D/Particles_Additive"
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
+            fixed4 _TintColor;
 			
 			v2f vert (appdata v)
 			{

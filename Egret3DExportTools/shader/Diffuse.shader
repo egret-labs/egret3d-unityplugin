@@ -4,7 +4,7 @@
 	{
 		_MainColor ("MainColor", Color) = (1,1,1,1)
 		_MainTex ("MainTex", 2D) = "white" {}
-		_AlphaCut("AlphaCut",float) = 0.5
+		_AlphaCut("AlphaCut",float) = 0.0
 	}
 	SubShader 
 	{
