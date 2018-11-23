@@ -1,0 +1,8 @@
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\TestDll_3.5.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\TestDll_3.5.pdb
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\UnityExportTool.csprojResolveAssemblyReference.cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\TestDll_3._5.Properties.Resources.resources
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\UnityExportTool.csproj.GenerateResource.Cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\UnityExportTool.csproj.CoreCompileInputs.cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\TestDll_3.5.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\TestDll_3.5.pdb

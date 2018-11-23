@@ -1,0 +1,10 @@
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\Unity3DExportTool.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\Unity3DExportTool.pdb
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\UnityEditor.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\bin\Debug\UnityEngine.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.csprojResolveAssemblyReference.cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.Properties.Resources.resources
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.csproj.GenerateResource.Cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.csproj.CoreCompileInputs.cache
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.dll
+E:\Work\Egret\UnityExportPlugin\unity-plugin-export\UnityExportTool\obj\Debug\Unity3DExportTool.pdb
