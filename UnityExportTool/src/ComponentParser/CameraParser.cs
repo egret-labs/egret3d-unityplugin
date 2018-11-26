@@ -21,8 +21,8 @@ namespace Egret3DExportTools
             }
             compJson.SetNumber("_near", comp.nearClipPlane);
             compJson.SetNumber("_far", comp.farClipPlane);
-            compJson.SetInt("cullingMask", 0xffffff);
-
+            // compJson.SetInt("cullingMask", 0xffffff);
+            compJson.SetInt("cullingMask", comp.cullingMask);
             //clearFlag
             switch (comp.clearFlags)
             {
