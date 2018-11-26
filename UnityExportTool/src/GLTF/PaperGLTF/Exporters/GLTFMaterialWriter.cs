@@ -156,10 +156,10 @@ namespace PaperGLTF
             }
             else if (shaderName.Contains("color") || isTextureEmpty)
             {
-                if(renderType == "Transparent")
+                if (renderType == "Transparent")
                 {
-                    if(isAdditive)
-                    {   
+                    if (isAdditive)
+                    {
                         return "transparent_additive_color";
                     }
                     else
@@ -266,7 +266,7 @@ namespace PaperGLTF
             {
                 color = target.GetColor("_MainColor");
             }
-            else if(target.HasProperty("_TintColor"))
+            else if (target.HasProperty("_TintColor"))
             {
                 color = target.GetColor("_TintColor");
             }
@@ -350,15 +350,35 @@ namespace PaperGLTF
                 {
                     mainST = target.GetVector("_MainTex_ST");
                 }
-                uvTransform.AddNumber(mainST.x);
+                var tx = mainST.z;
+                var ty = mainST.w;
+                var sx = mainST.x;
+                var sy = mainST.y;
+                var cx = 0.0f;
+                var cy = 0.0f;
+                var rotation = 0.0f;
+                var c = Math.Cos(rotation);
+                var s = Math.Sin(rotation);
+
+                uvTransform.AddNumber(sx * c);
+                uvTransform.AddNumber(sx * s);
+                uvTransform.AddNumber(-sx * (c * cx + s * cy) + cx + tx);
+                uvTransform.AddNumber(-sy * s);
+                uvTransform.AddNumber(sy * c);
+                uvTransform.AddNumber(-sy * (-s * cx + c * cy) + cy + ty);
                 uvTransform.AddNumber(0.0);
                 uvTransform.AddNumber(0.0);
-                uvTransform.AddNumber(0.0);
-                uvTransform.AddNumber(mainST.y);
-                uvTransform.AddNumber(0.0);
-                uvTransform.AddNumber(mainST.z);
-                uvTransform.AddNumber(mainST.w);
                 uvTransform.AddNumber(1.0);
+
+                // uvTransform.AddNumber(mainST.x);
+                // uvTransform.AddNumber(0.0);
+                // uvTransform.AddNumber(0.0);
+                // uvTransform.AddNumber(0.0);
+                // uvTransform.AddNumber(mainST.y);
+                // uvTransform.AddNumber(0.0);
+                // uvTransform.AddNumber(mainST.z);
+                // uvTransform.AddNumber(mainST.w);
+                // uvTransform.AddNumber(1.0);
                 valuesJson.Add("uvTransform", uvTransform);
                 if (!_isParticle)
                 {
