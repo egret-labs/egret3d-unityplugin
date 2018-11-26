@@ -14,19 +14,19 @@ namespace Egret3DExportTools
             //初始化组件管理器
             componentParsers.Clear();
             // RegComponentParser(new AniPlayerParser(),               typeof(FB.PosePlus.AniPlayer),              "egret3d.Animation");
-            RegComponentParser(new AnimatorParser(),                typeof(UnityEngine.Animator),               "egret3d.Animation");
-            RegComponentParser(new AnimationParser(),               typeof(UnityEngine.Animation),              "egret3d.Animation");
-            RegComponentParser(new BoxColliderParser(),             typeof(UnityEngine.BoxCollider),            "egret3d.BoxCollider");
-            RegComponentParser(new SphereColliderParser(),          typeof(UnityEngine.SphereCollider),         "egret3d.SphereCollider");
-            RegComponentParser(new CameraParser(),                  typeof(UnityEngine.Camera),                 "egret3d.Camera"); ;
-            RegComponentParser(new MeshFilterParser(),              typeof(UnityEngine.MeshFilter),             "egret3d.MeshFilter");
-            RegComponentParser(new MeshRendererParser(),            typeof(UnityEngine.MeshRenderer),           "egret3d.MeshRenderer"); ;
-            RegComponentParser(new ParticleSystemParser(),          typeof(UnityEngine.ParticleSystem),         "egret3d.particle.ParticleComponent");
-            RegComponentParser(new ParticleSystemRendererParser(),  typeof(UnityEngine.ParticleSystemRenderer), "egret3d.particle.ParticleRenderer");
-            RegComponentParser(new SkinnedMeshRendererParser(),     typeof(UnityEngine.SkinnedMeshRenderer),    "egret3d.SkinnedMeshRenderer");
-            RegComponentParser(new TransformParser(),               typeof(UnityEngine.Transform),              "egret3d.Transform");
-            RegComponentParser(new DirectionalLightParser(),        typeof(UnityEngine.Light),                  "egret3d.DirectionalLight");
-            RegComponentParser(new SpotLightParser(),               typeof(UnityEngine.Light),                  "egret3d.SpotLight");
+            RegComponentParser(new AnimatorParser(), typeof(UnityEngine.Animator), "egret3d.Animation");
+            RegComponentParser(new AnimationParser(), typeof(UnityEngine.Animation), "egret3d.Animation");
+            RegComponentParser(new BoxColliderParser(), typeof(UnityEngine.BoxCollider), "egret3d.BoxCollider");
+            RegComponentParser(new SphereColliderParser(), typeof(UnityEngine.SphereCollider), "egret3d.SphereCollider");
+            RegComponentParser(new CameraParser(), typeof(UnityEngine.Camera), "egret3d.Camera"); ;
+            RegComponentParser(new MeshFilterParser(), typeof(UnityEngine.MeshFilter), "egret3d.MeshFilter");
+            RegComponentParser(new MeshRendererParser(), typeof(UnityEngine.MeshRenderer), "egret3d.MeshRenderer"); ;
+            RegComponentParser(new ParticleSystemParser(), typeof(UnityEngine.ParticleSystem), "egret3d.particle.ParticleComponent");
+            RegComponentParser(new ParticleSystemRendererParser(), typeof(UnityEngine.ParticleSystemRenderer), "egret3d.particle.ParticleRenderer");
+            RegComponentParser(new SkinnedMeshRendererParser(), typeof(UnityEngine.SkinnedMeshRenderer), "egret3d.SkinnedMeshRenderer");
+            RegComponentParser(new TransformParser(), typeof(UnityEngine.Transform), "egret3d.Transform");
+            RegComponentParser(new DirectionalLightParser(), typeof(UnityEngine.Light), "egret3d.DirectionalLight");
+            RegComponentParser(new SpotLightParser(), typeof(UnityEngine.Light), "egret3d.SpotLight");
         }
         /**
          * 注册可序列化组件。
@@ -38,7 +38,8 @@ namespace Egret3DExportTools
         {
             parser.compType = compType;
             parser.className = className;
-            if(!componentParsers.ContainsKey(compType.Name)){
+            if (!componentParsers.ContainsKey(compType.Name))
+            {
                 componentParsers[compType.Name] = new List<IComponentParser>();
             }
             componentParsers[compType.Name].Add(parser);
@@ -70,7 +71,9 @@ namespace Egret3DExportTools
             item.SetClass("paper.GameObject");
             item.SetString("name", obj.name);
             item.SetString("tag", obj.tag);
-            item.SetInt("layer", LAYER[obj.layer >= LAYER.Length ? 0 : obj.layer]);
+            var layerMask = 1 << obj.layer;
+            item.SetInt("layer", layerMask);
+            // item.SetInt("layer", LAYER[obj.layer >= LAYER.Length ? 0 : obj.layer]);;
             item.SetBool("isStatic", obj.isStatic);
 
             var componentsItem = new MyJson_Array();
@@ -149,7 +152,7 @@ namespace Egret3DExportTools
             }
 
             var flag = false;
-            foreach(var parser in parserList)
+            foreach (var parser in parserList)
             {
                 var compJson = new MyJson_Object();
                 //组件必须拥有的属性
@@ -162,7 +165,7 @@ namespace Egret3DExportTools
                 ResourceManager.instance.AddCompJson(compJson);
                 flag = true;
             }
-            
+
             return flag;
         }
     }

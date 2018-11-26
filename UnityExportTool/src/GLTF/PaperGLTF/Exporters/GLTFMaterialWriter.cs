@@ -370,15 +370,6 @@ namespace PaperGLTF
                 uvTransform.AddNumber(0.0);
                 uvTransform.AddNumber(1.0);
 
-                // uvTransform.AddNumber(mainST.x);
-                // uvTransform.AddNumber(0.0);
-                // uvTransform.AddNumber(0.0);
-                // uvTransform.AddNumber(0.0);
-                // uvTransform.AddNumber(mainST.y);
-                // uvTransform.AddNumber(0.0);
-                // uvTransform.AddNumber(mainST.z);
-                // uvTransform.AddNumber(mainST.w);
-                // uvTransform.AddNumber(1.0);
                 valuesJson.Add("uvTransform", uvTransform);
                 if (!_isParticle)
                 {
@@ -387,7 +378,6 @@ namespace PaperGLTF
             }
             else
             {
-                // texture = Texture2D.whiteTexture;
                 MyLog.LogWarning("纯色材质:" + target.name);
             }
 
