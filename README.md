@@ -1,12 +1,19 @@
 # Egret3DExportTools
 * 支持Unity5.6.4版本以上
 
-## 使用方法
-1. 复制Egret3DExportTools文件夹到Unity项目Assets下.
-2. Unity编辑器菜单会多出一个Egret3DExportTools选项，点击打开即可.
+## 使用DLL方法
+1. 复制Out目录下Egret3DExportTools文件夹到Unity项目Assets下。
+2. 等待Unity编译，完成后会在控制台出现"Finished updating scripts / assemblies"。
+3. Unity编辑器菜单会多出一个Egret3DExportTools选项，点击打开即可。
+
+## 生成DLL方法
+1. 使用visual studio 2017打开UnityExportTool目录下Unity3DExportTool.sln文件。
+2. 默认引用libs/unity5下的Unity库，可以自行选择想要引用的Unity库。
+3. 打开项目后，在生成标签下选择自己的DLL输出路径。
+4. 点击生成解决方案生成插件DLL。
 
 ## 注意事项
-1. 导出NavMesh功能暂不支持.
+1. 导出目录请不要带有空格，空格会被插件替换为下划线。
 
 ### 2018/09/30 更新
 * 【调整】采用标准蒙皮动画结构输出动画数据
