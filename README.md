@@ -9,7 +9,7 @@
 ## 生成DLL方法
 1. 使用visual studio 2017打开UnityExportTool目录下Unity3DExportTool.sln文件。
 2. 默认引用libs/unity5下的Unity库，可以自行选择想要引用的Unity库。
-3. 打开项目后，在生成标签下选择自己的DLL输出路径。
+3. 打开项目设置，在生成标签下选择自己的DLL输出路径。
 4. 点击生成解决方案生成插件DLL。
 
 ## 注意事项
