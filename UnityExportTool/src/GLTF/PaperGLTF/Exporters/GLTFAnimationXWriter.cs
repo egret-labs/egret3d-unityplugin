@@ -199,7 +199,6 @@
                         AnimationExtensionFactory.EXTENSION_NAME,
                         new AnimationExtension () {
                             frameRate = animationClip.frameRate,
-                            frameCount = frameCount,
                             clips = new List<Schema.AnimationClip>() {
                                 new Schema.AnimationClip() {
                                     name = animationClip.name,
@@ -212,6 +211,7 @@
                     },
                 },
             };
+            var ext = glTFAnimation.Extensions[AnimationExtensionFactory.EXTENSION_NAME] as AnimationExtension;
             this._root.Animations.Add(glTFAnimation);
             // Input.
             var inputAccessor = new Accessor();
@@ -455,6 +455,21 @@
                     }
                 }
             }
+
+            foreach (var evt in animationClip.events)
+            {
+                var glTFFrameEvent = new AnimationFrameEvent();
+                glTFFrameEvent.name = evt.functionName;
+                glTFFrameEvent.position = evt.time;
+                glTFFrameEvent.intVariable = evt.intParameter;
+                glTFFrameEvent.floatVariable = evt.floatParameter;
+                glTFFrameEvent.stringVariable = evt.stringParameter;
+                ext.events.Add(glTFFrameEvent);
+            }
+
+            ext.events.Sort();
+
+
         }
     }
 }

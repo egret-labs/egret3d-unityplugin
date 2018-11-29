@@ -41,23 +41,6 @@
 
             var ext = new AnimationExtension();
             ext.frameRate = player.clips[0].fps;
-            ext.frameCount = totalFrame -1;
-            ext.data = 0;
-            ext.frames = new List<int>();
-            for (var frameIndex = 0; frameIndex < ext.frameCount; frameIndex++)
-            {
-                ext.frames.Add(binarySingleFrameSize * frameIndex / 4);
-            }
-            ext.joints = new List<string>();
-            var bones = player.clips[0].boneinfo;
-            for (var boneIndex = 0; boneIndex < bones.Count; boneIndex++)
-            {
-                var boneName = bones[boneIndex];
-                if (player.getbone(boneName) != null)
-                {
-                    ext.joints.Add(bones[boneIndex]);
-                }
-            }
             ext.clips = new List<Schema.AnimationClip>();
             float position = 0;
             for (var aniIndex = 0; aniIndex < player.clips.Count; aniIndex++)
@@ -68,7 +51,7 @@
                 ani.position = position;
                 ani.duration = (rawClip.frames.Count - 1) / ext.frameRate;
                 position += rawClip.frames.Count / ext.frameRate;
-                for (var evtIndex = 0; evtIndex < rawClip.events.Count; evtIndex++)
+                /*for (var evtIndex = 0; evtIndex < rawClip.events.Count; evtIndex++)
                 {
                     var rawEvent = rawClip.events[evtIndex];
                     var evt = new Schema.FrameEvent();
@@ -78,7 +61,7 @@
                     evt.floatVariable = rawEvent.floatVariable;
                     evt.stringVariable = rawEvent.stringVariable;
                     ani.events.Add(evt);
-                }
+                }*/
                 ext.clips.Add(ani);
             }
 
