@@ -14,6 +14,17 @@
 
 ## 注意事项
 1. 导出目录请不要带有空格，空格会被插件替换为下划线。
+2. 导出随机种子不支持
+
+## 支持的模块
+1. Main
+2. Emission
+3. Shape
+4. Velocity over lifetime
+5. Color over lifetime
+6. Size over lifetime
+7. Rotation over lifetime
+8. Texture Sheet Animation
 
 ### 2018/09/30 更新
 * 【调整】采用标准蒙皮动画结构输出动画数据
