@@ -5,22 +5,21 @@
     using Newtonsoft.Json.Linq;
     using System.Collections.Generic;
 
-    public class FrameEvent
-    {
-        public string name;
-        public float position;
-        public int intVariable;
-        public float floatVariable;
-        public string stringVariable;
-    }
-
     public class AnimationClip
     {
         public string name;
         public int playTimes;
         public float position;
         public float duration;
-        public List<FrameEvent> events = new List<FrameEvent>();
+    }
+
+    public class AnimationFrameEvent
+    {
+        public string name;
+        public float position;
+        public int intVariable;
+        public float floatVariable;
+        public string stringVariable;
     }
 
     public class AnimationChannelExtension : IExtension {
@@ -57,21 +56,15 @@
     public class AnimationExtension : IExtension
     {
         public float frameRate;
-        public int frameCount;
-        public int data;
-        public List<int> frames = new List<int>();
-        public List<string> joints = new List<string>();
         public List<AnimationClip> clips = new List<AnimationClip>();
+        public List<AnimationFrameEvent> events = new List<AnimationFrameEvent>();
 
         public IExtension Clone(GLTFRoot root)
         {
             return new AnimationExtension {
                 frameRate = frameRate,
-                frameCount = frameCount,
-                data = data,
-                frames = frames,
-                joints = joints,
-                clips = clips
+                clips = clips,
+                events = events
             };
         }
 
@@ -84,27 +77,7 @@
                     frameRate
                 ));
 
-            ext.Add(new JProperty(
-                    AnimationExtensionFactory.FRAME_COUNT,
-                    frameCount
-                ));
-
-            ext.Add(new JProperty(
-                    AnimationExtensionFactory.DATA,
-                    data
-                ));
-
-            ext.Add(new JProperty(
-                    AnimationExtensionFactory.FRAMES,
-                    new JArray(frames)
-                ));
-
-            ext.Add(new JProperty(
-                    AnimationExtensionFactory.JOINTS,
-                    new JArray(joints)
-                ));
-
-            if (this.clips.Count > 0)
+            if (clips.Count > 0)
             {
                 var obj = JsonConvert.SerializeObject(clips);
                 JsonConvert.DeserializeObject(obj);
@@ -114,7 +87,18 @@
                         JsonConvert.DeserializeObject(obj)
                     ));
             }
-            
+
+            if (events.Count > 0)
+            {
+                var obj = JsonConvert.SerializeObject(events);
+                JsonConvert.DeserializeObject(obj);
+
+                ext.Add(new JProperty(
+                        AnimationExtensionFactory.EVENTS,
+                        JsonConvert.DeserializeObject(obj)
+                    ));
+            }
+
             return new JProperty(AnimationExtensionFactory.EXTENSION_NAME, ext);
         }
     }
