@@ -62,14 +62,19 @@ namespace Egret3DExportTools
         {
             var path = AssetDatabase.GetAssetPath(source);
             TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(path);
-            var saveTextureType = importer.textureType;
+            MyLog.Log("---导出图片:" + source.name + " path:" + path);
+            var saveTextureType = TextureImporterType.Default;
             var isRestore = false;
-            if(saveTextureType == TextureImporterType.NormalMap)
+            if (importer)
             {
-                //法线贴图类型贴图因为Unity特殊处理类，如果要正常导出，就要转换一下类型
-                isRestore = true;
-                importer.textureType = TextureImporterType.Default;
-                importer.SaveAndReimport();
+                saveTextureType = importer.textureType;
+                if (saveTextureType == TextureImporterType.NormalMap)
+                {
+                    //法线贴图类型贴图因为Unity特殊处理类，如果要正常导出，就要转换一下类型
+                    isRestore = true;
+                    importer.textureType = TextureImporterType.Default;
+                    importer.SaveAndReimport();
+                }
             }
 
             var renderTexture = RenderTexture.GetTemporary(source.width, source.height);
@@ -79,7 +84,6 @@ namespace Egret3DExportTools
             exportTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
             exportTexture.Apply();
 
-            MyLog.Log("---导出图片:" + source.name);
 
             byte[] res = null;
             try
@@ -102,7 +106,7 @@ namespace Egret3DExportTools
                 MyLog.LogError("图片导出出错:" + path + " 请保证原始资源是可读写，非压缩文件");
             }
 
-            if(isRestore)
+            if (isRestore && importer)
             {
                 importer.textureType = saveTextureType;
                 importer.SaveAndReimport();
