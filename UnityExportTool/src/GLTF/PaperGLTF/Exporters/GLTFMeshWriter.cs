@@ -63,6 +63,22 @@ namespace PaperGLTF
             return res;
         }
 
+        private List<Transform> _getAllChildren(Transform transform, List<Transform> children = null)
+        {
+            if (children == null) {
+                children = new List<Transform>();
+            }
+
+            for (var i = 0; i < transform.childCount; ++i)
+            {
+                var child = transform.GetChild(i);
+                children.Add(child);
+                _getAllChildren(child, children);
+            }
+
+            return children;
+        }
+
         //
         private void ExportMesh()
         {
@@ -71,56 +87,66 @@ namespace PaperGLTF
             if (this._target.GetComponent<UnityEngine.SkinnedMeshRenderer>() != null)
             {
                 var skin = this._target.GetComponent<UnityEngine.SkinnedMeshRenderer>();
-                
-                _root.Nodes = new List<Node>();
-                _root.Skins = new List<Skin>();
-                var gltfSKIN = new Skin {
+                var parent = _target.parent;
+                var allBones = _getAllChildren(parent);
+
+                var gltfSKIN = new Skin
+                {
                     Joints = new List<NodeId>()
                 };
+                _root.Nodes = new List<Node>();
+                _root.Skins = new List<Skin>();
                 _root.Skins.Add(gltfSKIN);
+
+                foreach (var bone in allBones)
+                {
+                    var translation = bone.localPosition;
+                    var rotation = bone.localRotation;
+                    var scale = bone.localScale;
+                    var node = new Node
+                    {
+                        Name = bone.gameObject.name,
+                        Translation = new GLTF.Math.Vector3(translation.x, translation.y, translation.z),
+                        Rotation = new GLTF.Math.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w),
+                        Scale = new GLTF.Math.Vector3(scale.x, scale.y, scale.z),
+                    };
+
+                    if (bone.childCount > 0)
+                    {
+                        Debug.logger.Log(bone.childCount);
+                        node.Children = new List<NodeId>();
+                        for (var i = 0; i < bone.childCount;i++)
+                        {
+                            node.Children.Add(
+                                new NodeId
+                                {
+                                    Id = allBones.IndexOf(bone.GetChild(i)),
+                                    Root = _root
+                                }
+                            );
+                        }    
+                    }
+                    _root.Nodes.Add(node);
+                }
 
                 if (skin.rootBone != null)
                 {
                     gltfSKIN.Skeleton = new NodeId
                     {
-                        Id = _root.Nodes.Count,
+                        Id = allBones.IndexOf(skin.rootBone),
                         Root = _root
                     };
-
-                    var node = new Node
-                    {
-                        Name = skin.rootBone.gameObject.name,
-                    };
-                    _root.Nodes.Add(node);
                 }
 
                 foreach (var bone in skin.bones)
                 {
-                    if (bone != skin.rootBone)
-                    {
-                        var node = new Node
+                    gltfSKIN.Joints.Add(
+                        new NodeId
                         {
-                            Name = bone.gameObject.name,
-                        };
-                        gltfSKIN.Joints.Add(
-                            new NodeId
-                            {
-                                Id = _root.Nodes.Count,
-                                Root = _root
-                            }
-                        );
-                        _root.Nodes.Add(node);
-                    }
-                    else
-                    {
-                        gltfSKIN.Joints.Add(
-                            new NodeId
-                            {
-                                Id = gltfSKIN.Skeleton.Id,
-                                Root = _root
-                            }
-                        );
-                    }
+                            Id = allBones.IndexOf(bone),
+                            Root = _root
+                        }
+                    );
                 }
 
                 mesh.Primitives.AddRange(ExportPrimitive(skin.sharedMesh, skin.sharedMaterials, gltfSKIN));

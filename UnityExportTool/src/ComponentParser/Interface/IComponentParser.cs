@@ -21,7 +21,7 @@ namespace Egret3DExportTools
             return true;
         }
 
-        public Type compType { get => _compType; set => _compType = value; }
-        public string className { get => _className; set => _className = value; }
+        public Type compType { get { return _compType; } set { _compType = value; } }
+        public string className { get { return _className; } set { _className = value; }  }
     }
 }
