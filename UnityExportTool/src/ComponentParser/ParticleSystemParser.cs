@@ -4,7 +4,7 @@ using System;
 namespace Egret3DExportTools
 {
     public class ParticleSystemParser : ComponentParser
-    {        
+    {
         public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
         {
             ParticleSystem comp = component as ParticleSystem;
@@ -58,7 +58,7 @@ namespace Egret3DExportTools
                 mainItem.SetEnum("_simulationSpace", main.simulationSpace);
                 mainItem.SetEnum("scaleMode", main.scalingMode);
                 mainItem.SetBool("playOnAwake", main.playOnAwake);
-                if(ExportToolsSetting.estimateMaxParticles)
+                if (ExportToolsSetting.estimateMaxParticles)
                 {
                     var value = this.EstimateMaxParticles(comp);
                     mainItem.SetInt("_maxParticles", value);
@@ -95,12 +95,14 @@ namespace Egret3DExportTools
                 var shapItem = new MyJson_Tree(false);
                 compJson["shape"] = shapItem;
                 shapItem.SetEnum("shapeType", comp.shape.shapeType);
-                shapItem.SetNumber("radius", comp.shape.radius);
                 shapItem.SetNumber("angle", comp.shape.angle);
                 shapItem.SetNumber("length", comp.shape.length);
                 shapItem.SetEnum("arcMode", comp.shape.arcMode);
-                shapItem.SetNumber("radiusSpread", comp.shape.radiusSpread);
+                shapItem.SetNumber("arc", comp.shape.arc);
+                shapItem.SetNumber("arcSpread", comp.shape.arcSpread);
                 shapItem.SetEnum("radiusMode", comp.shape.radiusMode);
+                shapItem.SetNumber("radius", comp.shape.radius);
+                shapItem.SetNumber("radiusSpread", comp.shape.radiusSpread);
                 shapItem.SetVector3("box", comp.shape.box);
                 shapItem.SetBool("randomDirection", comp.shape.randomDirectionAmount > 0);
                 shapItem.SetBool("spherizeDirection", comp.shape.sphericalDirectionAmount > 0);
@@ -170,7 +172,7 @@ namespace Egret3DExportTools
             int total = 0;
             var bursts = new ParticleSystem.Burst[comp.emission.burstCount];
             comp.emission.GetBursts(bursts);
-            foreach(var burst in bursts)
+            foreach (var burst in bursts)
             {
                 total += burst.maxCount;
             }
@@ -183,40 +185,40 @@ namespace Egret3DExportTools
         private float GetCureMax(ParticleSystem.MinMaxCurve curve)
         {
             float max = 0;
-            switch(curve.mode)
+            switch (curve.mode)
             {
                 case ParticleSystemCurveMode.Constant:
-                {
-                    max = curve.constant;
-                    break;
-                }
+                    {
+                        max = curve.constant;
+                        break;
+                    }
                 case ParticleSystemCurveMode.TwoConstants:
-                {
-                    max = curve.constantMax;
-                    break;
-                }
+                    {
+                        max = curve.constantMax;
+                        break;
+                    }
                 case ParticleSystemCurveMode.Curve:
-                {
-                    foreach(var keyFrame in curve.curve.keys)
                     {
-                        if(keyFrame.value > max)
+                        foreach (var keyFrame in curve.curve.keys)
                         {
-                            max = keyFrame.value * curve.curveMultiplier;
+                            if (keyFrame.value > max)
+                            {
+                                max = keyFrame.value * curve.curveMultiplier;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
                 case ParticleSystemCurveMode.TwoCurves:
-                {
-                    foreach(var keyFrame in curve.curveMax.keys)
                     {
-                        if(keyFrame.value > max)
+                        foreach (var keyFrame in curve.curveMax.keys)
                         {
-                            max = keyFrame.value * curve.curveMultiplier;
+                            if (keyFrame.value > max)
+                            {
+                                max = keyFrame.value * curve.curveMultiplier;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
             }
 
             return max;
