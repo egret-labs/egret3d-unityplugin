@@ -120,6 +120,7 @@ namespace Egret3DExportTools
                 ExportToolsSetting.debugLog = GUILayout.Toggle(ExportToolsSetting.debugLog, new GUIContent("输出日志", "勾选后，方便查看输出信息"));
                 ExportToolsSetting.prefabResetPos = GUILayout.Toggle(ExportToolsSetting.prefabResetPos, new GUIContent("坐标归零", "勾选后，将导出的预制体坐标归零"));
                 ExportToolsSetting.exportOriginalImage = GUILayout.Toggle(ExportToolsSetting.exportOriginalImage, new GUIContent("导出原始图片", "勾选后，jpg和png会直接使用原始图片导出"));
+                // ExportToolsSetting.unityNormalTexture = GUILayout.Toggle(ExportToolsSetting.unityNormalTexture, new GUIContent("使用Unity法线贴图", "勾选后，时使用Unity转换后的法线贴图导出"));
 
                 GUILayout.EndHorizontal();
             }

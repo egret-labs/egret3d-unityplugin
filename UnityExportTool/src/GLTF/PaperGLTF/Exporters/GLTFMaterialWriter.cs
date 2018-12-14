@@ -220,6 +220,8 @@ namespace PaperGLTF
         {
             var target = this._target;
 
+            var isCustom = ExportConfig.instance.IsCustomShader(target.shader.name);
+
             var materialJson = new MyJson_Tree();
 
             var assetJson = new MyJson_Tree();
@@ -256,133 +258,221 @@ namespace PaperGLTF
             var valuesJson = new MyJson_Tree();
             KHR_techniques_webglJson.Add("values", valuesJson);
 
-            var color = Color.white;
-            UnityEngine.Texture texture = null;
-            if (target.HasProperty("_Color"))
-            {
-                color = target.GetColor("_Color");
-            }
-            else if (target.HasProperty("_MainColor"))
-            {
-                color = target.GetColor("_MainColor");
-            }
-            else if (target.HasProperty("_TintColor"))
-            {
-                color = target.GetColor("_TintColor");
-            }
-
             UnityEditor.MaterialProperty[] orginmps = UnityEditor.MaterialEditor.GetMaterialProperties(new UnityEngine.Object[] { target });
-            // foreach (var mp in orginmps)
-            // {
-            //    Debug.Log("材质名称:" + mp.name + " 类型:" + mp.type);
-            // }
-            //TODO 寻找第一个Texture
-            foreach (var mp in orginmps)
+            if (!isCustom)
             {
-                if (mp.type.ToString() == "Texture")
+                var color = Color.white;
+                UnityEngine.Texture texture = null;
+                if (target.HasProperty("_Color"))
                 {
-                    var tex = target.GetTexture(mp.name);
-                    if (tex != null)
+                    color = target.GetColor("_Color");
+                }
+                else if (target.HasProperty("_MainColor"))
+                {
+                    color = target.GetColor("_MainColor");
+                }
+                else if (target.HasProperty("_TintColor"))
+                {
+                    color = target.GetColor("_TintColor");
+                }
+
+                //TODO 寻找第一个Texture
+                foreach (var mp in orginmps)
+                {
+                    if (mp.type.ToString() == "Texture")
                     {
-                        texture = tex;
-                        break;
+                        var tex = target.GetTexture(mp.name);
+                        if (tex != null)
+                        {
+                            texture = tex;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (this._isParticle)
-            {
-                valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                valuesJson.SetNumber("opacity", color.a);
-            }
-            else if (this._isAnimation)
-            {
-                valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                valuesJson.SetNumber("opacity", color.a);
+                if (this._isParticle)
+                {
+                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
+                    valuesJson.SetNumber("opacity", color.a);
+                }
+                else if (this._isAnimation)
+                {
+                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
+                    valuesJson.SetNumber("opacity", color.a);
+                }
+                else
+                {
+                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
+                    valuesJson.SetNumber("opacity", color.a);
+                }
+                if (ExportToolsSetting.lightType == ExportLightType.Phong && !this._isParticle)
+                {
+                    if (target.HasProperty("_SpecGlossMap"))
+                    {
+                        var specularMap = target.GetTexture("_SpecGlossMap");
+                        if (specularMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
+                            valuesJson.SetString("specularMap", texPath);
+                            definesJson.AddString("USE_SPECULARMAP");
+                        }
+                    }
+
+                    if (target.HasProperty("_BumpMap"))
+                    {
+                        var normalMap = target.GetTexture("_BumpMap");
+                        if (normalMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
+                            valuesJson.SetString("normalMap", texPath);
+                            definesJson.AddString("USE_NORMALMAP");
+                        }
+                    }
+                }
+
+                if (target.HasProperty("_Cutoff"))
+                {
+                    var cutoff = target.GetFloat("_Cutoff");
+                    if (cutoff < 1.0f)
+                    {
+                        definesJson.AddString("ALPHATEST " + cutoff);
+                    }
+                }
+
+                if (texture != null)
+                {
+                    var texPath = ResourceManager.instance.SaveTexture(texture as Texture2D, "");
+                    valuesJson.SetString("map", texPath);
+
+                    var mainST = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+                    MyJson_Array uvTransform = new MyJson_Array();
+                    if (target.HasProperty("_MainTex_ST"))
+                    {
+                        mainST = target.GetVector("_MainTex_ST");
+                    }
+                    var tx = mainST.z;
+                    var ty = mainST.w;
+                    var sx = mainST.x;
+                    var sy = mainST.y;
+                    var cx = 0.0f;
+                    var cy = 0.0f;
+                    var rotation = 0.0f;
+                    var c = Math.Cos(rotation);
+                    var s = Math.Sin(rotation);
+
+                    uvTransform.AddNumber(sx * c);
+                    uvTransform.AddNumber(sx * s);
+                    uvTransform.AddNumber(-sx * (c * cx + s * cy) + cx + tx);
+                    uvTransform.AddNumber(-sy * s);
+                    uvTransform.AddNumber(sy * c);
+                    uvTransform.AddNumber(-sy * (-s * cx + c * cy) + cy + ty);
+                    uvTransform.AddNumber(0.0);
+                    uvTransform.AddNumber(0.0);
+                    uvTransform.AddNumber(1.0);
+
+                    valuesJson.Add("uvTransform", uvTransform);
+                    if (!_isParticle)
+                    {
+                        definesJson.AddString("USE_MAP");
+                    }
+                }
+                else
+                {
+                    MyLog.LogWarning("纯色材质:" + target.name);
+                }
+
+                var shaderName = FindShaderName(texture == null);
+                KHR_techniques_webglJson.SetString("technique", "builtin/" + shaderName + ".shader.json");
             }
             else
             {
-                valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                valuesJson.SetNumber("opacity", color.a);
-            }
-            if (ExportToolsSetting.lightType == ExportLightType.Phong && !this._isParticle)
-            {
-                if (target.HasProperty("_SpecGlossMap"))
+                var shaderName = target.shader.name;
+                foreach (var mp in orginmps)
                 {
-                    var specularMap = target.GetTexture("_SpecGlossMap");
-                    if (specularMap != null)
+                    if (mp.flags == UnityEditor.MaterialProperty.PropFlags.HideInInspector)
+                        continue;
+
+                    var _uniform = new MyJson_Tree();
+                    string type = mp.type.ToString();
+                    if (type == "Float" || type == "Range")
                     {
-                        var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
-                        valuesJson.SetString("specularMap", texPath);
-                        definesJson.AddString("USE_SPECULARMAP");
+                        valuesJson.SetNumber(mp.name, target.GetFloat(mp.name));
+                    }
+                    else if (type == "Vector")
+                    {
+                        valuesJson.SetVector4(mp.name, target.GetVector(mp.name));
+                    }
+                    else if (type == "Color")
+                    {
+                        valuesJson.SetColor(mp.name, target.GetColor(mp.name));
+                    }
+                    else if (type == "Texture")
+                    {
+                        //Debug.Log(mp.textureValue + "_:" + mp.textureDimension.ToString());
+                        string texdim = mp.textureDimension.ToString();
+                        var tex = target.GetTexture(mp.name);
+                        if (tex != null)
+                        {
+                            if (texdim == "Tex2D")
+                            {
+                                var texPath = ResourceManager.instance.SaveTexture(tex as Texture2D, "");
+                                valuesJson.SetString(mp.name, texPath);
+
+                                string propertyName = mp.name + "_ST";
+                                if (target.HasProperty(propertyName))
+                                {
+                                    valuesJson.SetVector4(propertyName, target.GetVector(propertyName));
+                                }
+                            }
+                            else
+                            {
+                                throw new Exception("not suport texdim:" + texdim);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("not support type: " + mp.type);
                     }
                 }
 
-                if (target.HasProperty("_BumpMap"))
+                var statesJson = new MyJson_Tree();
+                paperJson.Add("states", statesJson);
+                var enalbesJson = new MyJson_Array();
+                var functionsJson = new MyJson_Tree();
+                statesJson.Add("enable", enalbesJson);
+                statesJson.Add("functions", functionsJson);
+
+                if (target.GetTag("RenderType", false, "") == "Transparent")
                 {
-                    var normalMap = target.GetTexture("_BumpMap");
-                    if (normalMap != null)
-                    {
-                        var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
-                        valuesJson.SetString("normalMap", texPath);
-                        definesJson.AddString("USE_NORMALMAP");
-                    }
+                    var isBlend = shaderName.Contains("blended");
+                    var isAdditive = shaderName.Contains("additive");
+                    var isMultiply = shaderName.Contains("multiply");
+                    this.SetBlend(enalbesJson, functionsJson, BlendMode.Blend);
                 }
+
+                var doubleSided = target.HasProperty("_Cull") && target.GetInt("_Cull") == (float)UnityEngine.Rendering.CullMode.Off;
+                if (!doubleSided)
+                {
+                    doubleSided = shaderName.Contains("both") || shaderName.Contains("side");
+                }
+                if (doubleSided)
+                {
+                    this.SetCullFace(enalbesJson, functionsJson, false, FrontFace.CCW, CullFace.BACK);
+                }
+                else
+                {
+                    this.SetCullFace(enalbesJson, functionsJson, true, FrontFace.CCW, CullFace.BACK);
+                }
+
+                this.SetDepth(enalbesJson, functionsJson, true, true);
+
+                var url = UnityEditor.AssetDatabase.GetAssetPath(target.shader);
+                url += ".json";
+                KHR_techniques_webglJson.SetString("technique", url);
+                MyLog.Log("自定义Shader:" + url);
             }
 
-            if (target.HasProperty("_Cutoff"))
-            {
-                var cutoff = target.GetFloat("_Cutoff");
-                if (cutoff < 1.0f)
-                {
-                    definesJson.AddString("ALPHATEST " + cutoff);
-                }
-            }
-
-            if (texture != null)
-            {
-                var texPath = ResourceManager.instance.SaveTexture(texture as Texture2D, "");
-                valuesJson.SetString("map", texPath);
-
-                var mainST = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
-                MyJson_Array uvTransform = new MyJson_Array();
-                if (target.HasProperty("_MainTex_ST"))
-                {
-                    mainST = target.GetVector("_MainTex_ST");
-                }
-                var tx = mainST.z;
-                var ty = mainST.w;
-                var sx = mainST.x;
-                var sy = mainST.y;
-                var cx = 0.0f;
-                var cy = 0.0f;
-                var rotation = 0.0f;
-                var c = Math.Cos(rotation);
-                var s = Math.Sin(rotation);
-
-                uvTransform.AddNumber(sx * c);
-                uvTransform.AddNumber(sx * s);
-                uvTransform.AddNumber(-sx * (c * cx + s * cy) + cx + tx);
-                uvTransform.AddNumber(-sy * s);
-                uvTransform.AddNumber(sy * c);
-                uvTransform.AddNumber(-sy * (-s * cx + c * cy) + cy + ty);
-                uvTransform.AddNumber(0.0);
-                uvTransform.AddNumber(0.0);
-                uvTransform.AddNumber(1.0);
-
-                valuesJson.Add("uvTransform", uvTransform);
-                if (!_isParticle)
-                {
-                    definesJson.AddString("USE_MAP");
-                }
-            }
-            else
-            {
-                MyLog.LogWarning("纯色材质:" + target.name);
-            }
-
-            var shaderName = FindShaderName(texture == null);
-            KHR_techniques_webglJson.SetString("technique", "builtin/" + shaderName + ".shader.json");
 
             materialJson.SetInt("version", 4);
 

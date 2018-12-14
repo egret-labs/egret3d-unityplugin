@@ -5,6 +5,7 @@ namespace Egret3DExportTools
     public class ExportConfig
     {
         public string exportPath;
+        public string[] customShaders;
 
         private static ExportConfig _instance;
         public static ExportConfig instance
@@ -15,7 +16,7 @@ namespace Egret3DExportTools
         {
             if (System.IO.File.Exists(configPath))
             {
-                var jsonStr = System.IO.File.ReadAllText(configPath, System.Text.Encoding.UTF8);           
+                var jsonStr = System.IO.File.ReadAllText(configPath, System.Text.Encoding.UTF8);
                 _instance = JsonUtility.FromJson<ExportConfig>(jsonStr);
             }
             else
@@ -27,10 +28,37 @@ namespace Egret3DExportTools
             {
                 _instance.exportPath = defaultExportPath;
             }
+
+            MyLog.Log("exportPath:" + _instance.exportPath);
+
+            if (_instance.customShaders != null)
+            {
+                foreach (var customShader in _instance.customShaders)
+                {
+                    MyLog.Log("customShader:" + customShader);
+                }
+            }
         }
         public void Save(string configPath)
         {
             System.IO.File.WriteAllText(configPath, JsonUtility.ToJson(this));
+        }
+
+        public bool IsCustomShader(string shaderName)
+        {
+            if (this.customShaders != null)
+            {
+                foreach (var customShader in this.customShaders)
+                {
+                    if (shaderName == customShader)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+
+            return false;
         }
     }
 
@@ -68,6 +96,7 @@ namespace Egret3DExportTools
         *估算一个合理的最大粒子数
         */
         public static bool estimateMaxParticles = true;
+        public static bool unityNormalTexture = false;
         /**
         *小数点保留位数
         */
