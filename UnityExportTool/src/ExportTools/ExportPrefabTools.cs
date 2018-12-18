@@ -20,12 +20,14 @@ namespace Egret3DExportTools
             //保存路径
             PathHelper.SetSceneOrPrefabPath(prefabPath);
             //预制体坐标归零，直接改坐标
+            var savePosition = curObj.transform.localPosition;
             if (ExportToolsSetting.instance.prefabResetPos)
             {
                 curObj.transform.localPosition = Vector3.zero;
             }
 
             SerializeObject.Serialize(curObj);
+            curObj.transform.localPosition = savePosition;
             ResourceManager.instance.ExportFiles(prefabPath, exportPath);
         }
     }
