@@ -54,7 +54,7 @@ namespace Egret3DExportTools
         public static void Serialize(GameObject obj)
         {
             //未激活的不导出
-            if ((!ExportToolsSetting.exportUnactivatedObject && !obj.activeInHierarchy))
+            if ((!ExportToolsSetting.instance.exportUnactivatedObject && !obj.activeInHierarchy))
             {
                 MyLog.Log(obj.name + "对象未激活");
                 return;
@@ -104,7 +104,7 @@ namespace Egret3DExportTools
                 }
                 string compClass = comp.GetType().Name;
                 MyLog.Log("组件:" + compClass);
-                if (!ExportToolsSetting.exportUnactivatedComp)
+                if (!ExportToolsSetting.instance.exportUnactivatedComp)
                 {
                     //利用反射查看组件是否激活，某些组件的enabled不再继承链上，只能用反射，比如BoxCollider
                     var property = comp.GetType().GetProperty("enabled");

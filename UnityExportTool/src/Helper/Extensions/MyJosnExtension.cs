@@ -17,11 +17,11 @@ namespace Egret3DExportTools
         }
         public static void SetNumber(this Dictionary<string, IJsonNode> jsonNode, string key, float value, int? digits = null)
         {
-            jsonNode[key] = new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.floatRoundDigits));
+            jsonNode[key] = new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
         }
         public static void SetNumber(this Dictionary<string, IJsonNode> jsonNode, string key, double value, int? digits = null)
         {
-            jsonNode[key] = new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.floatRoundDigits));
+            jsonNode[key] = new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
         }
         public static void SetString(this Dictionary<string, IJsonNode> jsonNode, string key, string value)
         {
@@ -218,11 +218,11 @@ namespace Egret3DExportTools
         }
         public static void AddNumber(this MyJson_Array array, float value, int? digits = null)
         {
-            array.Add(new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.floatRoundDigits)));
+            array.Add(new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits)));
         }
         public static void AddNumber(this MyJson_Array array, double value, int? digits = null)
         {
-            array.Add(new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.floatRoundDigits)));
+            array.Add(new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits)));
         }
         public static void AddHashCode(this MyJson_Array array, UnityEngine.Object value)
         {

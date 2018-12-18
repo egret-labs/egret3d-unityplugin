@@ -127,7 +127,7 @@ namespace PaperGLTF
             }
             // var isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
             var isPremultiply = shaderName.Contains("premultiply");
-            var lightType = ExportToolsSetting.lightType;
+            var lightType = ExportToolsSetting.instance.lightType;
             // var isLight = ExportToolsSetting.enableLight;
             // var isPhong = ExportToolsSetting.phongMaterial;
             /*if (this._isAnimation)
@@ -305,7 +305,7 @@ namespace PaperGLTF
                     valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
                     valuesJson.SetNumber("opacity", color.a);
                 }
-                if (ExportToolsSetting.lightType == ExportLightType.Phong && !this._isParticle)
+                if (ExportToolsSetting.instance.lightType == ExportLightType.Phong && !this._isParticle)
                 {
                     if (target.HasProperty("_SpecGlossMap"))
                     {

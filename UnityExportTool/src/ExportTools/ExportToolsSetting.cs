@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 namespace Egret3DExportTools
 {
     [System.Serializable]
@@ -70,48 +71,69 @@ namespace Egret3DExportTools
     }
 
     //TODO 放到config中
-    public static class ExportToolsSetting
+    public class ExportToolsSetting : UnityEngine.ScriptableObject
     {
+        private static ExportToolsSetting _instance;
+        public static ExportToolsSetting instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ExportToolsSetting();
+                }
+                return _instance;
+            }
+        }
         /**
         *是否打印Log信息
          */
-        public static bool debugLog = false;
+        public bool debugLog = false;
         /**
         *是否可以导出未激活的对象
         */
-        public static bool exportUnactivatedObject = false;
+        public bool exportUnactivatedObject = false;
         /**
         *是否可以导出未激活的组件
         */
-        public static bool exportUnactivatedComp = false;
+        public bool exportUnactivatedComp = false;
         /**
         *预制体坐标是否归零
         */
-        public static bool prefabResetPos = false;
+        public bool prefabResetPos = false;
         /**
         *gltf导出格式是否缩进
         */
-        public static bool reduceGltfJsonSize = true;
+        public bool reduceGltfJsonSize = true;
         /**
         *估算一个合理的最大粒子数
         */
-        public static bool estimateMaxParticles = true;
-        public static bool unityNormalTexture = false;
+        public bool estimateMaxParticles = true;
+        public bool unityNormalTexture = false;
         /**
         *小数点保留位数
         */
-        public static int floatRoundDigits = 6;
+        public int floatRoundDigits = 6;
 
-        public static bool exportOriginalImage = false;
+        public bool exportOriginalImage = false;
 
-        public static float jpegQuality = 75.0f;
+        public float jpegQuality = 75.0f;
 
-        public static ExportLightType lightType = ExportLightType.None;
+        public ExportLightType lightType = ExportLightType.None;
 
-        public static bool enableUV2s = true;
-        public static bool enableNormals = true;
-        public static bool enableColors = true;
-        public static bool enableBones = true;
-        public static bool enableTangents = false;
+        public bool enableUV2s = true;
+        public bool enableNormals = true;
+        public bool enableColors = true;
+        public bool enableBones = true;
+        public bool enableTangents = false;
+
+        [SerializeField]
+        public List<UnityEngine.GameObject> meshIgnores = new List<UnityEngine.GameObject>();
+
+
+        public bool IsInMeshIgnores(UnityEngine.GameObject target)
+        {
+            return this.meshIgnores.Contains(target);
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace Egret3DExportTools
             //保存路径
             PathHelper.SetSceneOrPrefabPath(prefabPath);
             //预制体坐标归零，直接改坐标
-            if (ExportToolsSetting.prefabResetPos)
+            if (ExportToolsSetting.instance.prefabResetPos)
             {
                 curObj.transform.localPosition = Vector3.zero;
             }

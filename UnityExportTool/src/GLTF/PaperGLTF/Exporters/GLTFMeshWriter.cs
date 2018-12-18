@@ -190,7 +190,9 @@ namespace PaperGLTF
 
             aPosition = ExportAccessor(SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.vertices, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, false);
             MyLog.Log("-------vertices:" + meshObj.vertices.Length);
-            if (meshObj.normals.Length != 0 && Egret3DExportTools.ExportToolsSetting.enableNormals)
+            var setting = ExportToolsSetting.instance;
+            var isInMeshIgnores = setting.IsInMeshIgnores(this._target.gameObject);
+            if (meshObj.normals.Length != 0 && (isInMeshIgnores || setting.enableNormals))
             {
                 MyLog.Log("-------normals:" + meshObj.normals.Length);
                 aNormal = ExportAccessor(SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.normals, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, true);
@@ -201,7 +203,7 @@ namespace PaperGLTF
                 aTangent = ExportAccessor(SchemaExtensions.ConvertVector4CoordinateSpaceAndCopy(meshObj.tangents, SchemaExtensions.TangentSpaceConversionScale), bufferViewId, true);
             }*/
 
-            if (meshObj.colors.Length != 0 && Egret3DExportTools.ExportToolsSetting.enableColors)
+            if (meshObj.colors.Length != 0 && (isInMeshIgnores || setting.enableColors))
             {
                 MyLog.Log("-------colors:" + meshObj.colors.Length);
                 aColor0 = ExportAccessor(meshObj.colors, bufferViewId);
@@ -229,7 +231,7 @@ namespace PaperGLTF
                 }
             }
 
-            if (meshObj.boneWeights.Length != 0 && Egret3DExportTools.ExportToolsSetting.enableBones)
+            if (meshObj.boneWeights.Length != 0 && (isInMeshIgnores || setting.enableBones))
             {
                 MyLog.Log("-------bones:" + meshObj.boneWeights.Length);
                 aBlendIndex = ExportAccessor(SchemaExtensions.ConvertBlendIndexAndCopy(meshObj.boneWeights));

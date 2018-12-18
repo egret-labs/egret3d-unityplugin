@@ -6,7 +6,7 @@ namespace Egret3DExportTools
     {
         public static void Log(object message)
         {
-            if(ExportToolsSetting.debugLog)
+            if(ExportToolsSetting.instance.debugLog)
             {
                 Debug.Log(message);
             }
@@ -14,7 +14,7 @@ namespace Egret3DExportTools
 
         public static void LogWarning(object message)
         {
-            if(ExportToolsSetting.debugLog)
+            if(ExportToolsSetting.instance.debugLog)
             {
                 Debug.LogWarning(message);
             }            

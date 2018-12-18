@@ -80,12 +80,19 @@ namespace Egret3DExportTools
 
         private bool _lightSetting = true;
         private bool _meshSetting = false;
-
+        private SerializedObject _serializeObject;
+        private SerializedProperty _meshIgnoresProperty;
 
         void OnEnable()
         {
             _showStyle.fontSize = 15;
             _showStyle.normal.textColor = new Color(1, 0, 0, 1);
+
+            //
+            _serializeObject = new SerializedObject(ExportToolsSetting.instance);
+            _meshIgnoresProperty = _serializeObject.FindProperty("meshIgnores");
+            //
+
             //加载配置文件
             ExportConfig.Reload(PathHelper.ConfigPath, PathHelper.SaveRootDirectory);
             //初始化一些全局的方法
@@ -98,7 +105,8 @@ namespace Egret3DExportTools
          */
         void OnGUI()
         {
-            this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition, GUILayout.Width(WIN_WIDTH), GUILayout.Height(285));
+            var setting = ExportToolsSetting.instance;
+            this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition, GUILayout.Width(WIN_WIDTH), GUILayout.Height(400));
             GUILayout.Space(SMALL_SPACE);
             //------------------------目录选择------------------------
             {
@@ -117,9 +125,9 @@ namespace Egret3DExportTools
             //------------------------辅助选项------------------------
             {
                 GUILayout.BeginHorizontal();
-                ExportToolsSetting.debugLog = GUILayout.Toggle(ExportToolsSetting.debugLog, new GUIContent("输出日志", "勾选后，方便查看输出信息"));
-                ExportToolsSetting.prefabResetPos = GUILayout.Toggle(ExportToolsSetting.prefabResetPos, new GUIContent("坐标归零", "勾选后，将导出的预制体坐标归零"));
-                ExportToolsSetting.exportOriginalImage = GUILayout.Toggle(ExportToolsSetting.exportOriginalImage, new GUIContent("导出原始图片", "勾选后，jpg和png会直接使用原始图片导出"));
+                setting.debugLog = GUILayout.Toggle(setting.debugLog, new GUIContent("输出日志", "勾选后，方便查看输出信息"));
+                setting.prefabResetPos = GUILayout.Toggle(setting.prefabResetPos, new GUIContent("坐标归零", "勾选后，将导出的预制体坐标归零"));
+                setting.exportOriginalImage = GUILayout.Toggle(setting.exportOriginalImage, new GUIContent("导出原始图片", "勾选后，jpg和png会直接使用原始图片导出"));
                 // ExportToolsSetting.unityNormalTexture = GUILayout.Toggle(ExportToolsSetting.unityNormalTexture, new GUIContent("使用Unity法线贴图", "勾选后，时使用Unity转换后的法线贴图导出"));
 
                 GUILayout.EndHorizontal();
@@ -129,7 +137,7 @@ namespace Egret3DExportTools
             if (this._lightSetting)
             {
                 GUILayout.BeginVertical();
-                ExportToolsSetting.lightType = (ExportLightType)EditorGUILayout.EnumPopup(ExportToolsSetting.lightType, GUILayout.MaxWidth(100));
+                setting.lightType = (ExportLightType)EditorGUILayout.EnumPopup(setting.lightType, GUILayout.MaxWidth(100));
                 GUILayout.EndVertical();
             }
             GUILayout.Space(SMALL_SPACE);
@@ -137,9 +145,22 @@ namespace Egret3DExportTools
             if (this._meshSetting)
             {
                 GUILayout.BeginHorizontal();
-                ExportToolsSetting.enableNormals = GUILayout.Toggle(ExportToolsSetting.enableNormals, new GUIContent("Normals", "取消后，不导出Normals"));
-                ExportToolsSetting.enableColors = GUILayout.Toggle(ExportToolsSetting.enableColors, new GUIContent("Colors", "取消后，不导出Colors"));
-                ExportToolsSetting.enableBones = GUILayout.Toggle(ExportToolsSetting.enableBones, new GUIContent("Bones", "取消后，不导出Bones"));
+                setting.enableNormals = GUILayout.Toggle(setting.enableNormals, new GUIContent("Normals", "取消后，不导出Normals"));
+                setting.enableColors = GUILayout.Toggle(setting.enableColors, new GUIContent("Colors", "取消后，不导出Colors"));
+                setting.enableBones = GUILayout.Toggle(setting.enableBones, new GUIContent("Bones", "取消后，不导出Bones"));
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                this._serializeObject.Update();
+                if (this._meshIgnoresProperty != null)
+                {
+                    EditorGUI.BeginChangeCheck();
+                    EditorGUILayout.PropertyField(this._meshIgnoresProperty, new GUIContent("忽略对象:", "在忽略列表中的对象网格属性全部导出"), true);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        _serializeObject.ApplyModifiedProperties();
+                    }
+                }
                 GUILayout.EndHorizontal();
             }
             GUILayout.Space(SPACE);

@@ -315,7 +315,7 @@ namespace Egret3DExportTools
                 }
 
                 //只有jpg、png可以原始图片导出，其他类型不支持
-                if (ExportToolsSetting.exportOriginalImage && isSupported && System.IO.File.Exists(filename))
+                if (ExportToolsSetting.instance.exportOriginalImage && isSupported && System.IO.File.Exists(filename))
                 {
                     MyLog.Log("原始图片:" + filename);
                     bs = System.IO.File.ReadAllBytes(filename);

@@ -68,7 +68,7 @@ namespace Egret3DExportTools
             if (importer)
             {
                 saveTextureType = importer.textureType;
-                if (saveTextureType == TextureImporterType.NormalMap && !ExportToolsSetting.unityNormalTexture)
+                if (saveTextureType == TextureImporterType.NormalMap && !ExportToolsSetting.instance.unityNormalTexture)
                 {
                     //法线贴图类型贴图因为Unity特殊处理类，如果要正常导出，就要转换一下类型
                     isRestore = true;

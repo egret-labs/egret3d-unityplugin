@@ -58,7 +58,7 @@ namespace Egret3DExportTools
                 mainItem.SetEnum("_simulationSpace", main.simulationSpace);
                 mainItem.SetEnum("scaleMode", main.scalingMode);
                 mainItem.SetBool("playOnAwake", main.playOnAwake);
-                if (ExportToolsSetting.estimateMaxParticles)
+                if (ExportToolsSetting.instance.estimateMaxParticles)
                 {
                     var value = this.EstimateMaxParticles(comp);
                     mainItem.SetInt("_maxParticles", value);
