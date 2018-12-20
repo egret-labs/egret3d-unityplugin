@@ -377,26 +377,23 @@ namespace Egret3DExportTools
             }
             else if (alphaKeysLen < 4)
             {
-                //过渡模式不会只有一个的情况
-                var time = 0.0f;
-                for (int i = 0; i < alphaKeysLen - 1; i++)
+                for (int i = 0; i < 3; i++)
                 {
-                    res[i] = alphaKeys[i];
-                    time = alphaKeys[i].time;
+                    if (i < alphaKeysLen)
+                    {
+                        res[i] = alphaKeys[i];
+                    }
+                    else
+                    {
+                        res[i] = alphaKeys[alphaKeysLen - 1];
+                    }
                 }
 
-                var avgTime = (1.0f - time) / (4.0f - alphaKeysLen + 1.0f);
-                for (int i = alphaKeysLen - 1; i < 4; i++)
-                {
-                    time += avgTime;
-                    time = Mathf.Min(1.0f, time);
-                    GradientAlphaKey alpha = new GradientAlphaKey();
-                    alpha.time = time;
-                    alpha.alpha = gradient.Evaluate(alpha.time).a;
-                    res[i] = alpha;
-                }
+                GradientAlphaKey finalFrame = new GradientAlphaKey();
+                finalFrame.time = 1.0f;
+                finalFrame.alpha = gradient.Evaluate(finalFrame.time).a;
+                res[3] = finalFrame;
 
-                res[3] = alphaKeys[alphaKeysLen - 1];
             }
             else
             {
@@ -420,26 +417,22 @@ namespace Egret3DExportTools
             }
             else if (colorKeysLen < 4)
             {
-                //过渡模式不会只有一个的情况
-                var time = 0.0f;
-                for (int i = 0; i < colorKeysLen - 1; i++)
+                for (int i = 0; i < 3; i++)
                 {
-                    res[i] = colorKeys[i];
-                    time = colorKeys[i].time;
+                    if (i < colorKeysLen)
+                    {
+                        res[i] = colorKeys[i];
+                    }
+                    else
+                    {
+                        res[i] = colorKeys[colorKeysLen - 1];
+                    }
                 }
 
-                var avgTime = (1.0f - time) / (4.0f - colorKeysLen + 1.0f);
-                for (int i = colorKeysLen - 1; i < 4; i++)
-                {
-                    time += avgTime;
-                    time = Mathf.Min(1.0f, time);
-                    GradientColorKey color = new GradientColorKey();
-                    color.time = time;
-                    color.color = gradient.Evaluate(color.time);
-                    res[i] = color;
-                }
-
-                res[3] = colorKeys[colorKeysLen - 1];
+                GradientColorKey finalFrame = new GradientColorKey();
+                finalFrame.time = 1.0f;
+                finalFrame.color = gradient.Evaluate(finalFrame.time);
+                res[3] = finalFrame;
             }
             else
             {
