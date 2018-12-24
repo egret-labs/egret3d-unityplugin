@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -58,7 +59,7 @@ namespace Egret3DExportTools
         public static void CheckDuplicateMeshs()
         {
             var selectedObj = Selection.activeGameObject;
-            if(selectedObj == null || selectedObj.GetComponent<MeshFilter>() == null || selectedObj.GetComponent<MeshFilter>().sharedMesh == null)
+            if (selectedObj == null || selectedObj.GetComponent<MeshFilter>() == null || selectedObj.GetComponent<MeshFilter>().sharedMesh == null)
             {
                 Debug.LogError("目标选择错误");
                 return;
@@ -93,7 +94,7 @@ namespace Egret3DExportTools
                 var target = targetList[i];
                 var targetMesh = target.GetComponent<MeshFilter>().sharedMesh;
                 var targetVertices = targetMesh.vertices;
-               
+
                 //长度相同
                 var isDuplicate = false;
                 if (sourceVertices.Length == targetVertices.Length && sourceMesh.GetInstanceID() != targetMesh.GetInstanceID())
@@ -119,6 +120,79 @@ namespace Egret3DExportTools
             }
             Selection.objects = selected.ToArray();
             Debug.Log("--------------排查完毕----------------");
+        }
+
+        [MenuItem("Egret3DExportTools/OptimizingObjName")]
+        public static void OptimizingObjName()
+        {
+            var selectedObj = Selection.activeGameObject;
+            if (selectedObj == null)
+            {
+                Debug.LogWarning("没有选中任何对象");
+                return;
+            }
+            var assetPath = UnityEditor.AssetDatabase.GetAssetPath(selectedObj);
+            Debug.Log("选中的:" + selectedObj.name + " 类型:" + System.IO.Path.GetExtension(assetPath));
+
+            if (string.IsNullOrEmpty(assetPath) || System.IO.Path.GetExtension(assetPath) != ".obj")
+            {
+                Debug.LogWarning("不是obj网格");
+                return;
+            }
+
+            //加载obj文件
+            string objText = File.ReadAllText(assetPath); ;
+            Dictionary<string, int> renameDic = new Dictionary<string, int>();
+            string[] allObjLines = objText.Split('\n');
+            int nameIndex = 0;
+            for (int i = 0, l = allObjLines.Length; i < l; i++)
+            {
+                string line = allObjLines[i];
+                //将每一行按空格分割
+                char[] charsToTrim = { ' ' };
+                string[] chars = line.TrimEnd('\r').TrimStart(' ').Split(charsToTrim, StringSplitOptions.RemoveEmptyEntries);
+                if (chars.Length <= 0)
+                {
+                    continue;
+                }
+
+                if (chars[0] == "g")
+                {
+                    //移除g
+                    var key = line.Replace("g ", "");
+                    key = key.Replace(" ", "_").Trim();
+                    renameDic[key] = nameIndex;
+                    allObjLines[i] = "g " + nameIndex;
+                    nameIndex++;
+                }
+            }
+
+            //加载obj文件的.meta文件,重置依赖关系
+            string metaText = File.ReadAllText(assetPath + ".meta");
+            string[] allMetaLines = metaText.Split('\n');
+            //遍历renameDic中的名字替换
+            for (int i = 0, l = allMetaLines.Length; i < l; i++)
+            {
+                string line = allMetaLines[i];
+                int lastSpaceIndex = line.LastIndexOf(" ");
+                if (lastSpaceIndex < 0)
+                {
+                    continue;
+                }
+                string name = line.Substring(lastSpaceIndex + 1).Trim();
+                foreach (var rename in renameDic.Keys)
+                {
+                    if (name == rename)
+                    {
+                        allMetaLines[i] = line.Replace(name, renameDic[rename].ToString());
+                    }
+                }
+            }
+
+            File.WriteAllText(assetPath, string.Join("\n", allObjLines));
+            File.WriteAllText(assetPath + ".meta", string.Join("\n", allMetaLines));
+            //
+            AssetDatabase.Refresh();
         }
 
         /**

@@ -35,3 +35,4 @@ E:\Work\Egret\egret3d-unityplugin\UnityExportTool\obj\Debug\ExportTool.csproj.Ge
 E:\Work\Egret\egret3d-unityplugin\UnityExportTool\obj\Debug\ExportTool.csproj.CoreCompileInputs.cache
 E:\Work\Egret\egret3d-unityplugin\UnityExportTool\obj\Debug\ExportTool.dll
 E:\Work\Egret\egret3d-unityplugin\UnityExportTool\obj\Debug\ExportTool.pdb
+E:\Work\Egret\egret3d-unityplugin\UnityExportTool\obj\Debug\ExportTool.csprojResolveAssemblyReference.cache
