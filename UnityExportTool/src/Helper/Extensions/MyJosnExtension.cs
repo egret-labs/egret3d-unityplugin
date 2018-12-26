@@ -99,6 +99,15 @@ namespace Egret3DExportTools
 
             jsonNode[desc] = cItemArr;
         }
+        public static void SetColor3(this Dictionary<string, IJsonNode> jsonNode, string desc, Color data, int? digits = null)
+        {
+            MyJson_Array cItemArr = new MyJson_Array();
+            cItemArr.AddNumber(data.r, digits);
+            cItemArr.AddNumber(data.g, digits);
+            cItemArr.AddNumber(data.b, digits);
+
+            jsonNode[desc] = cItemArr;
+        }
         /**
          * 组件的公共部分 Rect
          */

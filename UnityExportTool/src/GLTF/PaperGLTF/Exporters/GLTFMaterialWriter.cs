@@ -112,6 +112,46 @@ namespace PaperGLTF
             };
         }
 
+        public float GetFloat(string key, float defalutValue)
+        {
+            if (this._target.HasProperty(key))
+            {
+                return this._target.GetFloat(key);
+            }
+
+            return defalutValue;
+        }
+
+        public UnityEngine.Color GetColor(string key, UnityEngine.Color defalutValue)
+        {
+            if (this._target.HasProperty(key))
+            {
+                return this._target.GetColor(key);
+            }
+
+            return defalutValue;
+        }
+
+        public UnityEngine.Vector4 GetVector4(string key, UnityEngine.Vector4 defalutValue)
+        {
+            if (this._target.HasProperty(key))
+            {
+                return this._target.GetVector(key);
+            }
+
+            return defalutValue;
+        }
+
+        public UnityEngine.Texture GetTexture(string key, UnityEngine.Texture defalutValue)
+        {
+            if (this._target.HasProperty(key))
+            {
+                return this._target.GetTexture(key);
+            }
+
+            return defalutValue;
+        }
+
         private string FindShaderName(bool isTextureEmpty = false)
         {
             var target = this._target;
@@ -120,21 +160,14 @@ namespace PaperGLTF
             var isBlend = shaderName.Contains("blended");
             var isAdditive = shaderName.Contains("additive");
             var isMultiply = shaderName.Contains("multiply");
-            var isDoubleSide = target.HasProperty("_Cull") && target.GetInt("_Cull") == (int)UnityEngine.Rendering.CullMode.Off;//用它获取不到
+            var isDoubleSide = target.HasProperty("_Cull") && target.GetInt("_Cull") == (int)UnityEngine.Rendering.CullMode.Off;
             if (!isDoubleSide)
             {
                 isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
             }
-            // var isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
             var isPremultiply = shaderName.Contains("premultiply");
             var lightType = ExportToolsSetting.instance.lightType;
-            // var isLight = ExportToolsSetting.enableLight;
-            // var isPhong = ExportToolsSetting.phongMaterial;
-            /*if (this._isAnimation)
-            {
-                return "diffuse";
-            }
-            else*/
+
             if (this._isParticle)
             {
                 if (isBlend)
@@ -190,6 +223,10 @@ namespace PaperGLTF
                 {
                     if (isDoubleSide)
                     {
+                        if (lightType == ExportLightType.Physical)
+                        {
+                            return "meshphysical_doubleside";
+                        }
                         if (lightType == ExportLightType.Phong)
                         {
                             return "meshphong_doubleside";
@@ -202,6 +239,10 @@ namespace PaperGLTF
                     }
                     else
                     {
+                        if (lightType == ExportLightType.Physical)
+                        {
+                            return "meshphysical";
+                        }
                         if (lightType == ExportLightType.Phong)
                         {
                             return "meshphong";
@@ -276,6 +317,19 @@ namespace PaperGLTF
                     color = target.GetColor("_TintColor");
                 }
 
+                foreach (var mp in orginmps)
+                {
+                    Debug.Log("材质名字:" + mp.name + " 类型:" + mp.type);
+                    if (mp.type.ToString() == "Texture")
+                    {
+                        var t = target.GetTexture(mp.name);
+                        if(t)
+                        {
+                            Debug.Log("图片:" + t.name);
+                        }                        
+                    }
+                }
+
                 //TODO 寻找第一个Texture
                 foreach (var mp in orginmps)
                 {
@@ -290,52 +344,97 @@ namespace PaperGLTF
                     }
                 }
 
-                if (this._isParticle)
+                valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
+                valuesJson.SetNumber("opacity", color.a);
+                if (!this._isParticle)
                 {
-                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                    valuesJson.SetNumber("opacity", color.a);
-                }
-                else if (this._isAnimation)
-                {
-                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                    valuesJson.SetNumber("opacity", color.a);
-                }
-                else
-                {
-                    valuesJson.SetVector3("diffuse", new Vector3(color.r, color.g, color.b));
-                    valuesJson.SetNumber("opacity", color.a);
-                }
-                if (ExportToolsSetting.instance.lightType == ExportLightType.Phong && !this._isParticle)
-                {
-                    if (target.HasProperty("_SpecGlossMap"))
+                    if (ExportToolsSetting.instance.lightType == ExportLightType.Phong)
                     {
-                        var specularMap = target.GetTexture("_SpecGlossMap");
-                        if (specularMap != null)
+                        if (target.HasProperty("_SpecGlossMap"))
                         {
-                            var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
-                            valuesJson.SetString("specularMap", texPath);
-                            definesJson.AddString("USE_SPECULARMAP");
+                            var specularMap = target.GetTexture("_SpecGlossMap");
+                            if (specularMap != null)
+                            {
+                                var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
+                                valuesJson.SetString("specularMap", texPath);
+                                definesJson.AddString("USE_SPECULARMAP");
+                            }
+                        }
+
+                        if (target.HasProperty("_BumpMap"))
+                        {
+                            var normalMap = target.GetTexture("_BumpMap");
+                            if (normalMap != null)
+                            {
+                                var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
+                                valuesJson.SetString("normalMap", texPath);
+                                definesJson.AddString("USE_NORMALMAP");
+                            }
                         }
                     }
-
-                    if (target.HasProperty("_BumpMap"))
+                    else if (ExportToolsSetting.instance.lightType == ExportLightType.Physical)
                     {
-                        var normalMap = target.GetTexture("_BumpMap");
+                        var roughness = 1.0f - this.GetFloat("_Glossiness", 0.0f);
+                        var metalness = this.GetFloat("_Metallic", 0.0f);
+                        var aoMap = this.GetTexture("_OcclusionMap", null);
+                        var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
+                        var emissive = this.GetColor("_EmissionColor", Color.black);
+                        var emissiveMap = this.GetTexture("_EmissionMap", null);
+                        var emissiveIntensity = 1.0f;
+                        var bumpMap = this.GetTexture("_BumpMap", null);
+                        var bumpScale = this.GetFloat("_BumpScale", 1.0f);
+                        var normalMap = this.GetTexture("_DetailNormalMap", null);
+                        var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
+                        UnityEngine.Texture roughnessMap = null;
+                        var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
+                        var displacementMap = this.GetTexture("_ParallaxMap", null);
+                        var displacementScale = this.GetFloat("_Parallax", 0.0f);
+
+                        valuesJson.SetColor3("emissive", emissive);
+                        valuesJson.SetNumber("roughness", roughness);
+                        valuesJson.SetNumber("metalness", metalness);
+
+                        if (aoMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(aoMap as Texture2D, "");
+                            valuesJson.SetString("aoMap", texPath);
+                            valuesJson.SetNumber("aoMapIntensity", aoMapIntensity);
+
+                            definesJson.AddString("USE_AOMAP");
+                        }
+
+                        if (emissiveMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
+                            valuesJson.SetString("emissiveMap", texPath);
+                            definesJson.AddString("USE_EMISSIVEMAP");
+                        }
+
+                        if (bumpMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(bumpMap as Texture2D, "");
+                            valuesJson.SetString("bumpMap", texPath);
+                            valuesJson.SetNumber("bumpScale", bumpScale / 10.0f);
+                            definesJson.AddString("USE_BUMPMAP");
+                            // valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
+                        }
+
                         if (normalMap != null)
                         {
                             var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
                             valuesJson.SetString("normalMap", texPath);
+                            valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
                             definesJson.AddString("USE_NORMALMAP");
                         }
-                    }
-                }
 
-                if (target.HasProperty("_Cutoff"))
-                {
-                    var cutoff = target.GetFloat("_Cutoff");
-                    if (cutoff < 1.0f)
-                    {
-                        definesJson.AddString("ALPHATEST " + cutoff);
+                        if(displacementMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(displacementMap as Texture2D, "");
+                            valuesJson.SetString("displacementMap", texPath);
+                            valuesJson.SetNumber("displacementScale", displacementScale);
+                            valuesJson.SetNumber("displacementBias", 0.0f);
+                            definesJson.AddString("USE_DISPLACEMENTMAP");
+                        }
                     }
                 }
 
@@ -379,6 +478,15 @@ namespace PaperGLTF
                 else
                 {
                     MyLog.LogWarning("纯色材质:" + target.name);
+                }
+
+                if (target.HasProperty("_Cutoff"))
+                {
+                    var cutoff = target.GetFloat("_Cutoff");
+                    if (cutoff < 1.0f)
+                    {
+                        definesJson.AddString("ALPHATEST " + cutoff);
+                    }
                 }
 
                 var shaderName = FindShaderName(texture == null);

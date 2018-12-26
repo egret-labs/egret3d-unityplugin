@@ -68,6 +68,7 @@ namespace Egret3DExportTools
         None,
         Lambert,
         Phong,
+        Physical,
     }
 
     //TODO 放到config中
