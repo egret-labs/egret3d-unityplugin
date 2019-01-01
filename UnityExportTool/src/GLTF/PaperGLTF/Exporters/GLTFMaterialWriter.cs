@@ -10,81 +10,93 @@ namespace PaperGLTF
 
     using Egret3DExportTools;
 
+    public enum MaterialType
+    {
+        Diffuse,
+        Lambert,
+        Phong,
+        Standard,
+        StandardSpecular,
+        StandardRoughness,
+        Particle,
+        Custom
+    }
+
+    public enum BlendMode
+    {
+        None,
+        Blend,
+        Blend_PreMultiply,
+        Add,
+        Add_PreMultiply,
+        Subtractive,
+        Subtractive_PreMultiply,
+        Multiply,
+        Multiply_PreMultiply,
+    }
+
+    public enum EnableState
+    {
+        BLEND = 3042,
+        CULL_FACE = 2884,
+        DEPTH_TEST = 2929,
+        POLYGON_OFFSET_FILL = 32823,
+        SAMPLE_ALPHA_TO_COVERAGE = 32926,
+    }
+
+    public enum BlendEquation
+    {
+        FUNC_ADD = 32774,
+        FUNC_SUBTRACT = 32778,
+        FUNC_REVERSE_SUBTRACT = 32779,
+    }
+
+    public enum BlendFactor
+    {
+        ZERO = 0,
+        ONE = 1,
+        SRC_COLOR = 768,
+        ONE_MINUS_SRC_COLOR = 769,
+        DST_COLOR = 774,
+        ONE_MINUS_DST_COLOR = 775,
+        SRC_ALPHA = 770,
+        ONE_MINUS_SRC_ALPHA = 771,
+        DST_ALPHA = 772,
+        ONE_MINUS_DST_ALPHA = 773,
+        CONSTANT_COLOR = 32769,
+        ONE_MINUS_CONSTANT_COLOR = 32770,
+        CONSTANT_ALPHA = 32771,
+        ONE_MINUS_CONSTANT_ALPHA = 32772,
+        SRC_ALPHA_SATURATE = 776,
+    }
+
+    public enum CullFace
+    {
+        FRONT = 1028,
+        BACK = 1029,
+        FRONT_AND_BACK = 1032,
+    }
+
+    public enum FrontFace
+    {
+        CW = 2304,
+        CCW = 2305,
+    }
+
+    public enum DepthFunc
+    {
+        NEVER = 512,
+        LESS = 513,
+        LEQUAL = 515,
+        EQUAL = 514,
+        GREATER = 516,
+        NOTEQUAL = 517,
+        GEQUAL = 518,
+        ALWAYS = 519,
+    }
+
     public class MaterialWriter : GLTFExporter
     {
-        enum BlendMode
-        {
-            None,
-            Blend,
-            Blend_PreMultiply,
-            Add,
-            Add_PreMultiply,
-            Subtractive,
-            Subtractive_PreMultiply,
-            Multiply,
-            Multiply_PreMultiply,
-        }
-
-        enum EnableState
-        {
-            BLEND = 3042,
-            CULL_FACE = 2884,
-            DEPTH_TEST = 2929,
-            POLYGON_OFFSET_FILL = 32823,
-            SAMPLE_ALPHA_TO_COVERAGE = 32926,
-        }
-
-        enum BlendEquation
-        {
-            FUNC_ADD = 32774,
-            FUNC_SUBTRACT = 32778,
-            FUNC_REVERSE_SUBTRACT = 32779,
-        }
-
-        enum BlendFactor
-        {
-            ZERO = 0,
-            ONE = 1,
-            SRC_COLOR = 768,
-            ONE_MINUS_SRC_COLOR = 769,
-            DST_COLOR = 774,
-            ONE_MINUS_DST_COLOR = 775,
-            SRC_ALPHA = 770,
-            ONE_MINUS_SRC_ALPHA = 771,
-            DST_ALPHA = 772,
-            ONE_MINUS_DST_ALPHA = 773,
-            CONSTANT_COLOR = 32769,
-            ONE_MINUS_CONSTANT_COLOR = 32770,
-            CONSTANT_ALPHA = 32771,
-            ONE_MINUS_CONSTANT_ALPHA = 32772,
-            SRC_ALPHA_SATURATE = 776,
-        }
-
-        enum CullFace
-        {
-            FRONT = 1028,
-            BACK = 1029,
-            FRONT_AND_BACK = 1032,
-        }
-
-        enum FrontFace
-        {
-            CW = 2304,
-            CCW = 2305,
-        }
-
-        enum DepthFunc
-        {
-            NEVER = 512,
-            LESS = 513,
-            LEQUAL = 515,
-            EQUAL = 514,
-            GREATER = 516,
-            NOTEQUAL = 517,
-            GEQUAL = 518,
-            ALWAYS = 519,
-        }
-
         private bool _isParticle = false;
         private bool _isAnimation = false;
         private UnityEngine.Material _target;
@@ -150,6 +162,55 @@ namespace PaperGLTF
             }
 
             return defalutValue;
+        }
+
+        private MaterialType GetMaterialType()
+        {
+            var isCustom = ExportConfig.instance.IsCustomShader(this._target.shader.name);
+            if (ExportConfig.instance.IsCustomShader(this._target.shader.name))
+            {
+                return MaterialType.Custom;
+            }
+            else if (this._isParticle)
+            {
+                return MaterialType.Particle;
+            }
+            else
+            {
+                var lightType = ExportToolsSetting.instance.lightType;
+                switch (lightType)
+                {
+                    case ExportLightType.Lambert:
+                        {
+                            return MaterialType.Lambert;
+                        }
+                    case ExportLightType.Phong:
+                        {
+                            return MaterialType.Phong;
+                        }
+                    case ExportLightType.Standard:
+                        {
+                            var shaderName = this._target.name;
+                            switch (shaderName)
+                            {
+                                case "Standard (Specular setup)":
+                                    {
+                                        return MaterialType.StandardSpecular;
+                                    }
+                                case "Standard (Roughness setup)":
+                                    {
+                                        return MaterialType.StandardRoughness;
+                                    }
+                                default:
+                                    {
+                                        return MaterialType.Standard;
+                                    }
+                            }
+                        }
+                }
+            }
+
+            return MaterialType.Diffuse;
         }
 
         private string FindShaderName(bool isTextureEmpty = false)
@@ -223,10 +284,10 @@ namespace PaperGLTF
                 {
                     if (isDoubleSide)
                     {
-                        // if (lightType == ExportLightType.Physical)
-                        // {
-                        //     return "meshphysical_doubleside";
-                        // }
+                        if (lightType == ExportLightType.Physical || lightType == ExportLightType.Standard)
+                        {
+                            return "meshphysical_doubleside";
+                        }
                         if (lightType == ExportLightType.Phong)
                         {
                             return "meshphong_doubleside";
@@ -239,10 +300,10 @@ namespace PaperGLTF
                     }
                     else
                     {
-                        // if (lightType == ExportLightType.Physical)
-                        // {
-                        //     return "meshphysical";
-                        // }
+                        if (lightType == ExportLightType.Physical || lightType == ExportLightType.Standard)
+                        {
+                            return "meshphysical";
+                        }
                         if (lightType == ExportLightType.Phong)
                         {
                             return "meshphong";
@@ -258,6 +319,43 @@ namespace PaperGLTF
         }
 
         public override byte[] WriteGLTF()
+        {
+            var target = this._target;
+            var gltfJson = new MyJson_Tree();
+            //
+            var assetJson = new MyJson_Tree();
+            assetJson.SetInt("version", 2);
+            gltfJson.Add("asset", assetJson);
+
+            var materialsJson = new MyJson_Array();
+            gltfJson.Add("materials", materialsJson);
+
+            var extensionsRequired = new MyJson_Array();
+            extensionsRequired.AddString("KHR_techniques_webgl");
+            extensionsRequired.AddString("paper");
+            gltfJson.Add("extensionsRequired", extensionsRequired);
+
+            var extensionsUsed = new MyJson_Array();
+            extensionsUsed.AddString("KHR_techniques_webgl");
+            extensionsUsed.AddString("paper");
+            gltfJson.Add("extensionsUsed", extensionsUsed);
+            //
+            gltfJson.SetInt("version", 4);
+
+            //Unifrom or Defines
+            var materialType = this.GetMaterialType();
+            var writer = MaterialWriterFactory.Create(materialType, target);
+
+            var materialItemJson =  writer.Write();
+            materialsJson.Add(materialItemJson);           
+
+            //
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            gltfJson.CovertToStringWithFormat(sb, 4);
+            return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        }
+
+        public byte[] WriteGLTF2()
         {
             var target = this._target;
 
@@ -323,10 +421,10 @@ namespace PaperGLTF
                     if (mp.type.ToString() == "Texture")
                     {
                         var t = target.GetTexture(mp.name);
-                        if(t)
+                        if (t)
                         {
                             Debug.Log("图片:" + t.name);
-                        }                        
+                        }
                     }
                 }
 
@@ -372,72 +470,140 @@ namespace PaperGLTF
                             }
                         }
                     }
-                    // else if (ExportToolsSetting.instance.lightType == ExportLightType.Physical)
-                    // {
-                    //     var roughness = 1.0f - this.GetFloat("_Glossiness", 0.0f);
-                    //     var metalness = this.GetFloat("_Metallic", 0.0f);
-                    //     var aoMap = this.GetTexture("_OcclusionMap", null);
-                    //     var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
-                    //     var emissive = this.GetColor("_EmissionColor", Color.black);
-                    //     var emissiveMap = this.GetTexture("_EmissionMap", null);
-                    //     var emissiveIntensity = 1.0f;
-                    //     var bumpMap = this.GetTexture("_BumpMap", null);
-                    //     var bumpScale = this.GetFloat("_BumpScale", 1.0f);
-                    //     var normalMap = this.GetTexture("_DetailNormalMap", null);
-                    //     var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
-                    //     UnityEngine.Texture roughnessMap = null;
-                    //     var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
-                    //     var displacementMap = this.GetTexture("_ParallaxMap", null);
-                    //     var displacementScale = this.GetFloat("_Parallax", 0.0f);
+                    else if (ExportToolsSetting.instance.lightType == ExportLightType.Physical)
+                    {
+                        var roughness = 1.0f - this.GetFloat("_Glossiness", 0.0f);
+                        var metalness = this.GetFloat("_Metallic", 0.0f);
+                        var aoMap = this.GetTexture("_OcclusionMap", null);
+                        var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
+                        var emissive = this.GetColor("_EmissionColor", Color.black);
+                        var emissiveMap = this.GetTexture("_EmissionMap", null);
+                        var emissiveIntensity = 1.0f;
+                        var bumpMap = this.GetTexture("_BumpMap", null);
+                        var bumpScale = this.GetFloat("_BumpScale", 1.0f);
+                        var normalMap = this.GetTexture("_DetailNormalMap", null);
+                        var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
+                        UnityEngine.Texture roughnessMap = null;
+                        var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
+                        var displacementMap = this.GetTexture("_ParallaxMap", null);
+                        var displacementScale = this.GetFloat("_Parallax", 0.0f);
 
-                    //     valuesJson.SetColor3("emissive", emissive);
-                    //     valuesJson.SetNumber("roughness", roughness);
-                    //     valuesJson.SetNumber("metalness", metalness);
+                        valuesJson.SetColor3("emissive", emissive);
+                        valuesJson.SetNumber("roughness", roughness);
+                        valuesJson.SetNumber("metalness", metalness);
 
-                    //     if (aoMap != null)
-                    //     {
-                    //         var texPath = ResourceManager.instance.SaveTexture(aoMap as Texture2D, "");
-                    //         valuesJson.SetString("aoMap", texPath);
-                    //         valuesJson.SetNumber("aoMapIntensity", aoMapIntensity);
+                        if (aoMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(aoMap as Texture2D, "");
+                            valuesJson.SetString("aoMap", texPath);
+                            valuesJson.SetNumber("aoMapIntensity", aoMapIntensity);
 
-                    //         definesJson.AddString("USE_AOMAP");
-                    //     }
+                            definesJson.AddString("USE_AOMAP");
+                        }
 
-                    //     if (emissiveMap != null)
-                    //     {
-                    //         var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
-                    //         valuesJson.SetString("emissiveMap", texPath);
-                    //         definesJson.AddString("USE_EMISSIVEMAP");
-                    //     }
+                        if (emissiveMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
+                            valuesJson.SetString("emissiveMap", texPath);
+                            definesJson.AddString("USE_EMISSIVEMAP");
+                        }
 
-                    //     if (bumpMap != null)
-                    //     {
-                    //         var texPath = ResourceManager.instance.SaveTexture(bumpMap as Texture2D, "");
-                    //         // valuesJson.SetString("bumpMap", texPath);
-                    //         // valuesJson.SetNumber("bumpScale", bumpScale / 10.0f);
-                    //         // definesJson.AddString("USE_BUMPMAP");
-                    //         valuesJson.SetString("normalMap", texPath);
-                    //         valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
-                    //         definesJson.AddString("USE_NORMALMAP");
-                    //     }
+                        if (bumpMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(bumpMap as Texture2D, "");
+                            // valuesJson.SetString("bumpMap", texPath);
+                            // valuesJson.SetNumber("bumpScale", bumpScale / 10.0f);
+                            // definesJson.AddString("USE_BUMPMAP");
+                            valuesJson.SetString("normalMap", texPath);
+                            valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
+                            definesJson.AddString("USE_NORMALMAP");
+                        }
 
-                    //     if (normalMap != null)
-                    //     {
-                    //         var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
-                    //         valuesJson.SetString("normalMap", texPath);
-                    //         valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
-                    //         definesJson.AddString("USE_NORMALMAP");
-                    //     }
+                        if (normalMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
+                            valuesJson.SetString("normalMap", texPath);
+                            valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
+                            definesJson.AddString("USE_NORMALMAP");
+                        }
 
-                    //     if(displacementMap != null)
-                    //     {
-                    //         var texPath = ResourceManager.instance.SaveTexture(displacementMap as Texture2D, "");
-                    //         valuesJson.SetString("displacementMap", texPath);
-                    //         valuesJson.SetNumber("displacementScale", displacementScale);
-                    //         valuesJson.SetNumber("displacementBias", 0.0f);
-                    //         definesJson.AddString("USE_DISPLACEMENTMAP");
-                    //     }
-                    // }
+                        if (displacementMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(displacementMap as Texture2D, "");
+                            valuesJson.SetString("displacementMap", texPath);
+                            valuesJson.SetNumber("displacementScale", displacementScale);
+                            valuesJson.SetNumber("displacementBias", 0.0f);
+                            definesJson.AddString("USE_DISPLACEMENTMAP");
+                        }
+                    }
+                    else if (ExportToolsSetting.instance.lightType == ExportLightType.Standard)
+                    {
+                        var roughness = 1.0f - this.GetFloat("_Glossiness", 0.0f);
+                        var metalness = this.GetFloat("_Metallic", 0.0f);
+                        var aoMap = this.GetTexture("_OcclusionMap", null);
+                        var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
+                        var emissive = this.GetColor("_EmissionColor", Color.black);
+                        var emissiveMap = this.GetTexture("_EmissionMap", null);
+                        var emissiveIntensity = 1.0f;
+                        var bumpMap = this.GetTexture("_BumpMap", null);
+                        var bumpScale = this.GetFloat("_BumpScale", 1.0f);
+                        var normalMap = this.GetTexture("_DetailNormalMap", null);
+                        var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
+                        UnityEngine.Texture roughnessMap = null;
+                        var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
+                        var displacementMap = this.GetTexture("_ParallaxMap", null);
+                        var displacementScale = this.GetFloat("_Parallax", 0.0f);
+
+                        valuesJson.SetColor3("emissive", emissive);
+                        valuesJson.SetNumber("roughness", roughness);
+                        valuesJson.SetNumber("metalness", metalness);
+
+                        if (aoMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(aoMap as Texture2D, "");
+                            valuesJson.SetString("aoMap", texPath);
+                            valuesJson.SetNumber("aoMapIntensity", aoMapIntensity);
+
+                            definesJson.AddString("USE_AOMAP");
+                        }
+
+                        if (emissiveMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
+                            valuesJson.SetString("emissiveMap", texPath);
+                            definesJson.AddString("USE_EMISSIVEMAP");
+                        }
+
+                        if (bumpMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(bumpMap as Texture2D, "");
+                            // valuesJson.SetString("bumpMap", texPath);
+                            // valuesJson.SetNumber("bumpScale", bumpScale / 10.0f);
+                            // definesJson.AddString("USE_BUMPMAP");
+                            valuesJson.SetString("normalMap", texPath);
+                            valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
+                            definesJson.AddString("USE_NORMALMAP");
+                        }
+
+                        if (normalMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
+                            valuesJson.SetString("normalMap", texPath);
+                            valuesJson.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
+                            definesJson.AddString("USE_NORMALMAP");
+                        }
+
+                        if (displacementMap != null)
+                        {
+                            var texPath = ResourceManager.instance.SaveTexture(displacementMap as Texture2D, "");
+                            valuesJson.SetString("displacementMap", texPath);
+                            valuesJson.SetNumber("displacementScale", displacementScale);
+                            valuesJson.SetNumber("displacementBias", 0.0f);
+                            definesJson.AddString("USE_DISPLACEMENTMAP");
+                        }
+
+                        definesJson.AddString("STANDARD");
+                    }
                 }
 
                 if (texture != null)

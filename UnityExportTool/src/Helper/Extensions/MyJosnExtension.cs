@@ -121,6 +121,31 @@ namespace Egret3DExportTools
 
             jsonNode[desc] = cItemArr;
         }
+        public static void SetUVTransform(this Dictionary<string, IJsonNode> jsonNode, string desc, Vector4 data, int? digits = null)
+        {
+            var tx = data.z;
+            var ty = data.w;
+            var sx = data.x;
+            var sy = data.y;
+            var cx = 0.0f;
+            var cy = 0.0f;
+            var rotation = 0.0f;
+            var c = Math.Cos(rotation);
+            var s = Math.Sin(rotation);
+
+            MyJson_Array cItemArr = new MyJson_Array();
+            cItemArr.AddNumber(sx * c);
+            cItemArr.AddNumber(sx * s);
+            cItemArr.AddNumber(-sx * (c * cx + s * cy) + cx + tx);
+            cItemArr.AddNumber(-sy * s);
+            cItemArr.AddNumber(sy * c);
+            cItemArr.AddNumber(-sy * (-s * cx + c * cy) + cy + ty);
+            cItemArr.AddNumber(0.0);
+            cItemArr.AddNumber(0.0);
+            cItemArr.AddNumber(1.0);
+
+            jsonNode[desc] = cItemArr;
+        }
 
         //------------------------------------------------------复杂的数据-----------------------------------------------------------
         public static void SetUUID(this Dictionary<string, IJsonNode> jsonNode, string value)
