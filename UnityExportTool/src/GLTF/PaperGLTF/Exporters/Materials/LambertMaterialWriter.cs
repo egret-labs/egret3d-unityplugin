@@ -12,18 +12,7 @@ namespace PaperGLTF
         {
             get
             {
-                var shaderName = this.source.shader.name.ToLower();
-                var isDoubleSide = this.source.HasProperty("_Cull") && this.source.GetInt("_Cull") == (int)UnityEngine.Rendering.CullMode.Off;
-                if (!isDoubleSide)
-                {
-                    isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
-                }
-                if (isDoubleSide)
-                {
-                    return "meshlambert_doubleside";
-                }
-
-                return "meshlambert";
+                return "builtin/meshlambert.shader.json";
             }
         }
     }

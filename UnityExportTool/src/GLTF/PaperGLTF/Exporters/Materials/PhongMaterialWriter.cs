@@ -6,7 +6,21 @@ namespace PaperGLTF
     {
         protected override void Update()
         {
+            base.Update();
             var source = this.source;
+            if (source.HasProperty("_Shininess"))
+            {
+                var shininess = this.GetFloat("_Shininess", 0.0f);
+                if (shininess > 0.0f)
+                {
+                    shininess = 1 / shininess;
+                }
+                if (shininess != 30.0f)
+                {
+                    this.values.SetNumber("shininess", shininess);
+                }
+            }
+
             if (source.HasProperty("_SpecGlossMap"))
             {
                 var specularMap = source.GetTexture("_SpecGlossMap");
@@ -14,7 +28,6 @@ namespace PaperGLTF
                 {
                     var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
                     this.values.SetString("specularMap", texPath);
-                    this.defines.Add("USE_SPECULARMAP");
                 }
             }
 
@@ -25,10 +38,9 @@ namespace PaperGLTF
                 {
                     var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
                     this.values.SetString("normalMap", texPath);
-                    this.defines.Add("USE_NORMALMAP");
                 }
             }
-            
+
             base.Update();
         }
 
@@ -36,18 +48,7 @@ namespace PaperGLTF
         {
             get
             {
-                var shaderName = this.source.shader.name.ToLower();
-                var isDoubleSide = this.source.HasProperty("_Cull") && this.source.GetInt("_Cull") == (int)UnityEngine.Rendering.CullMode.Off;
-                if (!isDoubleSide)
-                {
-                    isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
-                }
-                if (isDoubleSide)
-                {
-                    return "meshphong_doubleside";
-                }
-
-                return "meshphong";
+                return "builtin/meshphong.shader.json";
             }
         }
     }

@@ -6,13 +6,6 @@ namespace PaperGLTF
     using Egret3DExportTools;
     public class CustomMaterialWriter : BaseMaterialWriter
     {
-        protected BlendMode blend = BlendMode.None;
-        protected bool cull = true;
-        protected FrontFace frontFace = FrontFace.CCW;
-        protected CullFace cullFace = CullFace.BACK;
-        protected bool zTest;
-        protected bool zWrite;
-        
         protected override void Update()
         {
             var target = this.source;
@@ -25,7 +18,7 @@ namespace PaperGLTF
                     continue;
                 }
 
-                var _uniform = new MyJson_Tree();
+                var uniform = new MyJson_Tree();
                 string type = materialProperty.type.ToString();
                 if (type == "Float" || type == "Range")
                 {
@@ -68,24 +61,6 @@ namespace PaperGLTF
                 }
             }
 
-            var doubleSided = target.HasProperty("_Cull") && target.GetInt("_Cull") == (float)UnityEngine.Rendering.CullMode.Off;
-            if (!doubleSided)
-            {
-                doubleSided = shaderName.Contains("both") || shaderName.Contains("side");
-            }
-
-            this.cull = !doubleSided;
-            this.frontFace = FrontFace.CCW;
-            this.cullFace = CullFace.BACK;
-            this.zTest = true;
-            this.zWrite = true;
-            if (target.GetTag("RenderType", false, "") == "Transparent")
-            {
-                //TODO
-                this.blend = shaderName.Contains("additive") ? BlendMode.Add : BlendMode.Blend;
-                this.zWrite = false;
-            }
-            
             MyLog.Log("自定义Shader:" + this.technique);
         }
 

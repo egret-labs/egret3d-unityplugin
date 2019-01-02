@@ -68,7 +68,6 @@ namespace Egret3DExportTools
         None,
         Lambert,
         Phong,
-        Physical,
         Standard,
     }
 

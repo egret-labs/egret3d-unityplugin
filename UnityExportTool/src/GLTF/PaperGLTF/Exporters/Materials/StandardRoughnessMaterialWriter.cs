@@ -19,7 +19,6 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(metalnessMap as Texture2D, "");
                 this.values.SetString("metalnessMap", texPath);
-                this.defines.Add("USE_METALNESSMAP");
             }
 
             var roughnessMap = this.GetTexture("_SpecGlossMap", null);
@@ -27,12 +26,11 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(roughnessMap as Texture2D, "");
                 this.values.SetString("roughnessMap", texPath);
-                this.defines.Add("USE_ROUGHNESSMAP");
             }
         }
-        protected override void StandardEnd()
-        {
+        // protected override void StandardEnd()
+        // {
             
-        }
+        // }
     }
 }

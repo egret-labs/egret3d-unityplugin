@@ -6,7 +6,8 @@ namespace PaperGLTF
     {
         protected override void StandardBegin()
         {
-            var roughness = 1.0f - this.GetFloat("_Glossiness", 0.0f);
+            // var roughness = this.GetFloat("_Glossiness", 0.0f);
+            var roughness = 1.0f;
             var metalness = this.GetFloat("_Metallic", 0.0f);
             var emissive = this.GetColor("_EmissionColor", Color.black);
 
@@ -19,12 +20,12 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(metalnessMap as Texture2D, "");
                 this.values.SetString("metalnessMap", texPath);
-                this.defines.Add("USE_METALNESSMAP");
             }
+            Debug.Log("StandardSpecularMaterialWriter:" + roughness);
         }
-        protected override void StandardEnd()
-        {
+        // protected override void StandardEnd()
+        // {
             
-        }
+        // }
     }
 }

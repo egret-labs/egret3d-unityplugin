@@ -37,28 +37,8 @@ namespace PaperGLTF
         protected override string technique
         {
             get
-            {
-                var shaderName = this.source.shader.name.ToLower();
-                var isBlend = shaderName.Contains("blended");
-                var isAdditive = shaderName.Contains("additive");
-                var isMultiply = shaderName.Contains("multiply");
-                var isPremultiply = shaderName.Contains("premultiply");
-                if (isBlend)
-                {
-                    return isPremultiply ? "particle_blend_premultiply" : "particle_blend";
-                }
-                else if (isAdditive)
-                {
-                    return isPremultiply ? "particle_additive_premultiply" : "particle_additive";
-                }
-                else if (isMultiply)
-                {
-                    return isPremultiply ? "particle_multiply_premultiply" : "particle_multiply";
-                }
-                else
-                {
-                    return "particle";
-                }
+            {               
+                return "builtin/particle.shader.json";
             }
         }
     }

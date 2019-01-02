@@ -4,6 +4,91 @@ namespace PaperGLTF
     using System.Collections.Generic;
     using UnityEngine;
     using Egret3DExportTools;
+    
+    public enum MaterialType
+    {
+        Diffuse,
+        Lambert,
+        Phong,
+        Standard,
+        StandardSpecular,
+        StandardRoughness,
+        Particle,
+        Custom
+    }
+
+    public enum BlendMode
+    {
+        None,
+        Blend,
+        Blend_PreMultiply,
+        Add,
+        Add_PreMultiply,
+        Subtractive,
+        Subtractive_PreMultiply,
+        Multiply,
+        Multiply_PreMultiply,
+    }
+
+    public enum EnableState
+    {
+        BLEND = 3042,
+        CULL_FACE = 2884,
+        DEPTH_TEST = 2929,
+        POLYGON_OFFSET_FILL = 32823,
+        SAMPLE_ALPHA_TO_COVERAGE = 32926,
+    }
+
+    public enum BlendEquation
+    {
+        FUNC_ADD = 32774,
+        FUNC_SUBTRACT = 32778,
+        FUNC_REVERSE_SUBTRACT = 32779,
+    }
+
+    public enum BlendFactor
+    {
+        ZERO = 0,
+        ONE = 1,
+        SRC_COLOR = 768,
+        ONE_MINUS_SRC_COLOR = 769,
+        DST_COLOR = 774,
+        ONE_MINUS_DST_COLOR = 775,
+        SRC_ALPHA = 770,
+        ONE_MINUS_SRC_ALPHA = 771,
+        DST_ALPHA = 772,
+        ONE_MINUS_DST_ALPHA = 773,
+        CONSTANT_COLOR = 32769,
+        ONE_MINUS_CONSTANT_COLOR = 32770,
+        CONSTANT_ALPHA = 32771,
+        ONE_MINUS_CONSTANT_ALPHA = 32772,
+        SRC_ALPHA_SATURATE = 776,
+    }
+
+    public enum CullFace
+    {
+        FRONT = 1028,
+        BACK = 1029,
+        FRONT_AND_BACK = 1032,
+    }
+
+    public enum FrontFace
+    {
+        CW = 2304,
+        CCW = 2305,
+    }
+
+    public enum DepthFunc
+    {
+        NEVER = 512,
+        LESS = 513,
+        LEQUAL = 515,
+        EQUAL = 514,
+        GREATER = 516,
+        NOTEQUAL = 517,
+        GEQUAL = 518,
+        ALWAYS = 519,
+    }
     public abstract class BaseMaterialWriter
     {
         public Material source;
@@ -11,7 +96,7 @@ namespace PaperGLTF
         protected int renderQueue = 0;
         protected Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
         protected List<string> defines = new List<string>();
-        
+
         public virtual void Clean()
         {
             this.source = null;
@@ -35,9 +120,68 @@ namespace PaperGLTF
             paperJson.SetInt("renderQueue", this.source.renderQueue);
             paperJson.Add("defines", definesJson);
             extensions.Add("paper", paperJson);
+            //states
+            var statesJson = new MyJson_Tree();
+            paperJson.Add("states", statesJson);
+            var enalbesJson = new MyJson_Array();
+            var functionsJson = new MyJson_Tree();
+            statesJson.Add("enable", enalbesJson);
+            statesJson.Add("functions", functionsJson);
 
             var valuesJson = new MyJson_Tree();
             KHR_techniques_webglJson.Add("values", valuesJson);
+
+            //
+            var source = this.source;
+            var shaderName = source.shader.name.ToLower();
+            MyLog.Log("Shader:" + shaderName);
+            foreach (var value in this.values)
+            {
+                valuesJson.Add(value.Key, value.Value);
+            }
+            KHR_techniques_webglJson.SetString("technique", this.technique);
+            //paper
+            paperJson.SetInt("renderQueue", this.source.renderQueue);
+            foreach (var define in this.defines)
+            {
+                definesJson.AddString(define);
+            }
+
+            //
+            //standard
+            var isDoubleSide = source.HasProperty("_Cull") && source.GetInt("_Cull") == (float)UnityEngine.Rendering.CullMode.Off;
+            if (!isDoubleSide)
+            {
+                //others
+                isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
+            }
+
+            var isTransparent = false;
+            var blend = BlendMode.None;
+            if (source.GetTag("RenderType", false, "") == "Transparent")
+            {
+                //TODO
+                isTransparent = true;
+                var additive = shaderName.Contains("additive");
+                var multiply = shaderName.Contains("multiply");
+                var premultiply = shaderName.Contains("premultiply");
+                if (additive)
+                {
+                    blend = premultiply ? BlendMode.Add_PreMultiply : BlendMode.Add;
+                }
+                else if (multiply)
+                {
+                    blend = premultiply ? BlendMode.Multiply_PreMultiply : BlendMode.Multiply;
+                }
+                else
+                {
+                    blend = premultiply ? BlendMode.Blend_PreMultiply : BlendMode.Blend;
+                }
+            }
+
+            this.SetBlend(enalbesJson, functionsJson, blend);
+            this.SetCullFace(enalbesJson, functionsJson, !isDoubleSide);
+            this.SetDepth(enalbesJson, functionsJson, true, !isTransparent);
 
             return materialItemJson;
         }
@@ -85,19 +229,34 @@ namespace PaperGLTF
                     blendFuncSeparate.AddInt((int)BlendFactor.ONE);
                     blendFuncSeparate.AddInt((int)BlendFactor.ONE_MINUS_CONSTANT_ALPHA);
                     break;
+                case BlendMode.Multiply:
+                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
+                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
+                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
+                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
+                    break;
+                case BlendMode.Multiply_PreMultiply:
+                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
+                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
+                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
+                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_ALPHA);
+                    break;
             }
+
+            functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
+            functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
         }
 
-        protected void SetCullFace(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool cull, FrontFace frontFace = FrontFace.CCW, CullFace cullFace = CullFace.BACK)
+        protected void SetCullFace(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool cull)
         {
             if (cull)
             {
                 var frontFaceJson = new MyJson_Array();
-                frontFaceJson.AddInt((int)frontFace);
+                frontFaceJson.AddInt((int)FrontFace.CCW);
                 functionsJson.Add("frontFace", frontFaceJson);
 
                 var cullFaceJson = new MyJson_Array();
-                cullFaceJson.AddInt((int)cullFace);
+                cullFaceJson.AddInt((int)CullFace.BACK);
                 functionsJson.Add("cullFace", cullFaceJson);
 
                 enalbesJson.AddInt((int)EnableState.CULL_FACE);
@@ -167,7 +326,7 @@ namespace PaperGLTF
         {
             get
             {
-                return "meshbasic";
+                return "builtin/meshbasic.shader.json";
             }
         }
     }

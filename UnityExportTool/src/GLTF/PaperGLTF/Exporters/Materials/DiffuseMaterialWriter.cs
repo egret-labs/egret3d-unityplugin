@@ -14,7 +14,6 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(mainTex as Texture2D, "");
                 this.values.SetString("map", texPath);
-                this.defines.Add("USE_MAP");
                 if (source.HasProperty("_MainTex_ST"))
                 {
                     var mainST = this.GetVector4("_MainTex_ST", new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
@@ -66,6 +65,14 @@ namespace PaperGLTF
                     color = source.GetColor("_TintColor");
                 }
                 return color;
+            }
+        }
+
+        protected override string technique
+        {
+            get
+            {
+                return "builtin/meshbasic.shader.json";
             }
         }
     }

@@ -19,7 +19,6 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(metalnessMap as Texture2D, "");
                 this.values.SetString("metalnessMap", texPath);
-                this.defines.Add("USE_METALNESSMAP");
             }
         }
         protected virtual void StandardEnd()
@@ -28,8 +27,14 @@ namespace PaperGLTF
         }
         protected override void Update()
         {
-            var source = this.source;            
+            var source = this.source;
             this.StandardBegin();
+            var map = this.GetTexture("_MainTex", null);
+            if (map != null)
+            {
+                var texPath = ResourceManager.instance.SaveTexture(map as Texture2D, "");
+                this.values.SetString("map", texPath);
+            }
             var aoMap = this.GetTexture("_OcclusionMap", null);
             if (aoMap != null)
             {
@@ -37,7 +42,6 @@ namespace PaperGLTF
                 this.values.SetString("aoMap", texPath);
                 var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
                 this.values.SetNumber("aoMapIntensity", aoMapIntensity);
-                this.defines.Add("USE_AOMAP");
             }
 
             var emissiveMap = this.GetTexture("_EmissionMap", null);
@@ -45,7 +49,6 @@ namespace PaperGLTF
             {
                 var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
                 this.values.SetString("emissiveMap", texPath);
-                this.defines.Add("USE_EMISSIVEMAP");
             }
 
             var bumpMap = this.GetTexture("_BumpMap", null);
@@ -55,7 +58,6 @@ namespace PaperGLTF
                 this.values.SetString("normalMap", texPath);
                 var bumpScale = this.GetFloat("_BumpScale", 1.0f);
                 this.values.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
-                this.defines.Add("USE_NORMALMAP");
             }
 
             var normalMap = this.GetTexture("_DetailNormalMap", null);
@@ -65,7 +67,6 @@ namespace PaperGLTF
                 this.values.SetString("normalMap", texPath);
                 var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
                 this.values.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
-                this.defines.Add("USE_NORMALMAP");
             }
 
             var displacementMap = this.GetTexture("_ParallaxMap", null);
@@ -76,9 +77,8 @@ namespace PaperGLTF
                 var displacementScale = this.GetFloat("_Parallax", 0.0f);
                 this.values.SetNumber("displacementScale", displacementScale);
                 this.values.SetNumber("displacementBias", 0.0f);
-                this.defines.Add("USE_DISPLACEMENTMAP");
             }
-            
+
             this.StandardEnd();
         }
 
@@ -86,13 +86,7 @@ namespace PaperGLTF
         {
             get
             {
-                var isDoubleSide = this.source.HasProperty("_Cull") && this.source.GetInt("_Cull") == (int)UnityEngine.Rendering.CullMode.Off;
-                if(isDoubleSide)
-                {
-                    return "meshphysical_doubleside";
-                }
-                
-                return "meshphysical";
+                return "builtin/meshphysical.shader.json";
             }
         }
     }
