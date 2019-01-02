@@ -68,7 +68,8 @@ namespace PaperGLTF
             var writer = MaterialWriterFactory.Create(materialType, target);
 
             var materialItemJson =  writer.Write();
-            materialsJson.Add(materialItemJson);           
+            materialsJson.Add(materialItemJson);   
+            writer.Clean();        
 
             //
             System.Text.StringBuilder sb = new System.Text.StringBuilder();

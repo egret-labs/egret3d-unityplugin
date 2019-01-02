@@ -4,7 +4,7 @@ namespace PaperGLTF
     using System.Collections.Generic;
     using UnityEngine;
     using Egret3DExportTools;
-    
+
     public enum MaterialType
     {
         Diffuse,
@@ -93,7 +93,6 @@ namespace PaperGLTF
     {
         public Material source;
 
-        protected int renderQueue = 0;
         protected Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
         protected List<string> defines = new List<string>();
 
@@ -278,6 +277,56 @@ namespace PaperGLTF
                 var depthMask = new MyJson_Array();
                 depthMask.AddBool(true);
                 functionsJson.Add("depthMask", depthMask);
+            }
+        }
+
+        protected void SetFloat(string key, float value, float defalutValue = 0.0f)
+        {
+            if (value != defalutValue)
+            {
+                this.values.SetNumber(key, value);
+            }
+        }
+
+        protected void SetColor3(string key, Color value, Color defalutValue)
+        {
+            if (value != defalutValue)
+            {
+                this.values.SetColor3(key, value);
+            }
+        }
+
+        protected void SetColor3AndOpacity(Color value, Color defalutValue)
+        {
+            if (value != defalutValue)
+            {
+                this.values.SetColor3("diffuse", value);
+                this.values.SetNumber("opacity", value.a);
+            }
+        }
+
+        protected void SetVector2(string key, Vector2 value, Vector2 defalutValue)
+        {
+            if (value != defalutValue)
+            {
+                this.values.SetVector2(key, value);
+            }
+        }
+
+        protected void SetVector4(string key, Vector4 value, Vector4 defalutValue)
+        {
+            if (value != defalutValue)
+            {
+                this.values.SetVector4(key, value);
+            }
+        }
+
+        protected void SetTexture(string key, Texture value, Texture defalutValue = null)
+        {
+            if (value != defalutValue)
+            {
+                var texPath = ResourceManager.instance.SaveTexture(value as Texture2D, "");
+                this.values.SetString(key, texPath);
             }
         }
 

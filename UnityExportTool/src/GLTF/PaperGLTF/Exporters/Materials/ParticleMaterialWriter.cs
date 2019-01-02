@@ -11,12 +11,12 @@ namespace PaperGLTF
             var tex = this.GetTexture("_MainTex", null);
             if (tex != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(tex as Texture2D, "");
-                this.values.SetString("map", texPath);
+                this.SetTexture("map", tex);
 
-                if (source.HasProperty("_MainTex_ST"))
+                var defaultValue = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+                var mainST = this.GetVector4("_MainTex_ST", defaultValue);
+                if (!mainST.Equals(defaultValue))
                 {
-                    var mainST = this.GetVector4("_MainTex_ST", new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
                     this.values.SetUVTransform("uvTransform", mainST);
                 }
             }
@@ -30,14 +30,13 @@ namespace PaperGLTF
             {
                 color = this.GetColor("_Color", Color.white);
             }
-            this.values.SetColor3("diffuse", color);
-            this.values.SetNumber("opacity", color.a);
+            this.SetColor3AndOpacity(color, Color.white);
         }
 
         protected override string technique
         {
             get
-            {               
+            {
                 return "builtin/particle.shader.json";
             }
         }

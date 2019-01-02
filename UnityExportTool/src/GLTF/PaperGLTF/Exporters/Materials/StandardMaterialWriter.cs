@@ -10,15 +10,14 @@ namespace PaperGLTF
             var metalness = this.GetFloat("_Metallic", 0.0f);
             var emissive = this.GetColor("_EmissionColor", Color.black);
 
-            this.values.SetColor3("emissive", emissive);
-            this.values.SetNumber("roughness", roughness);
-            this.values.SetNumber("metalness", metalness);
+            this.SetColor3("emissive", emissive, Color.black);
+            this.SetFloat("roughness", roughness, 0.5f);
+            this.SetFloat("metalness", metalness, 0.5f);
 
             var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
             if (metalnessMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(metalnessMap as Texture2D, "");
-                this.values.SetString("metalnessMap", texPath);
+                this.SetTexture("metalnessMap", metalnessMap);
             }
         }
         protected virtual void StandardEnd()
@@ -32,51 +31,43 @@ namespace PaperGLTF
             var map = this.GetTexture("_MainTex", null);
             if (map != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(map as Texture2D, "");
-                this.values.SetString("map", texPath);
+                this.SetTexture("map", map);
             }
             var aoMap = this.GetTexture("_OcclusionMap", null);
             if (aoMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(aoMap as Texture2D, "");
-                this.values.SetString("aoMap", texPath);
-                var aoMapIntensity = this.GetFloat("_OcclusionStrength", 0.0f);
-                this.values.SetNumber("aoMapIntensity", aoMapIntensity);
+                this.SetTexture("aoMap", aoMap);
+                this.SetFloat("aoMapIntensity", this.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
             }
 
             var emissiveMap = this.GetTexture("_EmissionMap", null);
             if (emissiveMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(emissiveMap as Texture2D, "");
-                this.values.SetString("emissiveMap", texPath);
+                this.SetTexture("emissiveMap", emissiveMap);
             }
 
             var bumpMap = this.GetTexture("_BumpMap", null);
             if (bumpMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(bumpMap as Texture2D, "");
-                this.values.SetString("normalMap", texPath);
                 var bumpScale = this.GetFloat("_BumpScale", 1.0f);
-                this.values.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale));
+                this.SetTexture("normalMap", bumpMap);
+                this.SetVector2("normalScale", new UnityEngine.Vector2(bumpScale, bumpScale), Vector2.one);
             }
 
             var normalMap = this.GetTexture("_DetailNormalMap", null);
             if (normalMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
-                this.values.SetString("normalMap", texPath);
-                var normalScale = this.GetFloat("_DetailNormalMapScale", 0.0f);
-                this.values.SetVector2("normalScale", new UnityEngine.Vector2(normalScale / 10.0f, normalScale / 10.0f));
+                var normalScale = this.GetFloat("_DetailNormalMapScale", 1.0f);
+                this.SetTexture("normalMap", normalMap);
+                this.SetVector2("normalScale", new UnityEngine.Vector2(normalScale, normalScale), Vector2.one);
             }
 
             var displacementMap = this.GetTexture("_ParallaxMap", null);
             if (displacementMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(displacementMap as Texture2D, "");
-                this.values.SetString("displacementMap", texPath);
-                var displacementScale = this.GetFloat("_Parallax", 0.0f);
-                this.values.SetNumber("displacementScale", displacementScale);
-                this.values.SetNumber("displacementBias", 0.0f);
+                this.SetTexture("displacementMap", displacementMap);
+                this.SetFloat("displacementScale", this.GetFloat("_Parallax", 1.0f), 1.0f);
+                this.SetFloat("displacementBias", 0.0f, 0.0f);
             }
 
             this.StandardEnd();

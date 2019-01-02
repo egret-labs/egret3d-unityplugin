@@ -10,19 +10,18 @@ namespace PaperGLTF
             var source = this.source;
             var mainTex = this.MainText;
             var mainColor = this.MainColor;
-            if(mainTex != null)
+            if (mainTex != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(mainTex as Texture2D, "");
-                this.values.SetString("map", texPath);
-                if (source.HasProperty("_MainTex_ST"))
+                this.SetTexture("map", mainTex);
+                var defaultValue = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
+                var mainST = this.GetVector4("_MainTex_ST", defaultValue);
+                if (!mainST.Equals(defaultValue))
                 {
-                    var mainST = this.GetVector4("_MainTex_ST", new Vector4(1.0f, 1.0f, 0.0f, 0.0f));
                     this.values.SetUVTransform("uvTransform", mainST);
                 }
             }
 
-            this.values.SetColor3("diffuse", mainColor);
-            this.values.SetNumber("opacity", mainColor.a);
+            this.SetColor3AndOpacity(mainColor, Color.white);
         }
 
         protected UnityEngine.Texture MainText
