@@ -8,8 +8,8 @@ namespace PaperGLTF
     {
         protected override void Update()
         {
+            //自定义的value全部导出，不和默认值做过滤
             var target = this.source;
-            var shaderName = target.shader.name;
             var materialProperties = MaterialEditor.GetMaterialProperties(new UnityEngine.Object[] { target });
             foreach (var materialProperty in materialProperties)
             {
@@ -34,14 +34,13 @@ namespace PaperGLTF
                 }
                 else if (type == "Texture")
                 {
-                    string texdim = materialProperty.textureDimension.ToString();
                     var tex = this.GetTexture(materialProperty.name, null);
                     if (tex != null)
                     {
+                        string texdim = materialProperty.textureDimension.ToString();
                         if (texdim == "Tex2D")
                         {
-                            var texPath = ResourceManager.instance.SaveTexture(tex as Texture2D, "");
-                            this.values.SetString(materialProperty.name, texPath);
+                            this.SetTexture(materialProperty.name, tex);
 
                             string propertyName = materialProperty.name + "_ST";
                             if (target.HasProperty(propertyName))

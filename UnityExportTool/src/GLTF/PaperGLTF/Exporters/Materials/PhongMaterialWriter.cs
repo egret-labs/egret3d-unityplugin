@@ -8,40 +8,41 @@ namespace PaperGLTF
         {
             base.Update();
             var source = this.source;
-            if (source.HasProperty("_Shininess"))
+            var shininess = this.GetFloat("_Shininess", 0.0f);
+            if (shininess > 0.0f)
             {
-                var shininess = this.GetFloat("_Shininess", 0.0f);
-                if (shininess > 0.0f)
-                {
-                    shininess = 1 / shininess;
-                }
-                if (shininess != 30.0f)
-                {
-                    this.values.SetNumber("shininess", shininess);
-                }
+                shininess = 1 / shininess;
             }
+            this.SetFloat("shininess", shininess, 30.0f);
 
-            if (source.HasProperty("_SpecGlossMap"))
+            var specularMap = this.GetTexture("_SpecGlossMap", null);
+            if (specularMap != null)
             {
-                var specularMap = source.GetTexture("_SpecGlossMap");
-                if (specularMap != null)
-                {
-                    var texPath = ResourceManager.instance.SaveTexture(specularMap as Texture2D, "");
-                    this.values.SetString("specularMap", texPath);
-                }
+                this.SetTexture("specularMap", specularMap);
             }
-
-            if (source.HasProperty("_BumpMap"))
+            var aoMap = this.GetTexture("_OcclusionMap", null);
+            if (aoMap != null)
             {
-                var normalMap = source.GetTexture("_BumpMap");
-                if (normalMap != null)
-                {
-                    var texPath = ResourceManager.instance.SaveTexture(normalMap as Texture2D, "");
-                    this.values.SetString("normalMap", texPath);
-                }
+                this.SetTexture("aoMap", aoMap);
+                this.SetFloat("aoMapIntensity", this.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
             }
-
-            base.Update();
+            var emissiveMap = this.GetTexture("_EmissionMap", null);
+            if (emissiveMap != null)
+            {
+                this.SetTexture("emissiveMap", emissiveMap);
+            }
+            var normalMap = this.GetTexture("_BumpMap", null);
+            if (normalMap != null)
+            {
+                this.SetTexture("normalMap", normalMap);
+            }
+            var displacementMap = this.GetTexture("_ParallaxMap", null);
+            if (displacementMap != null)
+            {
+                this.SetTexture("displacementMap", displacementMap);
+                this.SetFloat("displacementScale", this.GetFloat("_Parallax", 1.0f), 1.0f);
+                this.SetFloat("displacementBias", 0.0f, 0.0f);
+            }
         }
 
         protected override string technique

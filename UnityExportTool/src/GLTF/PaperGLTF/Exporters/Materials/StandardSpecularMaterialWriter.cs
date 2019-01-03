@@ -11,21 +11,15 @@ namespace PaperGLTF
             var metalness = this.GetFloat("_Metallic", 0.0f);
             var emissive = this.GetColor("_EmissionColor", Color.black);
 
-            this.values.SetColor3("emissive", emissive);
-            this.values.SetNumber("roughness", roughness);
-            this.values.SetNumber("metalness", metalness);
+            this.SetColor3("emissive", emissive, Color.black);
+            this.SetFloat("roughness", roughness, 0.5f);
+            this.SetFloat("metalness", metalness, 0.5f);
 
-            var metalnessMap = this.GetTexture("_MetallicGlossMap", null);
-            if (metalnessMap != null)
+            var specularMap = this.GetTexture("_SpecGlossMap", null);
+            if (specularMap != null)
             {
-                var texPath = ResourceManager.instance.SaveTexture(metalnessMap as Texture2D, "");
-                this.values.SetString("metalnessMap", texPath);
+                this.SetTexture("specularMap", specularMap);
             }
-            Debug.Log("StandardSpecularMaterialWriter:" + roughness);
         }
-        // protected override void StandardEnd()
-        // {
-            
-        // }
     }
 }
