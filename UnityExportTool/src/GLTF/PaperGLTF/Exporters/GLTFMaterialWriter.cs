@@ -37,7 +37,7 @@ namespace PaperGLTF
                 },
                 Materials = new List<GLTF.Schema.Material>(),
             };
-        }        
+        }
 
         public override byte[] WriteGLTF()
         {
@@ -67,15 +67,18 @@ namespace PaperGLTF
             var materialType = this.GetMaterialType();
             var writer = MaterialWriterFactory.Create(materialType, target);
 
-            var materialItemJson =  writer.Write();
-            materialsJson.Add(materialItemJson);   
-            writer.Clean();        
+            var materialItemJson = writer.Write();
+            materialsJson.Add(materialItemJson);
+            writer.Clean();
 
             //
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            gltfJson.CovertToStringWithFormat(sb, 4);
-            return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            gltfJson.isWithFormat = true;
+            var jsonStr = gltfJson.ToString();
+
+            return System.Text.Encoding.UTF8.GetBytes(jsonStr);
         }
+
+
 
         private MaterialType GetMaterialType()
         {

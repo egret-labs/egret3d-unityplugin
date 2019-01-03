@@ -89,6 +89,15 @@ namespace PaperGLTF
         GEQUAL = 518,
         ALWAYS = 519,
     }
+
+    public enum RenderQueue
+    {
+        Background = 1000,
+        Geometry = 2000,
+        AlphaTest = 2450,
+        Transparent = 3000,
+        Overlay = 4000,
+    }
     public abstract class BaseMaterialWriter
     {
         public Material source;
@@ -115,17 +124,7 @@ namespace PaperGLTF
             extensions.Add("KHR_techniques_webgl", KHR_techniques_webglJson);
 
             var paperJson = new MyJson_Tree();
-            var definesJson = new MyJson_Array();
-            paperJson.SetInt("renderQueue", this.source.renderQueue);
-            paperJson.Add("defines", definesJson);
             extensions.Add("paper", paperJson);
-            //states
-            var statesJson = new MyJson_Tree();
-            paperJson.Add("states", statesJson);
-            var enalbesJson = new MyJson_Array();
-            var functionsJson = new MyJson_Tree();
-            statesJson.Add("enable", enalbesJson);
-            statesJson.Add("functions", functionsJson);
 
             var valuesJson = new MyJson_Tree();
             KHR_techniques_webglJson.Add("values", valuesJson);
@@ -141,46 +140,35 @@ namespace PaperGLTF
             KHR_techniques_webglJson.SetString("technique", this.technique);
             //paper
             paperJson.SetInt("renderQueue", this.source.renderQueue);
-            foreach (var define in this.defines)
+
+            if (this.defines.Count > 0)
             {
-                definesJson.AddString(define);
+                var definesJson = new MyJson_Array();
+                foreach (var define in this.defines)
+                {
+                    definesJson.AddString(define);
+                }
+                paperJson.Add("defines", definesJson);
             }
 
             //
             //standard
-            var isDoubleSide = source.HasProperty("_Cull") && source.GetInt("_Cull") == (float)UnityEngine.Rendering.CullMode.Off;
-            if (!isDoubleSide)
+            var isDoubleSide = this.isDoubleSide;
+            var isTransparent = this.isTransparent;
+            var blend = this.blendMode;
+            if (isDoubleSide || blend != BlendMode.None || isTransparent)
             {
-                //others
-                isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
+                //states
+                var statesJson = new MyJson_Tree();
+                paperJson.Add("states", statesJson);
+                var enalbesJson = new MyJson_Array();
+                var functionsJson = new MyJson_Tree();
+                statesJson.Add("enable", enalbesJson);
+                statesJson.Add("functions", functionsJson);
+                this.SetBlend(enalbesJson, functionsJson, blend);
+                this.SetCullFace(enalbesJson, functionsJson, !isDoubleSide);
+                this.SetDepth(enalbesJson, functionsJson, true, !isTransparent);
             }
-
-            var isTransparent = false;
-            var blend = BlendMode.None;
-            if (source.GetTag("RenderType", false, "") == "Transparent")
-            {
-                //TODO
-                isTransparent = true;
-                var additive = shaderName.Contains("additive");
-                var multiply = shaderName.Contains("multiply");
-                var premultiply = shaderName.Contains("premultiply");
-                if (additive)
-                {
-                    blend = premultiply ? BlendMode.Add_PreMultiply : BlendMode.Add;
-                }
-                else if (multiply)
-                {
-                    blend = premultiply ? BlendMode.Multiply_PreMultiply : BlendMode.Multiply;
-                }
-                else
-                {
-                    blend = premultiply ? BlendMode.Blend_PreMultiply : BlendMode.Blend;
-                }
-            }
-
-            this.SetBlend(enalbesJson, functionsJson, blend);
-            this.SetCullFace(enalbesJson, functionsJson, !isDoubleSide);
-            this.SetDepth(enalbesJson, functionsJson, true, !isTransparent);
 
             return materialItemJson;
         }
@@ -369,6 +357,69 @@ namespace PaperGLTF
             }
 
             return defalutValue;
+        }
+
+        protected bool isDoubleSide
+        {
+            get
+            {
+                var isDoubleSide = source.HasProperty("_Cull") && source.GetInt("_Cull") == (float)UnityEngine.Rendering.CullMode.Off;
+                if (!isDoubleSide)
+                {
+                    //others
+                    var shaderName = this.shaderName;
+                    isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
+                }
+                return isDoubleSide;
+            }
+        }
+
+        protected bool isTransparent
+        {
+            get
+            {
+                if (source.GetTag("RenderType", false, "") == "Transparent")
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        protected BlendMode blendMode
+        {
+            get
+            {
+                var blend = BlendMode.None;
+                var shaderName = this.shaderName;
+                if (source.GetTag("RenderType", false, "") == "Transparent")
+                {
+                    var additive = shaderName.Contains("additive");
+                    var multiply = shaderName.Contains("multiply");
+                    var premultiply = shaderName.Contains("premultiply");
+                    if (additive)
+                    {
+                        blend = premultiply ? BlendMode.Add_PreMultiply : BlendMode.Add;
+                    }
+                    else if (multiply)
+                    {
+                        blend = premultiply ? BlendMode.Multiply_PreMultiply : BlendMode.Multiply;
+                    }
+                    else
+                    {
+                        blend = premultiply ? BlendMode.Blend_PreMultiply : BlendMode.Blend;
+                    }
+                }
+                return blend;
+            }
+        }
+
+        protected string shaderName
+        {
+            get
+            {
+                return this.source.shader.name;
+            }
         }
 
         protected virtual string technique

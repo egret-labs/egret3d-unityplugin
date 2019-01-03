@@ -70,7 +70,7 @@ namespace Egret3DExportTools
                 saveTextureType = importer.textureType;
                 if (saveTextureType == TextureImporterType.NormalMap && !ExportToolsSetting.instance.unityNormalTexture)
                 {
-                    //法线贴图类型贴图因为Unity特殊处理类，如果要正常导出，就要转换一下类型
+                    //法线贴图类型贴图因为Unity特殊处理过，如果要正常导出，就要转换一下类型
                     isRestore = true;
                     importer.textureType = TextureImporterType.Default;
                     importer.SaveAndReimport();
@@ -83,7 +83,6 @@ namespace Egret3DExportTools
             var exportTexture = new Texture2D(source.width, source.height);
             exportTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
             exportTexture.Apply();
-
 
             byte[] res = null;
             try
