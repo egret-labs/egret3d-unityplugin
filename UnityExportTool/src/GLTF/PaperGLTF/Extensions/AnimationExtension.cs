@@ -25,6 +25,9 @@
     public class AnimationChannelExtension : IExtension {
         public string type;
         public string property;
+        public string uri;
+        public bool pose;
+        public bool update;
 
         public IExtension Clone(GLTFRoot root)
         {
@@ -32,6 +35,9 @@
             {
                 type = type,
                 property = property,
+                uri = uri,
+                pose = pose,
+                update = update,
             };
         }
 
@@ -47,6 +53,21 @@
             ext.Add(new JProperty(
                 AnimationExtensionFactory.PROPERTY,
                 property
+            ));
+
+            ext.Add(new JProperty(
+                "uri",
+                property
+            ));
+
+            ext.Add(new JProperty(
+                "pose",
+                pose
+            ));
+
+            ext.Add(new JProperty(
+                "update",
+                update
             ));
 
             return new JProperty(AnimationExtensionFactory.EXTENSION_NAME, ext);

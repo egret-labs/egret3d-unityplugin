@@ -416,6 +416,9 @@
 
                     var type = "";
                     var property = "";
+                    var uri = "";
+                    var pose = false;
+                    var update = false;
 
                     if (curveBind.type == typeof(GameObject))
                     {
@@ -428,11 +431,54 @@
                                 animationSampler.Interpolation = InterpolationType.STEP;
                                 break;
                         }
+
+                        // for (var i = 0; i < frameCount; ++i) // TODO
+                        // {
+                        //     var time = animationClip.length * i / (frameCount - 1); // TODO
+                        //     var curve = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveBind);
+                        //     var value = curve.Evaluate(time);
+                        //     _bufferWriter.Write(value);
+                        // }
+                    }
+                    else if (curveBind.type == typeof(UnityEngine.Material)) //
+                    {
+                        type = "egret3d.MeshRenderer";
+                        uri = "materials/0/_uvTransform";
+                        pose = true;
+                        update = true;
+
+                        switch (curveBind.propertyName)
+                        {
+                            case "_MainTex_ST.z":
+                                property = "0";
+                                break;
+
+                            case "_MainTex_ST.w":
+                                property = "1";
+                                break;
+
+                            case "_MainTex_ST.x":
+                                property = "2";
+                                break;
+
+                            case "_MainTex_ST.y":
+                                property = "3";
+                                break;
+                        }
+
+                        for (var i = 0; i < frameCount; ++i)
+                        {
+                            var time = animationClip.length * i / (frameCount - 1); // TODO
+                            var curve = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveBind);
+                            var value = curve.Evaluate(time);
+                            _bufferWriter.Write(value);
+                        }
                     }
                     else
                     {
                         Debug.Log(String.Format("Unknown type and property.", curveBind.type, curveBind.propertyName));
                     }
+
                     // Extensions.
                     animationChannel.Extensions = new Dictionary<string, IExtension>() {
                         {
@@ -440,6 +486,9 @@
                             new AnimationChannelExtension () {
                                 type = type,
                                 property = property,
+                                uri = uri,
+                                pose = pose,
+                                update = update,
                             }
                         },
                     };
