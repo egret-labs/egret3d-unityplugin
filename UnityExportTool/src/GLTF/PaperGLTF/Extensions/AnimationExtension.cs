@@ -26,8 +26,7 @@
         public string type;
         public string property;
         public string uri;
-        public bool pose;
-        public bool update;
+        public int needUpdate;
 
         public IExtension Clone(GLTFRoot root)
         {
@@ -36,8 +35,7 @@
                 type = type,
                 property = property,
                 uri = uri,
-                pose = pose,
-                update = update,
+                needUpdate = needUpdate,
             };
         }
 
@@ -57,17 +55,12 @@
 
             ext.Add(new JProperty(
                 "uri",
-                property
+                uri
             ));
 
             ext.Add(new JProperty(
-                "pose",
-                pose
-            ));
-
-            ext.Add(new JProperty(
-                "update",
-                update
+                "needUpdate",
+                needUpdate
             ));
 
             return new JProperty(AnimationExtensionFactory.EXTENSION_NAME, ext);

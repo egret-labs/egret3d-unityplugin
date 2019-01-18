@@ -417,8 +417,7 @@
                     var type = "";
                     var property = "";
                     var uri = "";
-                    var pose = false;
-                    var update = false;
+                    var needUpdate = -1;
 
                     if (curveBind.type == typeof(GameObject))
                     {
@@ -440,28 +439,27 @@
                         //     _bufferWriter.Write(value);
                         // }
                     }
-                    else if (curveBind.type == typeof(UnityEngine.Material)) //
+                    else if (curveBind.type == typeof(UnityEngine.MeshRenderer))
                     {
                         type = "egret3d.MeshRenderer";
-                        uri = "materials/0/_uvTransform";
-                        pose = true;
-                        update = true;
+                        uri = "materials/0/$/_uvTransform";
+                        needUpdate = 1;
 
                         switch (curveBind.propertyName)
                         {
-                            case "_MainTex_ST.z":
+                            case "material._MainTex_ST.z":
                                 property = "0";
                                 break;
 
-                            case "_MainTex_ST.w":
+                            case "material._MainTex_ST.w":
                                 property = "1";
                                 break;
 
-                            case "_MainTex_ST.x":
+                            case "material._MainTex_ST.x":
                                 property = "2";
                                 break;
 
-                            case "_MainTex_ST.y":
+                            case "material._MainTex_ST.y":
                                 property = "3";
                                 break;
                         }
@@ -476,7 +474,7 @@
                     }
                     else
                     {
-                        Debug.Log(String.Format("Unknown type and property.", curveBind.type, curveBind.propertyName));
+                        Debug.Log("Unknown type and property." + curveBind.type.ToString() + curveBind.propertyName);
                     }
 
                     // Extensions.
@@ -487,8 +485,7 @@
                                 type = type,
                                 property = property,
                                 uri = uri,
-                                pose = pose,
-                                update = update,
+                                needUpdate = needUpdate,
                             }
                         },
                     };
