@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using System.IO;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Egret3DExportTools
 {
@@ -241,19 +243,46 @@ namespace Egret3DExportTools
             sb.Append("}");
         }
 
+        private string FormatJsonString(string str, int spacesub = 4)
+        {
+            //格式化json字符串
+            var result = str;
+            JsonSerializer serializer = new JsonSerializer();
+            TextReader tr = new StringReader(str);
+            JsonTextReader jtr = new JsonTextReader(tr);
+            object obj = serializer.Deserialize(jtr);
+            if (obj != null)
+            {
+                StringWriter textWriter = new StringWriter();
+                JsonTextWriter jsonWriter = new JsonTextWriter(textWriter)
+                {
+                    Formatting = Formatting.Indented,
+                    Indentation = spacesub,
+                    IndentChar = ' '
+                };
+                serializer.Serialize(jsonWriter, obj);
+                result = textWriter.ToString();
+                textWriter.Close();
+                jsonWriter.Close();
+            }
+            tr.Close();
+            jtr.Close();
+            return result;
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
             if (this.isWithFormat)
             {
-                this.CovertToStringWithFormat(sb, 0);
+                this.CovertToString(sb);
+                return this.FormatJsonString(sb.ToString());
             }
             else
             {
                 this.CovertToString(sb);
+                return sb.ToString();
             }
-
-            return sb.ToString();
         }
     }
 

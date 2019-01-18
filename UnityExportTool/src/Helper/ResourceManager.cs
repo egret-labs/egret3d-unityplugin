@@ -289,6 +289,9 @@ namespace Egret3DExportTools
         {
             string localp = System.IO.Path.GetDirectoryName(Application.dataPath);
             string path = AssetDatabase.GetAssetPath(tex);
+
+            TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(path);
+            bool isNormal = importer && importer.textureType == TextureImporterType.NormalMap;
             string filename = localp + "/" + path;
             int i = filename.LastIndexOf(".");
             string ext = "png";
@@ -327,7 +330,7 @@ namespace Egret3DExportTools
 
                 path = PathHelper.CheckFileName(path);
                 this.AddFileBuffer(path, bs);
-                rename = SaveTextureFormat(tex, path, matPath, false, ext);
+                rename = SaveTextureFormat(tex, path, matPath, false, ext, isNormal);
             }
 
             return rename;
@@ -336,7 +339,7 @@ namespace Egret3DExportTools
         /**
          * 保存纹理图片相关信息
          */
-        public string SaveTextureFormat(Texture2D tex, string texPath, string matPath, bool closemipmap = false, string ext = "png")
+        public string SaveTextureFormat(Texture2D tex, string texPath, string matPath, bool closemipmap = false, string ext = "png", bool normal = false)
         {
             string name = PathHelper.CheckFileName(tex.name + ".image.json");
 
@@ -346,13 +349,33 @@ namespace Egret3DExportTools
             textureItem.SetEnum("filterMode", tex.filterMode, true);
             textureItem.SetEnum("wrap", tex.wrapMode, true);
             textureItem.SetBool("mipmap", !closemipmap && tex.mipmapCount > 1);
-            if (tex.format == TextureFormat.RGB24)
+
+            if (tex.anisoLevel > 1)
             {
-                textureItem.SetString("format", "RGB");
+                textureItem.SetNumber("anisotropy", tex.anisoLevel);
             }
-            else if (tex.format == TextureFormat.Alpha8)
+
+            if (tex.format == TextureFormat.Alpha8)
             {
                 textureItem.SetString("format", "Gray");
+            }
+            else if (ext == "jpg" ||
+             tex.format == TextureFormat.RGB24 ||
+             tex.format == TextureFormat.PVRTC_RGB2 ||
+             tex.format == TextureFormat.PVRTC_RGB4 ||
+             tex.format == TextureFormat.RGB565 ||
+             tex.format == TextureFormat.ETC_RGB4 ||
+             tex.format == TextureFormat.ATC_RGB4 ||
+             tex.format == TextureFormat.ETC2_RGB ||
+             tex.format == TextureFormat.ASTC_RGB_4x4 ||
+             tex.format == TextureFormat.ASTC_RGB_5x5 ||
+             tex.format == TextureFormat.ASTC_RGB_6x6 ||
+             tex.format == TextureFormat.ASTC_RGB_8x8 ||
+             tex.format == TextureFormat.ASTC_RGB_10x10 ||
+             tex.format == TextureFormat.ASTC_RGB_12x12
+             )
+            {
+                textureItem.SetString("format", "RGB");
             }
 
             textureItem.SetInt("version", 2);
