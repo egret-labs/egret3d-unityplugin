@@ -156,18 +156,48 @@ namespace PaperGLTF
             var isDoubleSide = this.isDoubleSide;
             var isTransparent = this.isTransparent;
             var blend = this.blendMode;
+            var statesJson = new MyJson_Tree();
+            var enable = new MyJson_Array();
+
             if (isDoubleSide || blend != BlendMode.None || isTransparent)
             {
                 //states
-                var statesJson = new MyJson_Tree();
                 paperJson.Add("states", statesJson);
-                var enalbesJson = new MyJson_Array();
                 var functionsJson = new MyJson_Tree();
-                statesJson.Add("enable", enalbesJson);
+                statesJson.Add("enable", enable);
                 statesJson.Add("functions", functionsJson);
-                this.SetBlend(enalbesJson, functionsJson, blend);
-                this.SetCullFace(enalbesJson, functionsJson, !isDoubleSide);
-                this.SetDepth(enalbesJson, functionsJson, true, !isTransparent);
+                this.SetBlend(enable, functionsJson, blend);
+                this.SetCullFace(enable, functionsJson, !isDoubleSide);
+                this.SetDepth(enable, functionsJson, true, !isTransparent);
+            }
+
+            Debug.Log("===============================================" + this.shaderName);
+            //
+            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
+            if (customConfig != null)
+            {
+                if (customConfig.enable != null)
+                {
+                    if (customConfig.enable.Length == 0)
+                    {
+                        statesJson.Remove("enable");
+                    }
+                    else
+                    {
+                        enable.Clear();
+                        foreach (var value in customConfig.enable)
+                        {
+                            enable.AddInt(value);
+                        }
+
+                        statesJson.Add("enable", enable);
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(customConfig.technique))
+                {
+                    KHR_techniques_webglJson.SetString("technique", customConfig.technique);
+                }
             }
 
             return materialItemJson;
@@ -232,29 +262,112 @@ namespace PaperGLTF
 
             functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
             functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
+
+            //
+            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
+            if (customConfig != null)
+            {
+                if (customConfig.blendFuncSeparate != null)
+                {
+                    if (customConfig.blendFuncSeparate.Length == 0)
+                    {
+                        functionsJson.Remove("blendEquationSeparate");
+                    }
+                    else
+                    {
+                        blendFuncSeparate.Clear();
+                        foreach (var value in customConfig.blendFuncSeparate)
+                        {
+                            blendFuncSeparate.AddInt(value);
+                        }
+                        functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
+                    }
+                }
+
+                if (customConfig.blendFuncSeparate != null)
+                {
+                    if (customConfig.blendFuncSeparate.Length == 0)
+                    {
+                        functionsJson.Remove("blendFuncSeparate");
+                    }
+                    else
+                    {
+                        blendFuncSeparate.Clear();
+                        foreach (var value in customConfig.blendFuncSeparate)
+                        {
+                            blendFuncSeparate.AddInt(value);
+                        }
+                        functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
+                    }
+                }
+            }
         }
 
         protected void SetCullFace(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool cull)
         {
+            var frontFace = new MyJson_Array();
+            var cullFace = new MyJson_Array();
+
             if (cull)
             {
-                var frontFaceJson = new MyJson_Array();
-                frontFaceJson.AddInt((int)FrontFace.CCW);
-                functionsJson.Add("frontFace", frontFaceJson);
+                frontFace.AddInt((int)FrontFace.CCW);
+                functionsJson.Add("frontFace", frontFace);
 
-                var cullFaceJson = new MyJson_Array();
-                cullFaceJson.AddInt((int)CullFace.BACK);
-                functionsJson.Add("cullFace", cullFaceJson);
+                cullFace.AddInt((int)CullFace.BACK);
+                functionsJson.Add("cullFace", cullFace);
 
                 enalbesJson.AddInt((int)EnableState.CULL_FACE);
+            }
+
+            //
+            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
+            if (customConfig != null)
+            {
+                if (customConfig.frontFace != null)
+                {
+                    if (customConfig.frontFace.Length == 0)
+                    {
+                        functionsJson.Remove("frontFace");
+                    }
+                    else
+                    {
+                        frontFace.Clear();
+                        foreach (var value in customConfig.frontFace)
+                        {
+                            frontFace.AddInt(value);
+                        }
+
+                        functionsJson.Add("frontFace", frontFace);
+                    }
+                }
+
+                if (customConfig.cullFace != null)
+                {
+                    if (customConfig.cullFace.Length == 0)
+                    {
+                        functionsJson.Remove("cullFace");
+                    }
+                    else
+                    {
+                        cullFace.Clear();
+                        foreach (var value in customConfig.cullFace)
+                        {
+                            cullFace.AddInt(value);
+                        }
+
+                        functionsJson.Add("cullFace", cullFace);
+                    }
+                }
             }
         }
 
         protected void SetDepth(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool zTest, bool zWrite)
         {
+            var depthFunc = new MyJson_Array();
+            var depthMask = new MyJson_Array();
+
             if (zTest)
             {
-                var depthFunc = new MyJson_Array();
                 depthFunc.AddInt((int)DepthFunc.LEQUAL);
                 functionsJson.Add("depthFunc", depthFunc);
                 enalbesJson.AddInt((int)EnableState.DEPTH_TEST);
@@ -262,9 +375,49 @@ namespace PaperGLTF
 
             if (zWrite)
             {
-                var depthMask = new MyJson_Array();
                 depthMask.AddBool(true);
                 functionsJson.Add("depthMask", depthMask);
+            }
+
+            //
+            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
+            if (customConfig != null)
+            {
+                if (customConfig.depthFunc != null)
+                {
+                    if (customConfig.depthFunc.Length == 0)
+                    {
+                        functionsJson.Remove("depthFunc");
+                    }
+                    else
+                    {
+                        depthFunc.Clear();
+                        foreach (var value in customConfig.depthFunc)
+                        {
+                            depthFunc.AddInt(value);
+                        }
+
+                        functionsJson.Add("depthFunc", depthFunc);
+                    }
+                }
+
+                if (customConfig.depthMask != null)
+                {
+                    if (customConfig.depthMask.Length == 0)
+                    {
+                        functionsJson.Remove("depthMask");
+                    }
+                    else
+                    {
+                        depthMask.Clear();
+                        foreach (var value in customConfig.depthMask)
+                        {
+                            depthMask.AddInt(value);
+                        }
+
+                        functionsJson.Add("depthMask", depthMask);
+                    }
+                }
             }
         }
 

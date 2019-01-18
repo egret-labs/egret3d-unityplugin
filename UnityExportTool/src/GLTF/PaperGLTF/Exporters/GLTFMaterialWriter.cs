@@ -78,20 +78,21 @@ namespace PaperGLTF
             return System.Text.Encoding.UTF8.GetBytes(jsonStr);
         }
 
-
-
         private MaterialType GetMaterialType()
         {
             var shaderName = this._target.shader.name;
-            if (ExportConfig.instance.IsCustomShader(shaderName))
-            {
-                return MaterialType.Custom;
-            }
-            else if (this._isParticle)
+            var customShaderConfig = ExportConfig.instance.IsCustomShader(shaderName);
+            
+            if (this._isParticle)
             {
                 return MaterialType.Particle;
             }
-            else
+
+            if (customShaderConfig != null)
+            {
+                return MaterialType.Custom;
+            }
+            
             {
                 var lightType = ExportToolsSetting.instance.lightType;
                 switch (lightType)

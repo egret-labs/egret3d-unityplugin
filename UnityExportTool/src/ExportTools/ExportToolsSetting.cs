@@ -3,10 +3,25 @@ using System.Collections.Generic;
 namespace Egret3DExportTools
 {
     [System.Serializable]
+    public class CustomShaderConfig {
+        public string[] include; // TODO
+        public string technique;
+        public int[] enable;
+        public int[] frontFace;
+        public int[] cullFace;
+        public int[] blendEquationSeparate;
+        public int[] blendFuncSeparate;
+        public int[] depthFunc;
+        public int[] depthMask;
+
+    }
+
+    [System.Serializable]
     public class ExportConfig
     {
         public string exportPath;
-        public string[] customShaders;
+        [SerializeField]
+        public Dictionary<string, CustomShaderConfig> customShaders;
 
         private static ExportConfig _instance;
         public static ExportConfig instance
@@ -36,7 +51,7 @@ namespace Egret3DExportTools
             {
                 foreach (var customShader in _instance.customShaders)
                 {
-                    MyLog.Log("customShader:" + customShader);
+                    MyLog.Log("customShader:" + customShader.Key);
                 }
             }
         }
@@ -45,21 +60,22 @@ namespace Egret3DExportTools
             System.IO.File.WriteAllText(configPath, JsonUtility.ToJson(this));
         }
 
-        public bool IsCustomShader(string shaderName)
+        public CustomShaderConfig IsCustomShader(string shaderName)
         {
             if (this.customShaders != null)
             {
                 foreach (var customShader in this.customShaders)
                 {
-                    if (shaderName == customShader)
+                    Debug.Log(shaderName);
+                    Debug.Log(customShader.Key);
+                    if (shaderName == customShader.Key)
                     {
-                        return true;
+                        return customShader.Value;
                     }
                 }
             }
 
-
-            return false;
+            return null;
         }
     }
 
