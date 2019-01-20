@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 namespace Egret3DExportTools
 {
-    [System.Serializable]
+    [JsonObject(MemberSerialization.OptOut)]
     public class CustomShaderConfig {
         public string[] include; // TODO
         public string technique;
@@ -13,15 +14,13 @@ namespace Egret3DExportTools
         public int[] blendFuncSeparate;
         public int[] depthFunc;
         public int[] depthMask;
-
     }
 
-    [System.Serializable]
+    [JsonObject(MemberSerialization.OptOut)]
     public class ExportConfig
     {
-        public string exportPath;
-        [SerializeField]
-        public Dictionary<string, CustomShaderConfig> customShaders;
+        public string exportPath = "";
+        public Dictionary<string, CustomShaderConfig> customShaders = new Dictionary<string, CustomShaderConfig>();
 
         private static ExportConfig _instance;
         public static ExportConfig instance
@@ -33,7 +32,7 @@ namespace Egret3DExportTools
             if (System.IO.File.Exists(configPath))
             {
                 var jsonStr = System.IO.File.ReadAllText(configPath, System.Text.Encoding.UTF8);
-                _instance = JsonUtility.FromJson<ExportConfig>(jsonStr);
+                _instance = JsonConvert.DeserializeObject<ExportConfig>(jsonStr);
             }
             else
             {
@@ -57,7 +56,7 @@ namespace Egret3DExportTools
         }
         public void Save(string configPath)
         {
-            System.IO.File.WriteAllText(configPath, JsonUtility.ToJson(this));
+            System.IO.File.WriteAllText(configPath, JsonConvert.SerializeObject(this));
         }
 
         public CustomShaderConfig IsCustomShader(string shaderName)

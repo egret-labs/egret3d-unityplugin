@@ -1,9 +1,8 @@
-namespace PaperGLTF
+namespace Egret3DExportTools
 {
     using System;
     using UnityEngine;
     using UnityEditor;
-    using Egret3DExportTools;
     public class CustomMaterialWriter : BaseMaterialWriter
     {
         protected override void Update()

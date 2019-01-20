@@ -7,7 +7,7 @@ namespace Egret3DExportTools
 {
     public class AnimationParser : ComponentParser
     {
-        protected AnimationClip[] _getAnimationClips(Component component)
+        protected UnityEngine.AnimationClip[] _getAnimationClips(Component component)
         {
             return AnimationUtility.GetAnimationClips(component.gameObject);
         }
@@ -15,7 +15,7 @@ namespace Egret3DExportTools
         public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson)
         {            
             var animation = component as Animation;
-            var animationClips = new List<AnimationClip>();
+            var animationClips = new List<UnityEngine.AnimationClip>();
             if (animation.clip)
             {
                 animationClips.Add(animation.clip);

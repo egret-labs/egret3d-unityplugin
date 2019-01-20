@@ -358,7 +358,7 @@ public class Animator_Inspector : Editor
 
         {
 
-            List<AnimationClip> clips = new List<AnimationClip>();
+            List<UnityEngine.AnimationClip> clips = new List<UnityEngine.AnimationClip>();
 #if UNITY4
             UnityEditorInternal.AnimatorController cc = ani.runtimeAnimatorController as UnityEditorInternal.AnimatorController;
 #else
@@ -424,14 +424,14 @@ public class Animator_Inspector : Editor
         }
     }
 
-    void CloneAni(AnimationClip clip, float fps)
+    void CloneAni(UnityEngine.AnimationClip clip, float fps)
     {
 
         var ani = target as Animator;
         CloneAni(clip, fps, ani);
     }
     //从一个Animator中获取所有的Animation
-    public static void CloneAni(AnimationClip clip, float fps, Animator ani)
+    public static void CloneAni(UnityEngine.AnimationClip clip, float fps, Animator ani)
     {
         //创建CleanData.Ani
         FB.PosePlus.AniClip _clip = ScriptableObject.CreateInstance<FB.PosePlus.AniClip>();
@@ -593,7 +593,7 @@ public class Animator_Inspector : Editor
 		}
 	}
 #else
-    public static void FindAllAniInControl(RuntimeAnimatorController control, List<AnimationClip> list)
+    public static void FindAllAniInControl(RuntimeAnimatorController control, List<UnityEngine.AnimationClip> list)
     {
         mapClip2State.Clear();
         if (control == null)
@@ -621,7 +621,7 @@ public class Animator_Inspector : Editor
             FindAllAniInControlMachine(layer.stateMachine, list);
         }
     }
-    static void FindAllAniInControlMachine(UnityEditor.Animations.AnimatorStateMachine machine, List<AnimationClip> list)
+    static void FindAllAniInControlMachine(UnityEditor.Animations.AnimatorStateMachine machine, List<UnityEngine.AnimationClip> list)
     {
         for (int i = 0; i < machine.states.Length; i++)
         {
@@ -629,9 +629,9 @@ public class Animator_Inspector : Editor
             var m = s.motion;
             if (m != null)
             {
-                if (list.Contains(m as AnimationClip) == false)
+                if (list.Contains(m as UnityEngine.AnimationClip) == false)
                 {
-                    list.Add(m as AnimationClip);
+                    list.Add(m as UnityEngine.AnimationClip);
                     if (m.name != s.name)
                     {
                         //Debug.LogWarning("发现一个问题，clipname 和 state name 不相等 " + m.name + "=>" + s.name);

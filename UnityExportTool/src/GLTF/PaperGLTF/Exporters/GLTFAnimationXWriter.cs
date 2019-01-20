@@ -1,10 +1,9 @@
-﻿namespace PaperGLTF
+﻿namespace Egret3DExportTools
 {
     using System.Collections.Generic;
     using System.IO;
     using System;
     using GLTF.Schema;
-    using PaperGLTF.Schema;
     using UnityEngine;
     using UnityGLTF.Extensions;
 
@@ -199,8 +198,8 @@
                         AnimationExtensionFactory.EXTENSION_NAME,
                         new AnimationExtension () {
                             frameRate = animationClip.frameRate,
-                            clips = new List<Schema.AnimationClip>() {
-                                new Schema.AnimationClip() {
+                            clips = new List<AnimationClip>() {
+                                new AnimationClip() {
                                     name = animationClip.name,
                                     playTimes = _getPlayTimes(animationClip),
                                     position = 0.0f,

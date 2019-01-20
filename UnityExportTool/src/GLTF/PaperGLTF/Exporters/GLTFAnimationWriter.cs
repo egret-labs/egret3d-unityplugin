@@ -1,7 +1,6 @@
-﻿namespace PaperGLTF
+﻿namespace Egret3DExportTools
 {
     using GLTF.Schema;
-    using PaperGLTF.Schema;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -41,12 +40,12 @@
 
             var ext = new AnimationExtension();
             ext.frameRate = player.clips[0].fps;
-            ext.clips = new List<Schema.AnimationClip>();
+            ext.clips = new List<AnimationClip>();
             float position = 0;
             for (var aniIndex = 0; aniIndex < player.clips.Count; aniIndex++)
             {
                 var rawClip = player.clips[aniIndex];
-                var ani = new Schema.AnimationClip();
+                var ani = new AnimationClip();
                 ani.name = rawClip.clipName;
                 ani.position = position;
                 ani.duration = (rawClip.frames.Count - 1) / ext.frameRate;

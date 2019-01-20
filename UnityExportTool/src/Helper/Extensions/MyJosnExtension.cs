@@ -213,7 +213,7 @@ namespace Egret3DExportTools
             }
         }
 
-        public static void SetAnimation(this MyJson_Object jsonNode, GameObject obj, AnimationClip[] animationClips)
+        public static void SetAnimation(this MyJson_Object jsonNode, GameObject obj, UnityEngine.AnimationClip[] animationClips)
         {
             var exportAnimations = new MyJson_Array();
             jsonNode["_animations"] = exportAnimations;
@@ -228,7 +228,7 @@ namespace Egret3DExportTools
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
                 if (!ResourceManager.instance.HaveCache(gltfHash))
                 {
-                    var glTFWriter = new PaperGLTF.AnimationXWriter(obj.transform, animationClip);
+                    var glTFWriter = new AnimationXWriter(obj.transform, animationClip);
                     ResourceManager.instance.AddFileBuffer(url, glTFWriter.WriteGLTF());
                     //
                     ResourceManager.instance.SaveCache(gltfHash, url);

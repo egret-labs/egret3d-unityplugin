@@ -1,6 +1,5 @@
-namespace PaperGLTF
+namespace Egret3DExportTools
 {
-    using Egret3DExportTools;
     public static class MaterialWriterFactory
     {
         public static BaseMaterialWriter Create(MaterialType type, UnityEngine.Material material)

@@ -97,7 +97,7 @@ namespace Egret3DExportTools
             ExportConfig.Reload(PathHelper.ConfigPath, PathHelper.SaveRootDirectory);
             //初始化一些全局的方法
             SerializeObject.Initialize();
-            PaperGLTF.GLTFInitialize.Initialize();
+            GLTFInitialize.Initialize();
         }
 
         /**

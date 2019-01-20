@@ -1,9 +1,8 @@
-namespace PaperGLTF
+namespace Egret3DExportTools
 {
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-    using Egret3DExportTools;
 
     public enum MaterialType
     {
@@ -116,6 +115,8 @@ namespace PaperGLTF
         public MyJson_Tree Write()
         {
             this.Update();
+            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
+            //
             var materialItemJson = new MyJson_Tree();
             var extensions = new MyJson_Tree();
             materialItemJson.Add("extensions", extensions);
@@ -137,7 +138,14 @@ namespace PaperGLTF
             {
                 valuesJson.Add(value.Key, value.Value);
             }
-            KHR_techniques_webglJson.SetString("technique", this.technique);
+            if (customConfig != null && !string.IsNullOrEmpty(customConfig.technique))
+            {
+                KHR_techniques_webglJson.SetString("technique", customConfig.technique);
+            }
+            else
+            {
+                KHR_techniques_webglJson.SetString("technique", this.technique);
+            }
             //paper
             paperJson.SetInt("renderQueue", this.source.renderQueue);
 
@@ -159,44 +167,49 @@ namespace PaperGLTF
             var statesJson = new MyJson_Tree();
             var enable = new MyJson_Array();
 
-            if (isDoubleSide || blend != BlendMode.None || isTransparent)
+            if (isDoubleSide || blend != BlendMode.None || isTransparent || customConfig != null || customConfig.enable != null)
             {
                 //states
                 paperJson.Add("states", statesJson);
                 var functionsJson = new MyJson_Tree();
                 statesJson.Add("enable", enable);
                 statesJson.Add("functions", functionsJson);
-                this.SetBlend(enable, functionsJson, blend);
-                this.SetCullFace(enable, functionsJson, !isDoubleSide);
-                this.SetDepth(enable, functionsJson, true, !isTransparent);
-            }
-
-            Debug.Log("===============================================" + this.shaderName);
-            //
-            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
-            if (customConfig != null)
-            {
-                if (customConfig.enable != null)
+                if (customConfig != null && customConfig.enable != null)
                 {
-                    if (customConfig.enable.Length == 0)
+                    foreach (var value in customConfig.enable)
                     {
-                        statesJson.Remove("enable");
+                        enable.AddInt(value);
                     }
-                    else
+                    if (customConfig.blendEquationSeparate != null)
                     {
-                        enable.Clear();
-                        foreach (var value in customConfig.enable)
-                        {
-                            enable.AddInt(value);
-                        }
-
-                        statesJson.Add("enable", enable);
+                        this.SetBlendEquationSeparate(functionsJson, customConfig.blendEquationSeparate);
+                    }
+                    if (customConfig.blendFuncSeparate != null)
+                    {
+                        this.SetBlendFuncSeparate(functionsJson, customConfig.blendFuncSeparate);
+                    }
+                    if (customConfig.frontFace != null)
+                    {
+                        this.SetFrontFace(functionsJson, customConfig.frontFace);
+                    }
+                    if (customConfig.cullFace != null)
+                    {
+                        this.SetCullFace(functionsJson, customConfig.cullFace);
+                    }
+                    if(customConfig.depthFunc != null)
+                    {
+                        this.SetDepthFunc(functionsJson, customConfig.depthFunc);
+                    }
+                    if(customConfig.depthMask != null)
+                    {
+                        this.SetDepthMask(functionsJson, customConfig.depthMask);
                     }
                 }
-
-                if (!String.IsNullOrEmpty(customConfig.technique))
+                else
                 {
-                    KHR_techniques_webglJson.SetString("technique", customConfig.technique);
+                    this.SetBlend(enable, functionsJson, blend);
+                    this.SetCullFace(enable, functionsJson, !isDoubleSide);
+                    this.SetDepth(enable, functionsJson, true, !isTransparent);
                 }
             }
 
@@ -208,6 +221,66 @@ namespace PaperGLTF
 
         }
 
+        protected void SetBlendEquationSeparate(MyJson_Tree functionsJson, int[] blendEquationSeparateValue)
+        {
+            var blendEquationSeparate = new MyJson_Array();
+            foreach (var v in blendEquationSeparateValue)
+            {
+                blendEquationSeparate.AddInt((int)v);
+            }
+            functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
+        }
+
+        protected void SetBlendFuncSeparate(MyJson_Tree functionsJson, int[] blendFuncSeparateValue)
+        {
+            var blendFuncSeparate = new MyJson_Array();
+            foreach (var v in blendFuncSeparateValue)
+            {
+                blendFuncSeparate.AddInt((int)v);
+            }
+            functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
+        }
+
+        protected void SetFrontFace(MyJson_Tree functionsJson, int[] frontFaceValue)
+        {
+            var frontFace = new MyJson_Array();
+            foreach (var v in frontFaceValue)
+            {
+                frontFace.AddInt(v);
+            }
+            functionsJson.Add("frontFace", frontFace);
+        }
+
+        protected void SetCullFace(MyJson_Tree functionsJson, int[] cullFaceValue)
+        {
+            var cullFace = new MyJson_Array();
+            foreach (var v in cullFaceValue)
+            {
+                cullFace.AddInt(v);
+            }
+            functionsJson.Add("cullFace", cullFace);
+        }
+
+        protected void SetDepthFunc(MyJson_Tree functionsJson, int[] depthFuncValue)
+        {
+            var depthFunc = new MyJson_Array();
+            foreach (var v in depthFuncValue)
+            {
+                depthFunc.AddInt(v);
+            }
+            functionsJson.Add("depthFunc", depthFunc);
+        }
+
+        protected void SetDepthMask(MyJson_Tree functionsJson, int[] depthMaskValue)
+        {
+            var depthMask = new MyJson_Array();
+            foreach (var v in depthMaskValue)
+            {
+                depthMask.AddBool(v != 0);
+            }
+            functionsJson.Add("depthMask", depthMask);
+        }
+
         protected void SetBlend(MyJson_Array enalbesJson, MyJson_Tree functionsJson, BlendMode blend)
         {
             if (blend == BlendMode.None)
@@ -216,208 +289,78 @@ namespace PaperGLTF
             }
             enalbesJson.AddInt((int)EnableState.BLEND);
 
-            var blendEquationSeparate = new MyJson_Array();
-            blendEquationSeparate.AddInt((int)BlendEquation.FUNC_ADD);
-            blendEquationSeparate.AddInt((int)BlendEquation.FUNC_ADD);
-            var blendFuncSeparate = new MyJson_Array();
+            var blendFuncSeparate = new int[4];
             switch (blend)
             {
                 case BlendMode.Add:
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_ALPHA);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_ALPHA);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
+                    blendFuncSeparate[0] = (int)BlendFactor.SRC_ALPHA;
+                    blendFuncSeparate[1] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[2] = (int)BlendFactor.SRC_ALPHA;
+                    blendFuncSeparate[3] = (int)BlendFactor.ONE;
                     break;
                 case BlendMode.Blend:
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_ALPHA);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE_MINUS_SRC_ALPHA);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE_MINUS_SRC_ALPHA);
+                    blendFuncSeparate[0] = (int)BlendFactor.SRC_ALPHA;
+                    blendFuncSeparate[1] = (int)BlendFactor.ONE_MINUS_SRC_ALPHA;
+                    blendFuncSeparate[2] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[3] = (int)BlendFactor.ONE_MINUS_SRC_ALPHA;
                     break;
                 case BlendMode.Add_PreMultiply:
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
+                    blendFuncSeparate[0] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[1] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[2] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[3] = (int)BlendFactor.ONE;
                     break;
                 case BlendMode.Blend_PreMultiply:
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE_MINUS_CONSTANT_ALPHA);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ONE_MINUS_CONSTANT_ALPHA);
+                    blendFuncSeparate[0] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[1] = (int)BlendFactor.ONE_MINUS_CONSTANT_ALPHA;
+                    blendFuncSeparate[2] = (int)BlendFactor.ONE;
+                    blendFuncSeparate[3] = (int)BlendFactor.ONE_MINUS_CONSTANT_ALPHA;
                     break;
                 case BlendMode.Multiply:
-                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
+                    blendFuncSeparate[0] = (int)BlendFactor.ZERO;
+                    blendFuncSeparate[1] = (int)BlendFactor.SRC_COLOR;
+                    blendFuncSeparate[2] = (int)BlendFactor.ZERO;
+                    blendFuncSeparate[3] = (int)BlendFactor.SRC_COLOR;
                     break;
                 case BlendMode.Multiply_PreMultiply:
-                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_COLOR);
-                    blendFuncSeparate.AddInt((int)BlendFactor.ZERO);
-                    blendFuncSeparate.AddInt((int)BlendFactor.SRC_ALPHA);
+                    blendFuncSeparate[0] = (int)BlendFactor.ZERO;
+                    blendFuncSeparate[1] = (int)BlendFactor.SRC_COLOR;
+                    blendFuncSeparate[2] = (int)BlendFactor.ZERO;
+                    blendFuncSeparate[3] = (int)BlendFactor.SRC_ALPHA;
                     break;
             }
 
-            functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
-            functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
-
-            //
-            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
-            if (customConfig != null)
-            {
-                if (customConfig.blendFuncSeparate != null)
-                {
-                    if (customConfig.blendFuncSeparate.Length == 0)
-                    {
-                        functionsJson.Remove("blendEquationSeparate");
-                    }
-                    else
-                    {
-                        blendFuncSeparate.Clear();
-                        foreach (var value in customConfig.blendFuncSeparate)
-                        {
-                            blendFuncSeparate.AddInt(value);
-                        }
-                        functionsJson.Add("blendEquationSeparate", blendEquationSeparate);
-                    }
-                }
-
-                if (customConfig.blendFuncSeparate != null)
-                {
-                    if (customConfig.blendFuncSeparate.Length == 0)
-                    {
-                        functionsJson.Remove("blendFuncSeparate");
-                    }
-                    else
-                    {
-                        blendFuncSeparate.Clear();
-                        foreach (var value in customConfig.blendFuncSeparate)
-                        {
-                            blendFuncSeparate.AddInt(value);
-                        }
-                        functionsJson.Add("blendFuncSeparate", blendFuncSeparate);
-                    }
-                }
-            }
+            int[] blendEquationSeparate = { (int)BlendEquation.FUNC_ADD, (int)BlendEquation.FUNC_ADD };
+            this.SetBlendEquationSeparate(functionsJson, blendEquationSeparate);
+            this.SetBlendFuncSeparate(functionsJson, blendFuncSeparate);
         }
 
         protected void SetCullFace(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool cull)
         {
-            var frontFace = new MyJson_Array();
-            var cullFace = new MyJson_Array();
-
             if (cull)
             {
-                frontFace.AddInt((int)FrontFace.CCW);
-                functionsJson.Add("frontFace", frontFace);
-
-                cullFace.AddInt((int)CullFace.BACK);
-                functionsJson.Add("cullFace", cullFace);
+                int[] frontFace = { (int)FrontFace.CCW };
+                this.SetFrontFace(functionsJson, frontFace);
+                int[] cullFace = { (int)CullFace.BACK };
+                this.SetCullFace(functionsJson, cullFace);
 
                 enalbesJson.AddInt((int)EnableState.CULL_FACE);
-            }
-
-            //
-            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
-            if (customConfig != null)
-            {
-                if (customConfig.frontFace != null)
-                {
-                    if (customConfig.frontFace.Length == 0)
-                    {
-                        functionsJson.Remove("frontFace");
-                    }
-                    else
-                    {
-                        frontFace.Clear();
-                        foreach (var value in customConfig.frontFace)
-                        {
-                            frontFace.AddInt(value);
-                        }
-
-                        functionsJson.Add("frontFace", frontFace);
-                    }
-                }
-
-                if (customConfig.cullFace != null)
-                {
-                    if (customConfig.cullFace.Length == 0)
-                    {
-                        functionsJson.Remove("cullFace");
-                    }
-                    else
-                    {
-                        cullFace.Clear();
-                        foreach (var value in customConfig.cullFace)
-                        {
-                            cullFace.AddInt(value);
-                        }
-
-                        functionsJson.Add("cullFace", cullFace);
-                    }
-                }
             }
         }
 
         protected void SetDepth(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool zTest, bool zWrite)
         {
-            var depthFunc = new MyJson_Array();
-            var depthMask = new MyJson_Array();
-
             if (zTest)
             {
-                depthFunc.AddInt((int)DepthFunc.LEQUAL);
-                functionsJson.Add("depthFunc", depthFunc);
+                int[] depthFunc = { (int)DepthFunc.LEQUAL };
+                this.SetDepthFunc(functionsJson, depthFunc);
                 enalbesJson.AddInt((int)EnableState.DEPTH_TEST);
             }
 
             if (zWrite)
             {
-                depthMask.AddBool(true);
-                functionsJson.Add("depthMask", depthMask);
-            }
-
-            //
-            var customConfig = ExportConfig.instance.IsCustomShader(this.shaderName);
-            if (customConfig != null)
-            {
-                if (customConfig.depthFunc != null)
-                {
-                    if (customConfig.depthFunc.Length == 0)
-                    {
-                        functionsJson.Remove("depthFunc");
-                    }
-                    else
-                    {
-                        depthFunc.Clear();
-                        foreach (var value in customConfig.depthFunc)
-                        {
-                            depthFunc.AddInt(value);
-                        }
-
-                        functionsJson.Add("depthFunc", depthFunc);
-                    }
-                }
-
-                if (customConfig.depthMask != null)
-                {
-                    if (customConfig.depthMask.Length == 0)
-                    {
-                        functionsJson.Remove("depthMask");
-                    }
-                    else
-                    {
-                        depthMask.Clear();
-                        foreach (var value in customConfig.depthMask)
-                        {
-                            depthMask.AddInt(value);
-                        }
-
-                        functionsJson.Add("depthMask", depthMask);
-                    }
-                }
+                int[] depthMask = { 1 };
+                this.SetDepthMask(functionsJson, depthMask);
             }
         }
 

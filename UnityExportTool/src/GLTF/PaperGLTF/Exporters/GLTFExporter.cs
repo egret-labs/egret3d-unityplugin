@@ -1,4 +1,4 @@
-﻿namespace PaperGLTF
+﻿namespace Egret3DExportTools
 {
     using GLTF.Schema;
     using System;

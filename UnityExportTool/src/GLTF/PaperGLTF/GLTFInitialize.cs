@@ -1,7 +1,6 @@
-﻿namespace PaperGLTF
+﻿namespace Egret3DExportTools
 {
     using GLTF.Schema;
-    using PaperGLTF.Schema;
 
     public static class GLTFInitialize
     {

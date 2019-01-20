@@ -1,7 +1,6 @@
-namespace PaperGLTF
+namespace Egret3DExportTools
 {
     using UnityEngine;
-    using Egret3DExportTools;
     public class StandardMaterialWriter : BaseMaterialWriter
     {
         protected virtual void StandardBegin()

@@ -1,4 +1,4 @@
-namespace PaperGLTF
+namespace Egret3DExportTools
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,6 @@ namespace PaperGLTF
     using GLTF.Schema;
     using UnityEngine;
     using UnityGLTF.Extensions;
-    using PaperGLTF.Schema;
     using Egret3DExportTools;
 
     public class MeshWriter : GLTFExporter

@@ -1,4 +1,4 @@
-﻿namespace PaperGLTF.Schema
+﻿namespace Egret3DExportTools
 {
     using GLTF.Schema;
     using Newtonsoft.Json;

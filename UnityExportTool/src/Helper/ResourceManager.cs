@@ -222,7 +222,7 @@ namespace Egret3DExportTools
                 return this.GetCache(id);
             }
 
-            var gltf = new PaperGLTF.MeshWriter(target);
+            var gltf = new MeshWriter(target);
             byte[] bs = gltf.WriteGLTF();
             var url = UnityEditor.AssetDatabase.GetAssetPath(mesh);
             //obj
@@ -260,7 +260,7 @@ namespace Egret3DExportTools
             }
             var name = PathHelper.CheckFileName(tempMatPath + ".json");
 
-            var gltf = new PaperGLTF.MaterialWriter(mat, isParticle, isAnimation);
+            var gltf = new MaterialWriter(mat, isParticle, isAnimation);
             byte[] bs = gltf.WriteGLTF();
             this.AddFileBuffer(name, bs);
             this.SaveCache(id, name);
@@ -399,7 +399,7 @@ namespace Egret3DExportTools
                 return this.GetCache(id);
             }
             string path = UnityEditor.AssetDatabase.GetAssetPath(animator.runtimeAnimatorController);
-            var writer = new PaperGLTF.AnimationWriter(player.transform);
+            var writer = new AnimationWriter(player.transform);
             byte[] bs = writer.WriteGLTF();
             var name = path.Substring(0, path.LastIndexOf("/") + 1) + player.gameObject.name + ".ani.bin";
             this.AddFileBuffer(name, bs);
