@@ -5,14 +5,23 @@ namespace Egret3DExportTools
 {
     [JsonObject(MemberSerialization.OptOut)]
     public class CustomShaderConfig {
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public string[] include; // TODO
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public string technique;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] enable;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] frontFace;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] cullFace;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] blendEquationSeparate;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] blendFuncSeparate;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] depthFunc;
+        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
         public int[] depthMask;
     }
 
@@ -43,8 +52,6 @@ namespace Egret3DExportTools
             {
                 _instance.exportPath = defaultExportPath;
             }
-
-            MyLog.Log("exportPath:" + _instance.exportPath);
 
             if (_instance.customShaders != null)
             {

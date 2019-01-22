@@ -167,7 +167,7 @@ namespace Egret3DExportTools
             var statesJson = new MyJson_Tree();
             var enable = new MyJson_Array();
 
-            if (isDoubleSide || blend != BlendMode.None || isTransparent || customConfig != null || customConfig.enable != null)
+            if (isDoubleSide || blend != BlendMode.None || isTransparent || (customConfig != null && customConfig.enable != null))
             {
                 //states
                 paperJson.Add("states", statesJson);
@@ -212,7 +212,6 @@ namespace Egret3DExportTools
                     this.SetDepth(enable, functionsJson, true, !isTransparent);
                 }
             }
-
             return materialItemJson;
         }
 
