@@ -72,8 +72,6 @@ namespace Egret3DExportTools
             {
                 foreach (var customShader in this.customShaders)
                 {
-                    Debug.Log(shaderName);
-                    Debug.Log(customShader.Key);
                     if (shaderName == customShader.Key)
                     {
                         return customShader.Value;
