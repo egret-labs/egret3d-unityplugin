@@ -163,6 +163,7 @@ namespace Egret3DExportTools
             //standard
             var isDoubleSide = this.isDoubleSide;
             var isTransparent = this.isTransparent;
+
             var blend = this.blendMode;
             var statesJson = new MyJson_Tree();
             var enable = new MyJson_Array();
@@ -196,11 +197,11 @@ namespace Egret3DExportTools
                     {
                         this.SetCullFace(functionsJson, customConfig.cullFace);
                     }
-                    if(customConfig.depthFunc != null)
+                    if (customConfig.depthFunc != null)
                     {
                         this.SetDepthFunc(functionsJson, customConfig.depthFunc);
                     }
-                    if(customConfig.depthMask != null)
+                    if (customConfig.depthMask != null)
                     {
                         this.SetDepthMask(functionsJson, customConfig.depthMask);
                     }
@@ -349,6 +350,11 @@ namespace Egret3DExportTools
 
         protected void SetDepth(MyJson_Array enalbesJson, MyJson_Tree functionsJson, bool zTest, bool zWrite)
         {
+            if (zTest && zWrite)
+            {
+                return;
+            }
+
             if (zTest)
             {
                 int[] depthFunc = { (int)DepthFunc.LEQUAL };
@@ -356,11 +362,8 @@ namespace Egret3DExportTools
                 enalbesJson.AddInt((int)EnableState.DEPTH_TEST);
             }
 
-            if (zWrite)
-            {
-                int[] depthMask = { 1 };
-                this.SetDepthMask(functionsJson, depthMask);
-            }
+            int[] depthMask = { zWrite ? 1 : 0 };
+            this.SetDepthMask(functionsJson, depthMask);
         }
 
         protected void SetFloat(string key, float value, float defalutValue = 0.0f)
@@ -454,7 +457,7 @@ namespace Egret3DExportTools
             return defalutValue;
         }
 
-        protected bool isDoubleSide
+        protected virtual bool isDoubleSide
         {
             get
             {
@@ -462,14 +465,14 @@ namespace Egret3DExportTools
                 if (!isDoubleSide)
                 {
                     //others
-                    var shaderName = this.shaderName;
+                    var shaderName = this.shaderName.ToLower();
                     isDoubleSide = shaderName.Contains("both") || shaderName.Contains("side");
                 }
                 return isDoubleSide;
             }
         }
 
-        protected bool isTransparent
+        protected virtual bool isTransparent
         {
             get
             {
@@ -481,12 +484,12 @@ namespace Egret3DExportTools
             }
         }
 
-        protected BlendMode blendMode
+        protected virtual BlendMode blendMode
         {
             get
             {
                 var blend = BlendMode.None;
-                var shaderName = this.shaderName;
+                var shaderName = this.shaderName.ToLower();
                 if (source.GetTag("RenderType", false, "") == "Transparent")
                 {
                     var additive = shaderName.Contains("additive");
@@ -509,7 +512,7 @@ namespace Egret3DExportTools
             }
         }
 
-        protected string shaderName
+        protected virtual string shaderName
         {
             get
             {

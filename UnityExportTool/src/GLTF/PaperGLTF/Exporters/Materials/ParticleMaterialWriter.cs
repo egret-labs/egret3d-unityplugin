@@ -32,6 +32,14 @@ namespace Egret3DExportTools
             this.SetColor3AndOpacity(color, Color.white);
         }
 
+        protected  override bool isDoubleSide
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         protected override string technique
         {
             get

@@ -52,7 +52,7 @@ namespace Egret3DExportTools
                 this._target.GetComponent<UnityEngine.MeshRenderer>() == null) &&
                 this._target.GetComponent<UnityEngine.ParticleSystemRenderer>() == null)
             {
-                UnityEngine.Debug.LogWarning("Mesh glTF写入错误，请检查你的渲染器是否是SkinnedMeshRenderer,MeshRenderer,ParticleSystemRenderer中的任意一种");
+                MyLog.LogWarning("Mesh glTF写入错误，请检查你的渲染器是否是SkinnedMeshRenderer,MeshRenderer,ParticleSystemRenderer中的任意一种");
                 return new byte[0];
             }
 
@@ -64,7 +64,8 @@ namespace Egret3DExportTools
 
         private List<Transform> _getAllChildren(Transform transform, List<Transform> children = null)
         {
-            if (children == null) {
+            if (children == null)
+            {
                 children = new List<Transform>();
             }
 
@@ -112,9 +113,9 @@ namespace Egret3DExportTools
 
                     if (bone.childCount > 0)
                     {
-                        Debug.logger.Log(bone.childCount);
+                        // Debug.logger.Log(bone.childCount);
                         node.Children = new List<NodeId>();
-                        for (var i = 0; i < bone.childCount;i++)
+                        for (var i = 0; i < bone.childCount; i++)
                         {
                             node.Children.Add(
                                 new NodeId
@@ -123,7 +124,7 @@ namespace Egret3DExportTools
                                     Root = _root
                                 }
                             );
-                        }    
+                        }
                     }
                     _root.Nodes.Add(node);
                 }
