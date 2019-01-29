@@ -228,8 +228,9 @@
             for (var i = 0; i < frameCount; ++i)
             {
                 //_bufferWriter.Write(Math.Round(Math.Min(animationClip.length * i / (frameCount - 1), animationClip.length), 6)); // TODO
-                _bufferWriter.Write(animationClip.length * i / (frameCount - 1));
+                _bufferWriter.Write(i / animationClip.frameRate);
             }
+            
 
             foreach (var curveBind in curveBinds)
             {
@@ -320,10 +321,10 @@
                         case "m_LocalPosition.z":
                             animationChannel.Target.Path = GLTFAnimationChannelPath.translation;
                             outputAccessor.Type = GLTFAccessorAttributeType.VEC3;
-
+                            
                             for (var i = 0; i < frameCount; ++i)
                             {
-                                var time = animationClip.length * i / (frameCount - 1); // TODO
+                                var time = i / animationClip.frameRate;
                                 var curveX = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[0]);
                                 var curveY = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[1]);
                                 var curveZ = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[2]);
@@ -345,7 +346,7 @@
 
                             for (var i = 0; i < frameCount; ++i)
                             {
-                                var time = animationClip.length * i / (frameCount - 1); // TODO
+                                var time = i / animationClip.frameRate;
                                 var curveX = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[0]);
                                 var curveY = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[1]);
                                 var curveZ = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[2]);
@@ -370,7 +371,7 @@
 
                             for (var i = 0; i < frameCount; ++i)
                             {
-                                var time = animationClip.length * i / (frameCount - 1); // TODO
+                                var time = i / animationClip.frameRate;
                                 var curveX = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[0]);
                                 var curveY = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[1]);
                                 var curveZ = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[2]);
@@ -394,7 +395,7 @@
 
                             for (var i = 0; i < frameCount; ++i)
                             {
-                                var time = animationClip.length * i / (frameCount - 1); // TODO
+                                var time = i / animationClip.frameRate;
                                 var curveX = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[0]);
                                 var curveY = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[1]);
                                 var curveZ = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveGroup[2]);
@@ -432,7 +433,7 @@
 
                         // for (var i = 0; i < frameCount; ++i) // TODO
                         // {
-                        //     var time = animationClip.length * i / (frameCount - 1); // TODO
+                        //     var time = animationClip.length * i / frameCountSO; // TODO
                         //     var curve = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveBind);
                         //     var value = curve.Evaluate(time);
                         //     _bufferWriter.Write(value);
@@ -462,14 +463,6 @@
                                 property = "3";
                                 break;
                         }
-
-                        for (var i = 0; i < frameCount; ++i)
-                        {
-                            var time = animationClip.length * i / (frameCount - 1); // TODO
-                            var curve = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveBind);
-                            var value = curve.Evaluate(time);
-                            _bufferWriter.Write(value);
-                        }
                     }
                     else
                     {
@@ -494,7 +487,7 @@
                         var curve = UnityEditor.AnimationUtility.GetEditorCurve(animationClip, curveBind);
                         if (curve != null)
                         {
-                            var value = curve.Evaluate(i * animationClip.frameRate);
+                            var value = curve.Evaluate(i / animationClip.frameRate);
                             _bufferWriter.Write(value);
                         }
                     }
@@ -513,8 +506,6 @@
             }
 
             ext.events.Sort();
-
-
         }
     }
 }
