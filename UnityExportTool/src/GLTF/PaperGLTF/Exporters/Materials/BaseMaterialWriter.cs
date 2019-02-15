@@ -149,6 +149,7 @@ namespace Egret3DExportTools
             //paper
             paperJson.SetInt("renderQueue", this.source.renderQueue);
 
+
             if (this.defines.Count > 0)
             {
                 var definesJson = new MyJson_Array();
@@ -218,7 +219,15 @@ namespace Egret3DExportTools
 
         protected virtual void Update()
         {
-
+            //
+            if(this.source.HasProperty("_Cutoff"))
+            {
+                var cutoff = this.GetFloat("_Cutoff", 1.0f);
+                if(cutoff != 1.0f)
+                {
+                    this.defines.Add("ALPHATEST " + cutoff);
+                }
+            }
         }
 
         protected void SetBlendEquationSeparate(MyJson_Tree functionsJson, int[] blendEquationSeparateValue)

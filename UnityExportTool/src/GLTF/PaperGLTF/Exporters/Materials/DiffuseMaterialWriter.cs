@@ -6,6 +6,7 @@ namespace Egret3DExportTools
     {
         protected override void Update()
         {
+            base.Update();
             var source = this.source;
             var mainTex = this.MainText;
             var mainColor = this.MainColor;

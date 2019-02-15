@@ -7,10 +7,14 @@ namespace Egret3DExportTools
         {
             base.Update();
             var source = this.source;
-            var shininess = this.GetFloat("_Shininess", 0.0f);
-            if (shininess > 0.0f)
+            var shininess = 30.0f;
+            if (this.source.HasProperty("_Shininess"))
             {
-                shininess = 1 / shininess;
+                shininess = this.GetFloat("_Shininess", 30.0f);
+                if (shininess > 0.0f)
+                {
+                    shininess = 1 / shininess;
+                }
             }
             this.SetFloat("shininess", shininess, 30.0f);
 
