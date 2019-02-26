@@ -224,7 +224,7 @@ namespace Egret3DExportTools
             var cutoff = this.cutoff;
             if (cutoff != 0.0f)
             {
-                this.defines.Add("ALPHATEST " + cutoff);
+                this.defines.Add("ALPHATEST " + cutoff.ToString("0.0####"));
             }
         }
 
