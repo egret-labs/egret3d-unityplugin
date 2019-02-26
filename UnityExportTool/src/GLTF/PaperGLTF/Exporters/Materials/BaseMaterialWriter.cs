@@ -99,6 +99,7 @@ namespace Egret3DExportTools
     }
     public abstract class BaseMaterialWriter
     {
+        public readonly List<string> UNITY_RENDER_TYPE = new List<string> { "Opaque", "Transparent", "TransparentCutout", "Background", "Overlay" };
         public Material source;
 
         protected Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
@@ -220,13 +221,10 @@ namespace Egret3DExportTools
         protected virtual void Update()
         {
             //
-            if(this.source.HasProperty("_Cutoff"))
+            var cutoff = this.cutoff;
+            if (cutoff != 0.0f)
             {
-                var cutoff = this.GetFloat("_Cutoff", 1.0f);
-                if(cutoff != 1.0f)
-                {
-                    this.defines.Add("ALPHATEST " + cutoff);
-                }
+                this.defines.Add("ALPHATEST " + cutoff);
             }
         }
 
@@ -518,6 +516,28 @@ namespace Egret3DExportTools
                     }
                 }
                 return blend;
+            }
+        }
+
+        protected virtual float cutoff
+        {
+            get
+            {
+                var cutoff = 0.0f;
+                var tag = source.GetTag("RenderType", false, "");
+                if (UNITY_RENDER_TYPE.Contains(tag))
+                {
+                    if(tag == "TransparentCutout")
+                    {
+                        cutoff = this.GetFloat("_Cutoff", 0.0f);
+                    }                    
+                }
+                else if (this.source.HasProperty("_Cutoff"))
+                {
+                    cutoff = this.GetFloat("_Cutoff", 0.0f);
+                }
+
+                return cutoff;
             }
         }
 
