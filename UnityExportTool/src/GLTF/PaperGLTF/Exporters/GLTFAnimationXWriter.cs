@@ -175,7 +175,7 @@
         public override byte[] WriteGLTF()
         {
             this.BeginWrite();
-            
+
             _exportAnimation(_animationClip);
 
             var res = this.EndWrite();
@@ -230,8 +230,8 @@
                 //_bufferWriter.Write(Math.Round(Math.Min(animationClip.length * i / (frameCount - 1), animationClip.length), 6)); // TODO
                 _bufferWriter.Write(i / animationClip.frameRate);
             }
-            
 
+            var MainTex_STy = new List<float>();
             foreach (var curveBind in curveBinds)
             {
                 // Curve has been parsed.
@@ -444,6 +444,7 @@
                         type = "egret3d.MeshRenderer";
                         uri = "materials/0/$/_uvTransform";
                         needUpdate = 1;
+                        // animationSampler.Interpolation = InterpolationType.STEP;
 
                         switch (curveBind.propertyName)
                         {
@@ -488,7 +489,25 @@
                         if (curve != null)
                         {
                             var value = curve.Evaluate(i / animationClip.frameRate);
-                            _bufferWriter.Write(value);
+                            if (curveBind.propertyName == "material._MainTex_ST.w")
+                            {
+                                if (i < MainTex_STy.Count)
+                                {
+                                    _bufferWriter.Write(1.0f - value - MainTex_STy[i]);
+                                }
+                                else
+                                {
+                                    _bufferWriter.Write(value);
+                                }                                
+                            }
+                            else
+                            {
+                                _bufferWriter.Write(value);
+                                if (curveBind.propertyName == "material._MainTex_ST.y")
+                                {
+                                    MainTex_STy.Add(value);
+                                }
+                            }
                         }
                     }
                 }
