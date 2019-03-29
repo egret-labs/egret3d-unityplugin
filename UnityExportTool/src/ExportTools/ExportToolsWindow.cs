@@ -38,8 +38,12 @@ namespace Egret3DExportTools
             var selectionObjs = Selection.gameObjects;
             foreach (var selectionObj in selectionObjs)
             {
+                //防止egret 序列化报错
+                var saveParent = selectionObj.transform.parent;
+                selectionObj.transform.parent = null;
                 PathHelper.SetOutPutPath(ExportConfig.instance.exportPath, selectionObj.name);
                 ExportPrefabTools.ExportPrefab(selectionObj, PathHelper.OutPath);
+                selectionObj.transform.parent = saveParent;
             }
         }
         /**
