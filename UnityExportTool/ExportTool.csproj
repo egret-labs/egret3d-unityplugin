@@ -65,12 +65,30 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="src\AssetParser\Extensions\AnimationExtension.cs" />
+    <Compile Include="src\AssetParser\Extensions\AnimationExtensionFactory.cs" />
+    <Compile Include="src\AssetParser\Extensions\CoordinateSystemExtension.cs" />
+    <Compile Include="src\AssetParser\Extensions\CoordinateSystemExtensionFactory.cs" />
+    <Compile Include="src\AssetParser\GLTFAnimationWriter.cs" />
+    <Compile Include="src\AssetParser\GLTFInitialize.cs" />
+    <Compile Include="src\AssetParser\GLTFMaterialWriter.cs" />
+    <Compile Include="src\AssetParser\GLTFMeshWriter.cs" />
+    <Compile Include="src\AssetParser\GLTFSerialize.cs" />
+    <Compile Include="src\AssetParser\GLTFTextureWriter.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\BaseMaterialParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\CustomParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\DiffuseParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\LambertParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\ParticleParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\PhongParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\StandardParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\StandardRoughnessParser.cs" />
+    <Compile Include="src\AssetParser\MaterialParser\StandardSpecularParser.cs" />
     <Compile Include="src\ComponentParser\AnimationParser.cs" />
     <Compile Include="src\ComponentParser\AnimatorParser.cs" />
     <Compile Include="src\ComponentParser\BoxColliderParser.cs" />
     <Compile Include="src\ComponentParser\CameraParser.cs" />
     <Compile Include="src\ComponentParser\DirectionalLightParser.cs" />
-    <Compile Include="src\ComponentParser\Interface\SerializeObject.cs" />
     <Compile Include="src\ComponentParser\MeshColliderParser.cs" />
     <Compile Include="src\ComponentParser\MeshFilterParser.cs" />
     <Compile Include="src\ComponentParser\MeshRendererParser.cs" />
@@ -135,22 +153,6 @@
     <Compile Include="src\GLTF\GLTFSerialization\Schema\Skin.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Schema\Texture.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Schema\TextureInfo.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFAnimationWriter.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFExporter.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFMaterialWriter.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFTextureWriter.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\BaseMaterialParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\CustomParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\DiffuseParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\LambertParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\ParticleParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\PhongParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\StandardParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\StandardRoughnessParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\MaterialParser\StandardSpecularParser.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Extensions\AnimationExtension.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Extensions\AnimationExtensionFactory.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\GLTFInitialize.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Async\AsyncAction.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Async\TaskExtensions.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Cache\AnimationCacheData.cs" />
@@ -166,11 +168,8 @@
     <Compile Include="src\GLTF\UnityGLTF\Editor\GLTFImporterNormals.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Editor\PbrShaderGUI.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Exceptions.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Extensions\CoordinateSystemExtension.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Extensions\CoordinateSystemExtensionFactory.cs" />
     <Compile Include="src\GLTF\UnityGLTF\Extensions\SchemaExtensions.cs" />
     <Compile Include="src\GLTF\UnityGLTF\GLTFComponent.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFMeshWriter.cs" />
     <Compile Include="src\GLTF\UnityGLTF\GLTFSceneExporter.cs" />
     <Compile Include="src\GLTF\UnityGLTF\GLTFSceneImporter.cs" />
     <Compile Include="src\GLTF\UnityGLTF\InstantiatedGLTFObject.cs" />
@@ -200,6 +199,7 @@
     <Compile Include="src\Helper\MyLog.cs" />
     <Compile Include="src\Helper\PathHelper.cs" />
     <Compile Include="src\Helper\ResourceManager.cs" />
+    <Compile Include="src\SerializeObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\Newtonsoft.Json.dll" />

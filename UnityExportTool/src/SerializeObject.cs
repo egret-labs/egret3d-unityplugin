@@ -40,7 +40,7 @@ namespace Egret3DExportTools
     {
         public static Transform currentTarget;
         private readonly static Dictionary<string, List<IComponentParser>> componentParsers = new Dictionary<string, List<IComponentParser>>();
-        private readonly static Dictionary<AssetType, GLTFExporter> assetParsers = new Dictionary<AssetType, GLTFExporter>();
+        private readonly static Dictionary<AssetType, GLTFSerialize> assetParsers = new Dictionary<AssetType, GLTFSerialize>();
 
         public static void Initialize()
         {
@@ -65,7 +65,7 @@ namespace Egret3DExportTools
             RegAssetParser(new TextureWriter(), AssetType.Texture);
             RegAssetParser(new MeshWriter(), AssetType.Mesh);
             RegAssetParser(new MaterialWriter(), AssetType.Material);
-            RegAssetParser(new AnimationWriter(), AssetType.Animation);
+            RegAssetParser(new GLTFAnimationParser(), AssetType.Animation);
         }
         /**
          * 注册可序列化组件。
@@ -84,7 +84,7 @@ namespace Egret3DExportTools
             componentParsers[compType.Name].Add(parser);
         }
 
-        public static void RegAssetParser(GLTFExporter parser, AssetType type)
+        public static void RegAssetParser(GLTFSerialize parser, AssetType type)
         {
             assetParsers.Add(type, parser);
         }

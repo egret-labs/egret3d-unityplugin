@@ -6,7 +6,7 @@
     using System.IO;
     using UnityEngine;
 
-    public abstract class GLTFExporter
+    public abstract class GLTFSerialize
     {
         protected GLTFRoot _root;
         protected BufferId _bufferId;
@@ -16,7 +16,7 @@
 
         protected Transform _target;
 
-        public GLTFExporter()
+        public GLTFSerialize()
         {
             this.Init();
         }

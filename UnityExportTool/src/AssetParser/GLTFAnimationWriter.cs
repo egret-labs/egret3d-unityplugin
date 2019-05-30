@@ -7,7 +7,7 @@
     using UnityEngine;
     using UnityGLTF.Extensions;
 
-    public class AnimationWriter : GLTFExporter
+    public class GLTFAnimationParser : GLTFSerialize
     {
         private UnityEngine.AnimationClip _animationClip;
         private List<Transform> _animationTargets = new List<Transform>(); // TODO 完善 children.

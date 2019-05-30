@@ -9,7 +9,7 @@ namespace Egret3DExportTools
 
     using Egret3DExportTools;
 
-    public class TextureWriter : GLTFExporter
+    public class TextureWriter : GLTFSerialize
     {
         private UnityEngine.Texture2D texture;
 

@@ -45,7 +45,7 @@ namespace Egret3DExportTools
         }
     }
 
-    public class MaterialWriter : GLTFExporter
+    public class MaterialWriter : GLTFSerialize
     {
         protected readonly MaterialData data = new MaterialData();
         private bool _isParticle = false;
