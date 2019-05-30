@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class SkinnedMeshRendererParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             SkinnedMeshRenderer comp = component as SkinnedMeshRenderer;
             compJson.SetBool("_castShadows", comp.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off);

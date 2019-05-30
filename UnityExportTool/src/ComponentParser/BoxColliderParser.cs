@@ -4,7 +4,7 @@ namespace Egret3DExportTools
 {
     public class BoxColliderParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             BoxCollider comp = component as BoxCollider;
 

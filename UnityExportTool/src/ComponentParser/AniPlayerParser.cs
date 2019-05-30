@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class AniPlayerParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             FB.PosePlus.AniPlayer comp = component as FB.PosePlus.AniPlayer;
 

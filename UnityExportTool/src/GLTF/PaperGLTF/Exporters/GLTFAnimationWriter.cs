@@ -138,7 +138,7 @@
                 Asset = new Asset
                 {
                     Version = "2.0",
-                    Generator = "paper",
+                    Generator = "egret",
                 },
                 Buffers = new List<GLTF.Schema.Buffer>(),
                 BufferViews = new List<BufferView>(),

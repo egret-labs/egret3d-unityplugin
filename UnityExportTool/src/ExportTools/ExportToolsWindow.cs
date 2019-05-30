@@ -126,6 +126,21 @@ namespace Egret3DExportTools
                 GUILayout.EndHorizontal();
             }
             GUILayout.Space(SPACE);
+            //------------------------根目录------------------------
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("根目录");
+                var dir = GUILayout.TextField(ExportConfig.instance.rootDir);
+                if(dir != ExportConfig.instance.rootDir)
+                {
+                    ExportConfig.instance.rootDir = dir;
+                    Debug.Log("根目录：" + dir);
+                    ExportConfig.instance.Save(PathHelper.ConfigPath);
+                    AssetDatabase.Refresh();
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.Space(SPACE);
             //------------------------辅助选项------------------------
             {
                 GUILayout.BeginHorizontal();

@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class ParticleSystemParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             ParticleSystem comp = component as ParticleSystem;
             if (!comp.emission.enabled || obj.GetComponent<ParticleSystemRenderer>() == null)

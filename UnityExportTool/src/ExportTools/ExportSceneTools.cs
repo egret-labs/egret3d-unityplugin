@@ -9,47 +9,103 @@ namespace Egret3DExportTools
         public static void ExportScene(List<GameObject> roots, string exportPath = "")
         {
             string sceneName = PathHelper.CurSceneName;
-            //导出场景
-            try
-            {
-                ExportImageTools.instance.Clear();
-                ResourceManager.instance.Clean();
-                //路径
-                string scenePath = sceneName + ".scene.json";
-                PathHelper.SetSceneOrPrefabPath(scenePath);
-                //Scene
-                var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
-                MyJson_Object sceneJson = new MyJson_Object();
-                sceneJson.SetUUID(scene.GetHashCode().ToString());//用场景名称的hashCode
-                sceneJson.SetUnityID(scene.GetHashCode());
-                sceneJson.SetClass("paper.Scene");
-                sceneJson.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
+            ExportImageTools.instance.Clear();
+            ResourceManager.instance.Clean();
+            //路径
+            string scenePath = sceneName + ".scene.json";
+            PathHelper.SetSceneOrPrefabPath(scenePath);
 
-                sceneJson.SetColor("ambientColor", RenderSettings.ambientLight);
-                sceneJson.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
-                //allGameObjects
-                var gameObjectsJson = new MyJson_Array();
-                sceneJson["gameObjects"] = gameObjectsJson;
-                GameObject[] allObjs = GameObject.FindObjectsOfType<GameObject>();
-                for (int i = 0; i < allObjs.Length; i++)
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            MyJson_Object sceneEntity = new MyJson_Object();
+            sceneEntity.SetSerializeClass(scene.GetHashCode(), SerializeClass.GameEntity);
+            ResourceManager.instance.AddObjectJson(sceneEntity);
+
+            MyJson_Array compList = new MyJson_Array();
+            sceneEntity["components"] = compList;
+
+            {
+                MyJson_Object sceneComp = new MyJson_Object();
+                sceneComp.SetSerializeClass(sceneComp.GetHashCode(), SerializeClass.Scene);
+                sceneComp.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
+
+                compList.AddHashCode(sceneComp);
+                ResourceManager.instance.AddCompJson(sceneComp);
+
+
+                MyJson_Object treeNode = new MyJson_Object();
+                treeNode.SetSerializeClass(treeNode.GetHashCode(), SerializeClass.TreeNode);
+                treeNode.SetString("name", "Root");
+                treeNode.SetHashCode("scene", sceneComp);
+
+                MyJson_Array children = new MyJson_Array();
+                treeNode["children"] = children;
+                //
+                compList.AddHashCode(treeNode);
+                ResourceManager.instance.AddCompJson(treeNode);
+
                 {
-                    gameObjectsJson.AddHashCode(allObjs[i]);
+                    // 环境光和光照贴图
+                    MyJson_Object sceneLight = new MyJson_Object();
+                    sceneLight.SetSerializeClass(sceneLight.GetHashCode(), SerializeClass.SceneLight);
+
+                    sceneLight.SetColor("ambientColor", RenderSettings.ambientLight);
+
+                    sceneLight["lightmaps"] = ExportSceneTools.AddLightmaps(exportPath);
+                    sceneLight.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
+
+                    //
+                    compList.AddUUID(sceneLight);
+                    ResourceManager.instance.AddCompJson(sceneLight);
                 }
-                //lightmaps
-                sceneJson["lightmaps"] = ExportSceneTools.AddLightmaps(exportPath);
-                ResourceManager.instance.AddObjectJson(sceneJson);
+
+                {
+                    // 雾
+                    if (RenderSettings.fog)
+                    {
+                        MyJson_Object fog = new MyJson_Object();
+                        fog.SetSerializeClass(fog.GetHashCode(), SerializeClass.Fog);
+
+                        if (RenderSettings.fogMode == FogMode.Linear)
+                        {
+                            fog.SetInt("mode", 0);
+                            fog.SetNumber("near", RenderSettings.fogStartDistance);
+                            fog.SetNumber("far", RenderSettings.fogEndDistance);
+                        }
+                        else
+                        {
+                            fog.SetInt("mode", 1);
+                            fog.SetNumber("density", RenderSettings.fogDensity);
+                        }
+
+                        fog.SetColor("color", RenderSettings.fogColor);
+                        //
+                        compList.AddUUID(fog);
+                        ResourceManager.instance.AddCompJson(fog);
+                    }
+                }
+
                 //序列化
-                foreach (var root in roots)
+                foreach (var child in roots)
                 {
-                    SerializeObject.Serialize(root);
+                    var childJson = SerializeObject.Serialize(child);
+                    if (childJson != null)
+                    {
+                        children.AddHashCode(childJson);
+                    }
                 }
+            }
+
+
+            // try
+            {
+
                 ResourceManager.instance.ExportFiles(scenePath, exportPath);
                 MyLog.Log("----场景导出成功----");
             }
-            catch (System.Exception e)
-            {
-                MyLog.LogError(sceneName + "  : 导出失败-----------" + e.StackTrace);
-            }
+            // catch (System.Exception e)
+            // {
+            //     MyLog.LogError(sceneName + "  : 导出失败-----------" + e.StackTrace);
+            // }
         }
 
         private static MyJson_Array AddLightmaps(string exportPath)
@@ -62,14 +118,12 @@ namespace Egret3DExportTools
                 if (!ResourceManager.instance.HaveCache(lmID))
                 {
                     //格式转换
-                    string suffix  = "png";
+                    string suffix = "png";
                     string relativePath = UnityEditor.AssetDatabase.GetAssetPath(lmTexture);
                     MyLog.Log("导出lightmap:" + relativePath);
                     string exrPath = Path.Combine(Application.dataPath, relativePath.Replace("Assets/", ""));
                     string ralPngPath = PathHelper.CheckFileName(relativePath.Substring(0, relativePath.LastIndexOf('/') + 1) + lmTexture.name + "." + suffix);
                     string pngPath = PathHelper.CheckFileName(Path.Combine(exportPath, ralPngPath));
-                    // string ralPngPath = relativePath.Substring(0, relativePath.LastIndexOf('/') + 1) + lmTexture.name + "." + suffix;
-                    // string pngPath = Path.Combine(exportPath, ralPngPath);
 
                     exrPath = exrPath.Replace("\\", "/");
                     pngPath = pngPath.Replace("\\", "/");
@@ -77,7 +131,7 @@ namespace Egret3DExportTools
                     ResourceManager.instance.AddFileBuffer(ralPngPath, bs);
                     // ExportImageTools.instance.AddExr(exrPath, pngPath);
                     //添加到 compList 和 assetsList
-                    ResourceManager.instance.SaveTextureFormat(lmTexture, ralPngPath, ralPngPath + ".image", false);
+                    ResourceManager.instance.SaveTextureFormat(lmTexture, ralPngPath);
                     string name = lmTexture.name + ".image.json";
                     var imgdescPath = PathHelper.CheckFileName(ralPngPath.Substring(0, ralPngPath.LastIndexOf("/") + 1) + name);
 
@@ -88,7 +142,6 @@ namespace Egret3DExportTools
                     lightmapsJson.Add(assetItem);
                 }
             }
-            // ExportImageTools.instance.ExrToPng();
 
             return lightmapsJson;
         }

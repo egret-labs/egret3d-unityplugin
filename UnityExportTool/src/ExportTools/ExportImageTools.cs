@@ -29,35 +29,6 @@ namespace Egret3DExportTools
         {
             this.taskString.Clear();
         }
-        public void AddExr(string inputPath, string outPath)
-        {
-            if (this.taskString.Contains(inputPath))
-            {
-                return;
-            }
-            if (inputPath.Contains(" "))
-            {
-                MyLog.LogError("路劲=>" + inputPath + "  包含空格，请检查");
-            }
-            if (outPath.Contains(" "))
-            {
-                MyLog.LogError("路劲=>" + outPath + "  包含空格，请检查");
-            }
-            this.taskString.Add(inputPath);
-            this.taskString.Add(outPath);
-        }
-        public void ExrToPng()
-        {
-            string exePath = Application.dataPath + "/Egret3DExportTools/ExrToPng/ExrToPng.exe";
-            if (Application.platform == RuntimePlatform.OSXEditor)
-            {
-                exePath = Application.dataPath + "/Egret3DExportTools/ExrToPng/ExrToPngmac";
-            }
-            string sArguments = string.Join(" ", taskString.ToArray());
-            UnityEngine.Debug.Log("sArguments:" + sArguments);
-            Process.Start(exePath, sArguments);
-            this.taskString.Clear();
-        }
         public byte[] EncodeToPNG(Texture2D source, string ext = "png")
         {
             var path = AssetDatabase.GetAssetPath(source);

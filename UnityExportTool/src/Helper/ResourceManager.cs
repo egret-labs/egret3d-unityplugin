@@ -39,6 +39,7 @@ namespace Egret3DExportTools
 
         private void ConvertJsonToString(System.Text.StringBuilder sb)
         {
+            // this._objects.Sort
             sb.Append("{\n\t\"assets\":[\n");
             for (int i = 0; i < this._assets.Count; i++)
             {
@@ -46,14 +47,17 @@ namespace Egret3DExportTools
                 MyJson_Object asset = new MyJson_Object();
                 sb.Append("\t\t");
                 // sb.Append(asset.ToString());
-                sb.Append('"' + assetUrl + '"');//现在版本Asset只导出url
+                var relativePath = assetUrl;
+                relativePath = relativePath.Replace("Assets", ExportConfig.instance.rootDir);
+
+                sb.Append('"' + relativePath + '"');//现在版本Asset只导出url
                 if (i != this._assets.Count - 1)
                 {
                     sb.Append(',');
                 }
                 sb.Append("\n");
             }
-            sb.Append("\t],\n\t\"objects\":[\n");
+            sb.Append("\t],\n\t\"entities\":[\n");
             for (int i = 0; i < this._objects.Count; i++)
             {
                 MyJson_Object obj = this._objects[i];
@@ -126,8 +130,10 @@ namespace Egret3DExportTools
                     continue;
                 }
                 //写入文件
-                var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(exportPath, fileBuffer.Key));
-                MyLog.Log("---导出文件:" + fileBuffer.Key);
+                var relativePath = fileBuffer.Key;
+                relativePath = relativePath.Replace("Assets", ExportConfig.instance.rootDir);
+                var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(exportPath, relativePath));
+                MyLog.Log("---导出文件:" + relativePath);
                 //创建路径
                 var fileDirectory = filePath.Substring(0, filePath.LastIndexOf("/") + 1);
                 if (!System.IO.Directory.Exists(fileDirectory))
@@ -330,7 +336,7 @@ namespace Egret3DExportTools
 
                 path = PathHelper.CheckFileName(path);
                 this.AddFileBuffer(path, bs);
-                rename = SaveTextureFormat(tex, path, matPath, false, ext, isNormal);
+                rename = SaveTextureFormat(tex, path, ext);
             }
 
             return rename;
@@ -339,53 +345,57 @@ namespace Egret3DExportTools
         /**
          * 保存纹理图片相关信息
          */
-        public string SaveTextureFormat(Texture2D tex, string texPath, string matPath, bool closemipmap = false, string ext = "png", bool normal = false)
+        public string SaveTextureFormat(Texture2D tex, string texPath, string ext = "png")
         {
             string name = PathHelper.CheckFileName(tex.name + ".image.json");
 
-            MyJson_Tree textureItem = new MyJson_Tree();
-            var fileName = texPath.Substring(0, texPath.LastIndexOf(".") + 1) + ext;
-            textureItem.SetString("name", PathHelper.CheckFileName(texPath));
-            textureItem.SetEnum("filterMode", tex.filterMode, true);
-            textureItem.SetEnum("wrap", tex.wrapMode, true);
-            textureItem.SetBool("mipmap", !closemipmap && tex.mipmapCount > 1);
+            // MyJson_Tree textureItem = new MyJson_Tree();
+            // var fileName = texPath.Substring(0, texPath.LastIndexOf(".") + 1) + ext;
+            // textureItem.SetString("name", PathHelper.CheckFileName(texPath));
+            // textureItem.SetEnum("filterMode", tex.filterMode, true);
+            // textureItem.SetEnum("wrap", tex.wrapMode, true);
+            // textureItem.SetBool("mipmap", tex.mipmapCount > 1);
 
-            if (tex.anisoLevel > 1)
-            {
-                textureItem.SetNumber("anisotropy", tex.anisoLevel);
-            }
+            // if (tex.anisoLevel > 1)
+            // {
+            //     textureItem.SetNumber("anisotropy", tex.anisoLevel);
+            // }
 
-            if (tex.format == TextureFormat.Alpha8)
-            {
-                textureItem.SetString("format", "Gray");
-            }
-            else if (ext == "jpg" ||
-             tex.format == TextureFormat.RGB24 ||
-             tex.format == TextureFormat.PVRTC_RGB2 ||
-             tex.format == TextureFormat.PVRTC_RGB4 ||
-             tex.format == TextureFormat.RGB565 ||
-             tex.format == TextureFormat.ETC_RGB4 ||
-             tex.format == TextureFormat.ATC_RGB4 ||
-             tex.format == TextureFormat.ETC2_RGB ||
-             tex.format == TextureFormat.ASTC_RGB_4x4 ||
-             tex.format == TextureFormat.ASTC_RGB_5x5 ||
-             tex.format == TextureFormat.ASTC_RGB_6x6 ||
-             tex.format == TextureFormat.ASTC_RGB_8x8 ||
-             tex.format == TextureFormat.ASTC_RGB_10x10 ||
-             tex.format == TextureFormat.ASTC_RGB_12x12
-             )
-            {
-                textureItem.SetString("format", "RGB");
-            }
+            // if (tex.format == TextureFormat.Alpha8)
+            // {
+            //     textureItem.SetString("format", "Gray");
+            // }
+            // else if (ext == "jpg" ||
+            //  tex.format == TextureFormat.RGB24 ||
+            //  tex.format == TextureFormat.PVRTC_RGB2 ||
+            //  tex.format == TextureFormat.PVRTC_RGB4 ||
+            //  tex.format == TextureFormat.RGB565 ||
+            //  tex.format == TextureFormat.ETC_RGB4 ||
+            //  tex.format == TextureFormat.ATC_RGB4 ||
+            //  tex.format == TextureFormat.ETC2_RGB ||
+            //  tex.format == TextureFormat.ASTC_RGB_4x4 ||
+            //  tex.format == TextureFormat.ASTC_RGB_5x5 ||
+            //  tex.format == TextureFormat.ASTC_RGB_6x6 ||
+            //  tex.format == TextureFormat.ASTC_RGB_8x8 ||
+            //  tex.format == TextureFormat.ASTC_RGB_10x10 ||
+            //  tex.format == TextureFormat.ASTC_RGB_12x12
+            //  )
+            // {
+            //     textureItem.SetString("format", "RGB");
+            // }
 
-            textureItem.SetInt("version", 2);
+            // textureItem.SetInt("version", 2);
 
-            //得到.imgdesc.json数据，并保存到bufs中
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            textureItem.CovertToStringWithFormat(sb, 4);
-            byte[] bs = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
-            //相对路径
+            // //得到.imgdesc.json数据，并保存到bufs中
+            // System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            // textureItem.CovertToStringWithFormat(sb, 4);
+            // byte[] bs = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            // //相对路径
             var imgdescPath = texPath.Substring(0, texPath.LastIndexOf("/") + 1) + name;
+            // this.AddFileBuffer(imgdescPath, bs);
+
+            var gltf = new TextureWriter(tex, texPath, ext);
+            var bs = gltf.WriteGLTF();
             this.AddFileBuffer(imgdescPath, bs);
 
             return imgdescPath;

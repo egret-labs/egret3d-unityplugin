@@ -1,11 +1,12 @@
 namespace Egret3DExportTools
 {
+    using System.Collections.Generic;
     using UnityEngine;
-    public class LambertMaterialWriter : DiffuseMaterialWriter
+    public class LambertParser : DiffuseParser
     {
-        protected override void Update()
+        public override void CollectUniformValues()
         {
-            base.Update();
+            base.CollectUniformValues();
             var aoMap = this.GetTexture("_OcclusionMap", null);
             if (aoMap != null)
             {
@@ -21,14 +22,6 @@ namespace Egret3DExportTools
             if (specGlossMap != null)
             {
                 this.SetTexture("specularMap", specGlossMap);
-            }
-        }
-
-        protected override string technique
-        {
-            get
-            {
-                return "builtin/meshlambert.shader.json";
             }
         }
     }

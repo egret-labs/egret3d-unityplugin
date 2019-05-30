@@ -9,19 +9,19 @@ namespace Egret3DExportTools
     {
         Type compType { set; get; }
         string className { set; get; }
-        bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson);
+        bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson);
     }
 
     public abstract class ComponentParser : IComponentParser
     {
         protected Type _compType;
         protected string _className;
-        public virtual bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson)
+        public virtual bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             return true;
         }
 
-        public Type compType { get { return _compType; } set { _compType = value; } }
-        public string className { get { return _className; } set { _className = value; }  }
+        public Type compType { get => _compType; set => _compType = value; }
+        public string className { get => _className; set => _className = value; }
     }
 }

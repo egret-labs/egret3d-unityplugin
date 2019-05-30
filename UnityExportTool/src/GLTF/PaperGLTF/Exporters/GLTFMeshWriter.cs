@@ -26,7 +26,7 @@ namespace Egret3DExportTools
                 Asset = new Asset
                 {
                     Version = "2.0",
-                    Generator = "paper",
+                    Generator = "egret",
                     Extensions = new Dictionary<string, IExtension>(),
                 },
                 Buffers = new List<GLTF.Schema.Buffer>(),

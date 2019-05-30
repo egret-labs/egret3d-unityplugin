@@ -1,7 +1,7 @@
 namespace Egret3DExportTools
 {
     using UnityEngine;
-    public class StandardSpecularMaterialWriter : StandardMaterialWriter
+    public class StandardSpecularParser : StandardParser
     {
         protected override void StandardBegin()
         {

@@ -12,7 +12,7 @@ namespace Egret3DExportTools
             return AnimationUtility.GetAnimationClips(component.gameObject);
         }
 
-        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {            
             var animation = component as Animation;
             var animationClips = new List<UnityEngine.AnimationClip>();

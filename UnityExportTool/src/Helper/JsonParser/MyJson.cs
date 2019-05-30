@@ -124,6 +124,20 @@ namespace Egret3DExportTools
         {
         }
 
+        public string HashToString()
+        {
+            var uuidStr = ResourceManager.instance.ResetHash(value).ToString();
+            string v = "";
+            if (uuidStr != null)
+            {
+                v = uuidStr.Replace("\\", "\\\\");
+                v = v.Replace("\"", "\\\"");
+            }
+            v = "\"" + v + "\"";
+
+            return v;
+        }
+
         public override string ToString()
         {
             return "{" + "\"" + "uuid" + "\":" + "\"" + ResourceManager.instance.ResetHash((int)value).ToString() + "\"" + "}";
@@ -201,7 +215,22 @@ namespace Egret3DExportTools
             int i = Count;
             foreach (var item in this)
             {
-                sb.Append("\"" + item.Key + "\":" + item.Value.ToString());
+                if (item.Key == "uuid")
+                {
+                    if (item.Value is MyJson_String)
+                    {
+                        sb.Append("\"" + item.Key + "\":" + (item.Value as MyJson_String).HashToString());
+                    }
+                    else if (item.Value is MyJson_HashCode)
+                    {
+                        sb.Append("\"" + item.Key + "\":" + (item.Value as MyJson_HashCode).HashToString());
+                    }
+                }
+                else
+                {
+                    sb.Append("\"" + item.Key + "\":" + item.Value.ToString());
+                }
+                // sb.Append("\"" + item.Key + "\":" + item.Value.ToString());
                 i--;
                 if (i != 0)
                 {
@@ -304,7 +333,14 @@ namespace Egret3DExportTools
             {
                 if (item.Key == "uuid")
                 {
-                    sb.Append("\"" + item.Key + "\":" + (item.Value as MyJson_String).HashToString());
+                    if (item.Value is MyJson_String)
+                    {
+                        sb.Append("\"" + item.Key + "\":" + (item.Value as MyJson_String).HashToString());
+                    }
+                    else if (item.Value is MyJson_HashCode)
+                    {
+                        sb.Append("\"" + item.Key + "\":" + (item.Value as MyJson_HashCode).HashToString());
+                    }
                 }
                 else
                 {

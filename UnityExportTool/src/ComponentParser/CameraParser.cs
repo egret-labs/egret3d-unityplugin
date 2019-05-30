@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class CameraParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             Camera comp = component as Camera;
 
@@ -19,28 +19,23 @@ namespace Egret3DExportTools
                 compJson.SetNumber("fov", comp.fieldOfView / 57.3, 4);
                 compJson.SetInt("opvalue", 1);
             }
-            compJson.SetNumber("_near", comp.nearClipPlane);
-            compJson.SetNumber("_far", comp.farClipPlane);
-            // compJson.SetInt("cullingMask", 0xffffff);
+            compJson.SetNumber("near", comp.nearClipPlane);
+            compJson.SetNumber("far", comp.farClipPlane);
             compJson.SetInt("cullingMask", comp.cullingMask);
-            //clearFlag
-            switch (comp.clearFlags)
+
+            //clearFlags
+            var clearFlags = comp.clearFlags;
+            if(clearFlags == CameraClearFlags.SolidColor || clearFlags == CameraClearFlags.Skybox)
             {
-                case CameraClearFlags.Skybox:
-                case CameraClearFlags.SolidColor:
-                    compJson.SetBool("clearOption_Color", true);
-                    compJson.SetBool("clearOption_Depth", true);
-                    break;
-                case CameraClearFlags.Depth:
-                    compJson.SetBool("clearOption_Color", false);
-                    compJson.SetBool("clearOption_Depth", true);
-                    break;
-                case CameraClearFlags.Nothing:
-                    compJson.SetBool("clearOption_Color", false);
-                    compJson.SetBool("clearOption_Depth", false);
-                    break;
-                default:
-                    break;
+                compJson.SetInt("bufferMask", 16640);
+            }
+            else if(clearFlags == CameraClearFlags.Depth)
+            {
+                compJson.SetInt("bufferMask", 256);
+            }
+            else
+            {
+                compJson.SetInt("bufferMask", 0);
             }
 
             //backgroundColor

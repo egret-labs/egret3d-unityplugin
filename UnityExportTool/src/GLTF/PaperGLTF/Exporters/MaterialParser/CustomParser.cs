@@ -3,10 +3,14 @@ namespace Egret3DExportTools
     using System;
     using UnityEngine;
     using UnityEditor;
-    public class CustomMaterialWriter : BaseMaterialWriter
+    using System.Collections.Generic;
+
+    public class CustomParser : BaseMaterialParser
     {
-        protected override void Update()
+        public override void CollectUniformValues()
         {
+            base.CollectUniformValues();
+            var values = this.data.values;
             //自定义的value全部导出，不和默认值做过滤
             var target = this.source;
             var materialProperties = MaterialEditor.GetMaterialProperties(new UnityEngine.Object[] { target });
@@ -21,15 +25,15 @@ namespace Egret3DExportTools
                 string type = materialProperty.type.ToString();
                 if (type == "Float" || type == "Range")
                 {
-                    this.values.SetNumber(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f));
+                    values.SetNumber(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f));
                 }
                 else if (type == "Vector")
                 {
-                    this.values.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
+                    values.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
                 }
                 else if (type == "Color")
                 {
-                    this.values.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
+                    values.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
                 }
                 else if (type == "Texture")
                 {
@@ -44,7 +48,7 @@ namespace Egret3DExportTools
                             string propertyName = materialProperty.name + "_ST";
                             if (target.HasProperty(propertyName))
                             {
-                                this.values.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
+                                values.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
                             }
                         }
                         else
@@ -59,15 +63,9 @@ namespace Egret3DExportTools
                 }
             }
 
-            MyLog.Log("自定义Shader:" + this.technique);
-        }
-
-        protected override string technique
-        {
-            get
-            {
-                return UnityEditor.AssetDatabase.GetAssetPath(this.source.shader) + ".json";
-            }
+            //
+            this.shaderAsset = UnityEditor.AssetDatabase.GetAssetPath(this.source.shader) + ".json";
+            MyLog.Log("自定义Shader:" + this.shaderAsset);
         }
     }
 }

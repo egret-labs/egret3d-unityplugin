@@ -1,11 +1,14 @@
 namespace Egret3DExportTools
 {
+    using System.Collections.Generic;
     using UnityEngine;
-    public class ParticleMaterialWriter : BaseMaterialWriter
+    public class ParticleParser : BaseMaterialParser
     {
-        protected override void Update()
+        public override void CollectUniformValues()
         {
+            base.CollectUniformValues();
             var source = this.source;
+            var values = this.data.values;
 
             var tex = this.GetTexture("_MainTex", null);
             if (tex != null)
@@ -16,7 +19,7 @@ namespace Egret3DExportTools
                 var mainST = this.GetVector4("_MainTex_ST", defaultValue);
                 if (!mainST.Equals(defaultValue))
                 {
-                    this.values.SetUVTransform("uvTransform", mainST);
+                    values.SetUVTransform("uvTransform", mainST);
                 }
             }
 
@@ -37,14 +40,6 @@ namespace Egret3DExportTools
             get
             {
                 return true;
-            }
-        }
-
-        protected override string technique
-        {
-            get
-            {
-                return "builtin/particle.shader.json";
             }
         }
     }

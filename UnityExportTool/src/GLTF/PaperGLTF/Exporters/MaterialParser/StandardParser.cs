@@ -1,7 +1,8 @@
 namespace Egret3DExportTools
 {
+    using System.Collections.Generic;
     using UnityEngine;
-    public class StandardMaterialWriter : BaseMaterialWriter
+    public class StandardParser : BaseMaterialParser
     {
         protected virtual void StandardBegin()
         {
@@ -19,12 +20,10 @@ namespace Egret3DExportTools
                 this.SetTexture("metalnessMap", metalnessMap);
             }
         }
-        protected virtual void StandardEnd()
+
+        public override void CollectUniformValues()
         {
-            this.defines.Add("STANDARD");
-        }
-        protected override void Update()
-        {
+            base.CollectUniformValues();
             var source = this.source;
             this.StandardBegin();
             var map = this.GetTexture("_MainTex", null);
@@ -69,15 +68,13 @@ namespace Egret3DExportTools
                 this.SetFloat("displacementBias", 0.0f, 0.0f);
             }
 
-            this.StandardEnd();
+            
         }
 
-        protected override string technique
+        public override void CollectDefines()
         {
-            get
-            {
-                return "builtin/meshphysical.shader.json";
-            }
+            base.CollectDefines();
+            this.data.defines.Add(new Define() { name = "STANDARD" });
         }
     }
 }

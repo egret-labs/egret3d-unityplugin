@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class AnimatorParser : AnimationParser
     {
-        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             var aniamtior = component as Animator;
             if (aniamtior.runtimeAnimatorController == null)

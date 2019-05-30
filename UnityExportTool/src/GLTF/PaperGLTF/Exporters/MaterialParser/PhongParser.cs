@@ -1,11 +1,12 @@
 namespace Egret3DExportTools
 {
+    using System.Collections.Generic;
     using UnityEngine;
-    public class PhongMaterialWriter : DiffuseMaterialWriter
+    public class PhongParser : DiffuseParser
     {
-        protected override void Update()
+        public override void CollectUniformValues()
         {
-            base.Update();
+            base.CollectUniformValues();
             var source = this.source;
             var shininess = 30.0f;
             if (this.source.HasProperty("_Shininess"))
@@ -45,14 +46,6 @@ namespace Egret3DExportTools
                 this.SetTexture("displacementMap", displacementMap);
                 this.SetFloat("displacementScale", this.GetFloat("_Parallax", 1.0f), 1.0f);
                 this.SetFloat("displacementBias", 0.0f, 0.0f);
-            }
-        }
-
-        protected override string technique
-        {
-            get
-            {
-                return "builtin/meshphong.shader.json";
             }
         }
     }

@@ -2,12 +2,14 @@ namespace Egret3DExportTools
 {
     using UnityEngine;
     using UnityEditor;
-    public class DiffuseMaterialWriter : BaseMaterialWriter
+    using System.Collections.Generic;
+    public class DiffuseParser : BaseMaterialParser
     {
-        protected override void Update()
+        public override void CollectUniformValues()
         {
-            base.Update();
+            base.CollectUniformValues();
             var source = this.source;
+            var values = this.data.values;
             var mainTex = this.MainText;
             var mainColor = this.MainColor;
             if (mainTex != null)
@@ -17,7 +19,7 @@ namespace Egret3DExportTools
                 var mainST = this.GetVector4("_MainTex_ST", defaultValue);
                 if (!mainST.Equals(defaultValue))
                 {
-                    this.values.SetUVTransform("uvTransform", mainST);
+                    values.SetUVTransform("uvTransform", mainST);
                 }
             }
 
@@ -64,14 +66,6 @@ namespace Egret3DExportTools
                     color = source.GetColor("_TintColor");
                 }
                 return color;
-            }
-        }
-
-        protected override string technique
-        {
-            get
-            {
-                return "builtin/meshbasic.shader.json";
             }
         }
     }

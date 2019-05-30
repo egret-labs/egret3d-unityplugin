@@ -21,12 +21,40 @@
 
         public virtual byte[] WriteGLTF()
         {
-            return null;
+            var gltfJson = new MyJson_Tree();
+            gltfJson.isWithFormat = true;
+            this.WriteJson(gltfJson);
+            return System.Text.Encoding.UTF8.GetBytes(gltfJson.ToString());
         }
 
         protected virtual void Init()
         {
 
+        }
+
+        protected virtual void WriteJson(MyJson_Tree gltfJson)
+        {
+            var assetJson = new MyJson_Tree();
+            assetJson.SetString("version", "2.0");
+            assetJson.SetString("generator", "Unity plugin for egret");
+            gltfJson.Add("asset", assetJson);
+            //
+            var extensionsRequired = new MyJson_Array();
+            extensionsRequired.AddString("KHR_techniques_webgl");
+            extensionsRequired.AddString("egret");
+            gltfJson.Add("extensionsRequired", extensionsRequired);
+
+            var extensionsUsed = new MyJson_Array();
+            extensionsUsed.AddString("KHR_techniques_webgl");
+            extensionsUsed.AddString("egret");
+            gltfJson.Add("extensionsUsed", extensionsUsed);
+            //
+            var extensionsJson = new MyJson_Tree();
+            var egret = new MyJson_Tree();
+            egret.SetString("version", "5.0");
+            egret.SetString("minVersion", "5.0");
+            extensionsJson.Add("egret", egret);
+            gltfJson.Add("extensions", extensionsJson);
         }
 
         protected void BeginWrite()
@@ -488,7 +516,7 @@
             accessor.ComponentType = GLTFComponentType.Float;
             accessor.Count = count;
             accessor.Type = GLTFAccessorAttributeType.MAT4;
-            
+
             var byteOffset = _bufferWriter.BaseStream.Position;
 
             foreach (var vec in arr)

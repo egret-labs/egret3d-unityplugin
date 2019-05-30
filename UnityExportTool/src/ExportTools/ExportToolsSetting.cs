@@ -4,24 +4,25 @@ using Newtonsoft.Json;
 namespace Egret3DExportTools
 {
     [JsonObject(MemberSerialization.OptOut)]
-    public class CustomShaderConfig {
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+    public class CustomShaderConfig
+    {
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string[] include; // TODO
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string technique;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] enable;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] frontFace;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] cullFace;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] blendEquationSeparate;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] blendFuncSeparate;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] depthFunc;
-        [JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public int[] depthMask;
     }
 
@@ -29,6 +30,7 @@ namespace Egret3DExportTools
     public class ExportConfig
     {
         public string exportPath = "";
+        public string rootDir = "Assets";
         public Dictionary<string, CustomShaderConfig> customShaders = new Dictionary<string, CustomShaderConfig>();
 
         private static ExportConfig _instance;
@@ -66,7 +68,7 @@ namespace Egret3DExportTools
             System.IO.File.WriteAllText(configPath, JsonConvert.SerializeObject(this));
         }
 
-        public CustomShaderConfig IsCustomShader(string shaderName)
+        public CustomShaderConfig getCustomShader(string shaderName)
         {
             if (this.customShaders != null)
             {

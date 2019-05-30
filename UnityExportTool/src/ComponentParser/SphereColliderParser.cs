@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class SphereColliderParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             SphereCollider comp = component as SphereCollider;
             var sphereItem = new MyJson_Array();

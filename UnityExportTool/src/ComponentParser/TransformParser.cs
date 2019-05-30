@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class TransformParser : ComponentParser
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson)
+        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
             Transform comp = component as Transform;
 
@@ -19,16 +19,20 @@ namespace Egret3DExportTools
                 localRotation = Quaternion.identity;
                 localScale = Vector3.one;
             }*/
+            compJson.SetString("name", obj.name);
+            compJson.SetString("tag", obj.tag);
+            compJson.SetInt("layer", 1 << obj.layer);
+            compJson.SetBool("isStatic", obj.isStatic);
             //localPosition
-            compJson.SetVector3("localPosition", localPosition);
+            compJson.SetVector3("_localPosition", localPosition);
             //localRotation
-            compJson.SetQuaternion("localRotation", localRotation);
+            compJson.SetQuaternion("_localRotation", localRotation);
             //localScale
-            compJson.SetVector3("localScale", localScale);
-            if ((component as Transform).parent)
-            {
-                compJson.SetHashCode("_parent", comp.parent);
-            }
+            compJson.SetVector3("_localScale", localScale);
+            // if ((component as Transform).parent)
+            // {
+            //     compJson.SetHashCode("_parent", comp.parent);
+            // }
             var childrenItem = new MyJson_Array();
             compJson["children"] = childrenItem;
             for (int i = 0; i < comp.childCount; i++)
@@ -39,6 +43,7 @@ namespace Egret3DExportTools
                     childrenItem.AddHashCode(child);
                 }
             }
+
 
             return true;
         }

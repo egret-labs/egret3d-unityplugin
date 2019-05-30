@@ -156,23 +156,29 @@ namespace Egret3DExportTools
         {
             jsonNode["unityId"] = new MyJson_Number(value);
         }
-        public static void SetHashCode(this Dictionary<string, IJsonNode> jsonNode, string key, UnityEngine.Object value)
+        public static void SetHashCode(this Dictionary<string, IJsonNode> jsonNode, string key, System.Object value)
         {
-            jsonNode[key] = new MyJson_HashCode(value.GetInstanceID());
+            jsonNode[key] = new MyJson_HashCode(value.GetHashCode());
         }
         public static void SetClass(this Dictionary<string, IJsonNode> jsonNode, string className)
         {
-            jsonNode.SetString("class", className);
+            jsonNode.SetString("__class", className);
         }
-        public static void SetComponent(this Dictionary<string, IJsonNode> jsonNode, int compHash, string className)
+        public static void SetSerializeClass(this Dictionary<string, IJsonNode> jsonNode, int compHash, string className)
         {
-            jsonNode.SetUUID(compHash.ToString());
-            jsonNode.SetUnityID(compHash);
+            // jsonNode.SetUUID(jsonNode.GetHashCode().ToString());
+            jsonNode.SetHashCode("uuid", jsonNode);
+            // jsonNode.SetUnityID(compHash);
             jsonNode.SetClass(className);
         }
-        public static void SetAsset(this Dictionary<string, IJsonNode> jsonNode, string url)
+        public static void SetAsset(this Dictionary<string, IJsonNode> jsonNode, int assetIndex)
         {
-            jsonNode.SetString("url", url);
+            jsonNode.SetInt("__asset", assetIndex);
+        }
+        public static void SetUri(this Dictionary<string, IJsonNode> jsonNode, string key, string uri)
+        {
+            uri = uri.Replace("Assets", ExportConfig.instance.rootDir);
+            jsonNode.SetString(key, uri);
         }
         public static void SetMesh(this MyJson_Object jsonNode, GameObject obj, Mesh mesh)
         {
@@ -187,13 +193,13 @@ namespace Egret3DExportTools
 
             //mesh
             var meshItem = new MyJson_Tree(false);
-            meshItem.SetInt("asset", assetIndex);
-            jsonNode["_mesh"] = meshItem;
+            meshItem.SetAsset(assetIndex);
+            jsonNode["mesh"] = meshItem;
         }
         public static void SetMaterials(this MyJson_Object jsonNode, GameObject obj, Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
         {
             var materialsItem = new MyJson_Array();
-            jsonNode["_materials"] = materialsItem;
+            jsonNode["materials"] = materialsItem;
             //写材质
             foreach (var material in materials)
             {
@@ -207,9 +213,7 @@ namespace Egret3DExportTools
                 string url = ResourceManager.instance.SaveMaterial(material, isParticleMat, isAnimationMat);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
-                var matItem = new MyJson_Tree();
-                matItem.SetInt("asset", assetIndex);
-                materialsItem.Add(matItem);
+                materialsItem.AddAssetIndex(assetIndex);
             }
         }
 
@@ -233,9 +237,7 @@ namespace Egret3DExportTools
                     //
                     ResourceManager.instance.SaveCache(gltfHash, url);
                 }
-                var aniItem = new MyJson_Tree();
-                aniItem.SetInt("asset", assetIndex);
-                exportAnimations.Add(aniItem);
+                exportAnimations.AddAssetIndex(assetIndex);
             }
         }
     }
@@ -258,13 +260,28 @@ namespace Egret3DExportTools
         {
             array.Add(new MyJson_Number(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits)));
         }
-        public static void AddHashCode(this MyJson_Array array, UnityEngine.Object value)
+        public static void AddHashCode(this MyJson_Array array, System.Object value)
         {
-            array.Add(new MyJson_HashCode(value.GetInstanceID()));
+            array.Add(new MyJson_HashCode(value.GetHashCode()));
+        }
+        public static void AddUUID(this MyJson_Array array, System.Object value)
+        {
+            array.Add(new MyJson_HashCode(value.GetHashCode()));
         }
         public static void AddString(this MyJson_Array array, string value)
         {
             array.Add(new MyJson_String(value));
+        }
+        public static void AddAssetIndex(this MyJson_Array array, int assetIndex)
+        {
+            var asset = new MyJson_Tree();
+            asset.SetAsset(assetIndex);
+            array.Add(asset);
+        }
+        public static void AddUri(this MyJson_Array array, string value)
+        {
+            value = value.Replace("Assets", ExportConfig.instance.rootDir);
+            array.AddString(value);
         }
     }
 }

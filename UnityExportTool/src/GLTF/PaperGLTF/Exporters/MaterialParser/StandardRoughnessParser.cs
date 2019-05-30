@@ -1,7 +1,7 @@
 namespace Egret3DExportTools
 {
     using UnityEngine;
-    public class StandardRoughnessMaterialWriter : StandardMaterialWriter
+    public class StandardRoughnessParser : StandardParser
     {
        protected override void StandardBegin()
         {
