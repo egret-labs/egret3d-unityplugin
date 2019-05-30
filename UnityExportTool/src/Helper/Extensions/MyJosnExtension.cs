@@ -188,7 +188,7 @@ namespace Egret3DExportTools
             }
 
             int meshHash = mesh.GetInstanceID();
-            string url = ResourceManager.instance.SaveMesh(obj.transform, mesh);
+            string url = SerializeObject.SerializeAsset(mesh, AssetType.Mesh);
             var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
             //mesh
@@ -209,8 +209,7 @@ namespace Egret3DExportTools
                     continue;
                 }
 
-                int hash = material.GetInstanceID();
-                string url = ResourceManager.instance.SaveMaterial(material, isParticleMat, isAnimationMat);
+                string url = SerializeObject.SerializeAsset(material, AssetType.Material);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
                 materialsItem.AddAssetIndex(assetIndex);
@@ -224,19 +223,20 @@ namespace Egret3DExportTools
 
             foreach (var animationClip in animationClips)
             {
-                var gltfHash = animationClip.GetInstanceID();
-                var url = UnityEditor.AssetDatabase.GetAssetPath(animationClip);
-                url = url.Substring(0, url.LastIndexOf(".")) + "_" + animationClip.name + ".ani.bin";
-                url = PathHelper.CheckFileName(url);
+                // var gltfHash = animationClip.GetInstanceID();
+                // var url = UnityEditor.AssetDatabase.GetAssetPath(animationClip);
+                // url = url.Substring(0, url.LastIndexOf(".")) + "_" + animationClip.name + ".ani.bin";
+                // url = PathHelper.CheckFileName(url);
                 //
+                var url = SerializeObject.SerializeAsset(animationClip, AssetType.Animation);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
-                if (!ResourceManager.instance.HaveCache(gltfHash))
-                {
-                    var glTFWriter = new AnimationXWriter(obj.transform, animationClip);
-                    ResourceManager.instance.AddFileBuffer(url, glTFWriter.WriteGLTF());
-                    //
-                    ResourceManager.instance.SaveCache(gltfHash, url);
-                }
+                // if (!ResourceManager.instance.HaveCache(gltfHash))
+                // {
+                //     var glTFWriter = new AnimationWriter();
+                //     ResourceManager.instance.AddFileBuffer(url, glTFWriter.WriteGLTF(animationClip));
+                //     //
+                //     ResourceManager.instance.SaveCache(gltfHash, url);
+                // }
                 exportAnimations.AddAssetIndex(assetIndex);
             }
         }

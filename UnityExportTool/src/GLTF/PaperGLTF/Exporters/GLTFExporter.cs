@@ -14,13 +14,24 @@
         protected BinaryWriter _bufferWriter;
         protected StreamWriter _streamWriter;
 
+        protected Transform _target;
+
         public GLTFExporter()
         {
             this.Init();
         }
 
-        public virtual byte[] WriteGLTF()
+        public virtual string writePath
         {
+            get
+            {
+                return "";
+            }
+        }
+
+        public virtual byte[] WriteGLTF(UnityEngine.Object sourceAsset)
+        {
+            this._target = SerializeObject.currentTarget;
             var gltfJson = new MyJson_Tree();
             gltfJson.isWithFormat = true;
             this.WriteJson(gltfJson);

@@ -48,28 +48,10 @@ namespace Egret3DExportTools
     public class MaterialWriter : GLTFExporter
     {
         protected readonly MaterialData data = new MaterialData();
-        private readonly bool _isParticle = false;
-        private readonly bool _isAnimation = false;
-        private readonly UnityEngine.Material _target;
+        private bool _isParticle = false;
+        private UnityEngine.Material _material;
 
         private readonly Dictionary<MaterialType, BaseMaterialParser> parsers = new Dictionary<MaterialType, BaseMaterialParser>();
-
-        public MaterialWriter(UnityEngine.Material target, bool isParticle, bool isAnimation = false) : base()
-        {
-            this._target = target;
-            this._isParticle = isParticle;
-            this._isAnimation = isAnimation;
-
-            //
-            this.register(MaterialType.Diffuse, new DiffuseParser(), "builtin/meshbasic.shader.json");
-            this.register(MaterialType.Lambert, new LambertParser(), "builtin/meshlambert.shader.json");
-            this.register(MaterialType.Phong, new PhongParser(), "builtin/meshphong.shader.json");
-            this.register(MaterialType.Standard, new StandardParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.StandardRoughness, new StandardRoughnessParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.StandardSpecular, new StandardSpecularParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.Particle, new ParticleParser(), "builtin/particle.shader.json");
-            this.register(MaterialType.Custom, new CustomParser(), "");
-        }
 
         private void register(MaterialType type, BaseMaterialParser parse, string shaderAsset)
         {
@@ -97,12 +79,47 @@ namespace Egret3DExportTools
                 },
                 Materials = new List<GLTF.Schema.Material>(),
             };
+
+            //
+            this.register(MaterialType.Diffuse, new DiffuseParser(), "builtin/meshbasic.shader.json");
+            this.register(MaterialType.Lambert, new LambertParser(), "builtin/meshlambert.shader.json");
+            this.register(MaterialType.Phong, new PhongParser(), "builtin/meshphong.shader.json");
+            this.register(MaterialType.Standard, new StandardParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.StandardRoughness, new StandardRoughnessParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.StandardSpecular, new StandardSpecularParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.Particle, new ParticleParser(), "builtin/particle.shader.json");
+            this.register(MaterialType.Custom, new CustomParser(), "");
+        }
+        public override string writePath
+        {
+            get
+            {
+                var mat = this._material;
+                string tempMatPath = UnityEditor.AssetDatabase.GetAssetPath(mat);
+                if (tempMatPath == "Resources/unity_builtin_extra")
+                {
+                    tempMatPath = "Library/" + mat.name + ".mat";
+                }
+                if (!tempMatPath.Contains(".mat"))
+                {
+                    tempMatPath += "." + mat.name + ".mat";//.obj文件此时应该导出不同的材质文件，GetAssetPath获取的确实同一个
+                }
+                var name = PathHelper.CheckFileName(tempMatPath + ".json");
+                return name;
+            }
+        }
+        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
+        {
+            this._material = sourceAsset as UnityEngine.Material;
+            return base.WriteGLTF(sourceAsset);
         }
 
         protected override void WriteJson(MyJson_Tree gltfJson)
         {
+            //TODO
+            this._isParticle = this._target.GetComponent<ParticleSystem>() != null;
             base.WriteJson(gltfJson);
-            var source = this._target;
+            var source = this._material;
             var data = this.data;
             //
             data.CleanUp();
@@ -216,7 +233,7 @@ namespace Egret3DExportTools
 
         private MaterialType GetMaterialType()
         {
-            var shaderName = this._target.shader.name;
+            var shaderName = this._material.shader.name;
             var customShaderConfig = ExportConfig.instance.getCustomShader(shaderName);
 
             if (this._isParticle)

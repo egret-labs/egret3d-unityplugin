@@ -23,22 +23,29 @@ namespace Egret3DExportTools
         public const string Transform = "Transform";
         public const string DirectionalLight = "DirectionalLight";
         public const string SpotLight = "SpotLight";
-
         public const string LightShadow = "LightShadow";
         public const string AssetEntity = "AssetEntity";
         public const string Material = "Material";
         public const string Defines = "Defines";
     }
+
+    public enum AssetType
+    {
+        Texture,
+        Material,
+        Mesh,
+        Animation
+    }
     public static class SerializeObject
     {
-        private readonly static Int32[] LAYER = { 0x000002, 0x000004, 0x000008, 0x000010, 0x000020, 0x000040, 0x000080, 0x0000f0, 0x000100, 0x000200, 0x000400, 0x000800, 0x000f00 };
+        public static Transform currentTarget;
         private readonly static Dictionary<string, List<IComponentParser>> componentParsers = new Dictionary<string, List<IComponentParser>>();
+        private readonly static Dictionary<AssetType, GLTFExporter> assetParsers = new Dictionary<AssetType, GLTFExporter>();
 
         public static void Initialize()
         {
             //初始化组件管理器
             componentParsers.Clear();
-            // RegComponentParser(new AniPlayerParser(),               typeof(FB.PosePlus.AniPlayer),              SerializeClass.Animation");
             RegComponentParser(new AnimatorParser(), typeof(UnityEngine.Animator), SerializeClass.Animation);
             RegComponentParser(new AnimationParser(), typeof(UnityEngine.Animation), SerializeClass.Animation);
             RegComponentParser(new BoxColliderParser(), typeof(UnityEngine.BoxCollider), SerializeClass.BoxCollider);
@@ -52,6 +59,13 @@ namespace Egret3DExportTools
             RegComponentParser(new TransformParser(), typeof(UnityEngine.Transform), SerializeClass.Transform);
             RegComponentParser(new DirectionalLightParser(), typeof(UnityEngine.Light), SerializeClass.DirectionalLight);
             RegComponentParser(new SpotLightParser(), typeof(UnityEngine.Light), SerializeClass.SpotLight);
+
+            //
+            assetParsers.Clear();
+            RegAssetParser(new TextureWriter(), AssetType.Texture);
+            RegAssetParser(new MeshWriter(), AssetType.Mesh);
+            RegAssetParser(new MaterialWriter(), AssetType.Material);
+            RegAssetParser(new AnimationWriter(), AssetType.Animation);
         }
         /**
          * 注册可序列化组件。
@@ -69,6 +83,11 @@ namespace Egret3DExportTools
             }
             componentParsers[compType.Name].Add(parser);
         }
+
+        public static void RegAssetParser(GLTFExporter parser, AssetType type)
+        {
+            assetParsers.Add(type, parser);
+        }
         /**
         *是否可以序列化该组件
         */
@@ -76,8 +95,27 @@ namespace Egret3DExportTools
         {
             return componentParsers.ContainsKey(className);
         }
+
+        public static string SerializeAsset(UnityEngine.Object obj, AssetType type)
+        {
+            var Res = ResourceManager.instance;
+            int id = obj.GetInstanceID();
+            if (Res.HaveCache(id))
+            {
+                return Res.GetCache(id);
+            }
+
+            var parser = assetParsers[type];
+            var bs = parser.WriteGLTF(obj);
+            var path = parser.writePath;
+            Res.AddFileBuffer(path, bs);
+            Res.SaveCache(id, path);
+
+            return path;
+        }
         public static MyJson_Object Serialize(GameObject obj)
         {
+            currentTarget = obj.transform;
             //未激活的不导出
             if ((!ExportToolsSetting.instance.exportUnactivatedObject && !obj.activeInHierarchy))
             {
@@ -89,6 +127,7 @@ namespace Egret3DExportTools
             {
                 return null;
             }
+
             MyLog.Log("导出对象:" + obj.name);
             MyJson_Object entity = new MyJson_Object();
             entity.SetSerializeClass(obj.GetHashCode(), SerializeClass.GameEntity);
@@ -148,7 +187,7 @@ namespace Egret3DExportTools
                     MyLog.LogWarning("组件： " + compClass + " 导出失败");
                 }
 
-                if(compClass == SerializeClass.Transform)
+                if (compClass == SerializeClass.Transform)
                 {
                     transform = compJson;
                 }
@@ -162,6 +201,8 @@ namespace Egret3DExportTools
                     Serialize(child);
                 }
             }
+
+            currentTarget = null;
 
             return transform;
         }

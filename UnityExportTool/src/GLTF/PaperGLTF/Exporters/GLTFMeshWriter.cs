@@ -10,12 +10,7 @@ namespace Egret3DExportTools
 
     public class MeshWriter : GLTFExporter
     {
-        private Transform _target;
-        public MeshWriter(Transform target) : base()
-        {
-            this._target = target;
-        }
-
+        private UnityEngine.Mesh _mesh;
         protected override void Init()
         {
             base.Init();
@@ -45,8 +40,31 @@ namespace Egret3DExportTools
             _root.Buffers.Add(_buffer);
         }
 
-        public override byte[] WriteGLTF()
+        public override string writePath
         {
+            get
+            {
+                var mesh = this._mesh;
+                var url = UnityEditor.AssetDatabase.GetAssetPath(mesh);
+                //obj
+                var extendName = "";
+                var extend = url.Substring(url.LastIndexOf(".") + 1);
+                if (extend == "obj")
+                {
+                    extendName = url.Substring(url.LastIndexOf("/") + 1);
+                    extendName = extendName.Substring(0, extendName.LastIndexOf(".")) + "_";
+                }
+                url = url.Substring(0, url.LastIndexOf("/") + 1);
+
+                var name = PathHelper.CheckFileName(url + extendName + mesh.name + ".mesh.bin");
+                return name;
+            }
+        }
+
+        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
+        {
+            this._mesh = sourceAsset as UnityEngine.Mesh;
+            base.WriteGLTF(sourceAsset);
             if (this._target.GetComponent<UnityEngine.SkinnedMeshRenderer>() == null &&
                 (this._target.GetComponent<UnityEngine.MeshFilter>() == null ||
                 this._target.GetComponent<UnityEngine.MeshRenderer>() == null) &&

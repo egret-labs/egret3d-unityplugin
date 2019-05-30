@@ -67,7 +67,6 @@
     </Compile>
     <Compile Include="src\ComponentParser\AnimationParser.cs" />
     <Compile Include="src\ComponentParser\AnimatorParser.cs" />
-    <Compile Include="src\ComponentParser\AniPlayerParser.cs" />
     <Compile Include="src\ComponentParser\BoxColliderParser.cs" />
     <Compile Include="src\ComponentParser\CameraParser.cs" />
     <Compile Include="src\ComponentParser\DirectionalLightParser.cs" />
@@ -137,7 +136,6 @@
     <Compile Include="src\GLTF\GLTFSerialization\Schema\Texture.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Schema\TextureInfo.cs" />
     <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFAnimationWriter.cs" />
-    <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFAnimationXWriter.cs" />
     <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFExporter.cs" />
     <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFMaterialWriter.cs" />
     <Compile Include="src\GLTF\PaperGLTF\Exporters\GLTFTextureWriter.cs" />
@@ -202,14 +200,6 @@
     <Compile Include="src\Helper\MyLog.cs" />
     <Compile Include="src\Helper\PathHelper.cs" />
     <Compile Include="src\Helper\ResourceManager.cs" />
-    <Compile Include="src\Inspector\Animator_Inspector.cs" />
-    <Compile Include="src\Inspector\Pretreatment.cs" />
-    <Compile Include="src\Poseplus\AniPlayer.cs" />
-    <Compile Include="src\Poseplus\Asbone.cs" />
-    <Compile Include="src\Poseplus\Data\AniBoxColider.cs" />
-    <Compile Include="src\Poseplus\Data\AniClip.cs" />
-    <Compile Include="src\Poseplus\Data\BoneMatrix.cs" />
-    <Compile Include="src\Poseplus\Data\Frame.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\Newtonsoft.Json.dll" />

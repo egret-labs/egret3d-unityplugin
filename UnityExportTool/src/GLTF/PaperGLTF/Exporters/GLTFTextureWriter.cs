@@ -11,15 +11,7 @@ namespace Egret3DExportTools
 
     public class TextureWriter : GLTFExporter
     {
-        private readonly string texPath;
-        private readonly string texExt;
-        private readonly UnityEngine.Texture2D target;
-        public TextureWriter(UnityEngine.Texture2D target, string texPath, string texExt) : base()
-        {
-            this.target = target;
-            this.texPath = texPath;
-            this.texExt = texExt;
-        }
+        private UnityEngine.Texture2D texture;
 
         protected override void Init()
         {
@@ -38,11 +30,57 @@ namespace Egret3DExportTools
             };
         }
 
-        protected override void WriteJson(MyJson_Tree gltfJson)
+        private void ExportTexture()
         {
+            var tex = this.texture;
+            var path = ExportImageTools.GetTexturePath(tex);
+            UnityEditor.TextureImporter importer = (UnityEditor.TextureImporter)UnityEditor.TextureImporter.GetAtPath(path);
+            bool isNormal = importer && importer.textureType == UnityEditor.TextureImporterType.NormalMap;
+            string ext = ExportImageTools.GetTextureExt(tex);
+            byte[] bs;
+
+            var isSupported = ExportImageTools.IsSupportedExt(tex);
+            //只有jpg、png可以原始图片导出，其他类型不支持
+            var filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), path);
+            if (ExportToolsSetting.instance.exportOriginalImage && isSupported && System.IO.File.Exists(filename))
+            {
+                MyLog.Log("原始图片:" + filename);
+                bs = System.IO.File.ReadAllBytes(filename);
+            }
+            else
+            {
+                bs = ExportImageTools.instance.EncodeToPNG(tex, ext);
+            }
+
+            ResourceManager.instance.AddFileBuffer(path, bs);
+        }
+
+        public override string writePath
+        {
+            get
+            {
+                string name = PathHelper.CheckFileName(this.texture.name + ".image.json");
+                var texPath = ExportImageTools.GetTexturePath(this.texture);
+            // //相对路径
+                var imgdescPath = texPath.Substring(0, texPath.LastIndexOf("/") + 1) + name;
+                return imgdescPath;
+            }
+        }
+
+        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
+        {
+            this.texture = sourceAsset as UnityEngine.Texture2D;
+            return base.WriteGLTF(sourceAsset);
+        }
+
+        protected override void WriteJson(MyJson_Tree gltfJson)
+        {   
+            //先把原始图片导出来
+            this.ExportTexture();
+
             base.WriteJson(gltfJson);
 
-            var mipmap = this.target.mipmapCount > 1;
+            var mipmap = this.texture.mipmapCount > 1;
 
             var images = new MyJson_Array();
             var samplers = new MyJson_Array();
@@ -54,15 +92,16 @@ namespace Egret3DExportTools
 
             //
             {
+                var path = ExportImageTools.GetTexturePath(this.texture);
                 var image = new MyJson_Tree();
-                image.SetUri("uri", this.texPath);
+                image.SetUri("uri", path);
                 images.Add(image);
             }
 
             {
                 var sampler = new MyJson_Tree();
-                var filterMode = this.target.filterMode;
-                var wrapMode = this.target.wrapMode;
+                var filterMode = this.texture.filterMode;
+                var wrapMode = this.texture.wrapMode;
 
                 if (wrapMode == TextureWrapMode.Repeat)
                 {
@@ -102,30 +141,30 @@ namespace Egret3DExportTools
                 texture.SetInt("source", 0);
                 var extensions = new MyJson_Tree();
                 var egret = new MyJson_Tree();
-                if (this.target.anisoLevel > 1)
+                if (this.texture.anisoLevel > 1)
                 {
-                    egret.SetInt("anisotropy", this.target.anisoLevel);
+                    egret.SetInt("anisotropy", this.texture.anisoLevel);
                 }
 
-
-                if (this.target.format == TextureFormat.Alpha8)
+                var texExt = ExportImageTools.GetTextureExt(this.texture);
+                if (this.texture.format == TextureFormat.Alpha8)
                 {
                     egret.SetInt("format", 6409);
                 }
-                else if (this.texExt == "jpg" ||
-                 this.target.format == TextureFormat.RGB24 ||
-                 this.target.format == TextureFormat.PVRTC_RGB2 ||
-                 this.target.format == TextureFormat.PVRTC_RGB4 ||
-                 this.target.format == TextureFormat.RGB565 ||
-                 this.target.format == TextureFormat.ETC_RGB4 ||
-                 this.target.format == TextureFormat.ATC_RGB4 ||
-                 this.target.format == TextureFormat.ETC2_RGB ||
-                 this.target.format == TextureFormat.ASTC_RGB_4x4 ||
-                 this.target.format == TextureFormat.ASTC_RGB_5x5 ||
-                 this.target.format == TextureFormat.ASTC_RGB_6x6 ||
-                 this.target.format == TextureFormat.ASTC_RGB_8x8 ||
-                 this.target.format == TextureFormat.ASTC_RGB_10x10 ||
-                 this.target.format == TextureFormat.ASTC_RGB_12x12
+                else if (texExt == "jpg" ||
+                 this.texture.format == TextureFormat.RGB24 ||
+                 this.texture.format == TextureFormat.PVRTC_RGB2 ||
+                 this.texture.format == TextureFormat.PVRTC_RGB4 ||
+                 this.texture.format == TextureFormat.RGB565 ||
+                 this.texture.format == TextureFormat.ETC_RGB4 ||
+                 this.texture.format == TextureFormat.ATC_RGB4 ||
+                 this.texture.format == TextureFormat.ETC2_RGB ||
+                 this.texture.format == TextureFormat.ASTC_RGB_4x4 ||
+                 this.texture.format == TextureFormat.ASTC_RGB_5x5 ||
+                 this.texture.format == TextureFormat.ASTC_RGB_6x6 ||
+                 this.texture.format == TextureFormat.ASTC_RGB_8x8 ||
+                 this.texture.format == TextureFormat.ASTC_RGB_10x10 ||
+                 this.texture.format == TextureFormat.ASTC_RGB_12x12
                  )
                 {
                     egret.SetInt("format", 6407);
