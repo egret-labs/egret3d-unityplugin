@@ -70,7 +70,7 @@
     <Compile Include="src\ExportTools\ExportPrefabTools.cs" />
     <Compile Include="src\ExportTools\ExportSceneTools.cs" />
     <Compile Include="src\ExportTools\ExportToolsSetting.cs" />
-    <Compile Include="src\ExportTools\ExportToolsWindow.cs" />
+    <Compile Include="src\ExportWindow.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\AttributeAccessor.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Exceptions.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Extensions\ExtTextureTransformExtension.cs" />
@@ -171,7 +171,6 @@
     <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtensionFactory.cs" />
     <Compile Include="src\Serialization\Assets\GLTFAnimationSerializer.cs" />
-    <Compile Include="src\Serialization\Assets\GLTFInitialize.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMaterialSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMeshSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFTextureSerializer.cs" />
@@ -198,6 +197,7 @@
     <Compile Include="src\Serialization\Components\SphereColliderSerializer.cs" />
     <Compile Include="src\Serialization\Components\SpotLightSerializer.cs" />
     <Compile Include="src\Serialization\Components\TransformSerializer.cs" />
+    <Compile Include="src\Serialization\GLTFInitialize.cs" />
     <Compile Include="src\Serialization\SerializeObject.cs" />
   </ItemGroup>
   <ItemGroup>

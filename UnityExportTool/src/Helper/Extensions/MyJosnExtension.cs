@@ -188,7 +188,7 @@ namespace Egret3DExportTools
             }
 
             int meshHash = mesh.GetInstanceID();
-            string url = SerializeObject.SerializeAsset(mesh, AssetType.Mesh);
+            string url = SerializeObject.Serialize(mesh, AssetType.Mesh);
             var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
             //mesh
@@ -209,7 +209,7 @@ namespace Egret3DExportTools
                     continue;
                 }
 
-                string url = SerializeObject.SerializeAsset(material, AssetType.Material);
+                string url = SerializeObject.Serialize(material, AssetType.Material);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
                 materialsItem.AddAssetIndex(assetIndex);
@@ -223,7 +223,7 @@ namespace Egret3DExportTools
 
             foreach (var animationClip in animationClips)
             {
-                var url = SerializeObject.SerializeAsset(animationClip, AssetType.Animation);
+                var url = SerializeObject.Serialize(animationClip, AssetType.Animation);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
                 exportAnimations.AddAssetIndex(assetIndex);
             }

@@ -391,7 +391,7 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                var texPath = SerializeObject.SerializeAsset(value, AssetType.Texture);
+                var texPath = SerializeObject.Serialize(value, AssetType.Texture);
                 this.data.values.SetUri(key, texPath);
             }
         }

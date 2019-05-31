@@ -5,13 +5,13 @@ using UnityEngine;
 using System.Collections.Generic;
 namespace Egret3DExportTools
 {
-    public class ExportToolsWindow : EditorWindow
+    public class ExportWindow : EditorWindow
     {
         private enum ExportType
         {
             NONE, PREFAB, SCENE
         }
-        public const string VERSION = "v1.3.1";//版本号
+        public const string VERSION = "v1.3.9";//版本号
         private const float WIN_WIDTH = 500.0f;
         private const float WIN_HEIGHT = 400.0f;
         private const float SMALL_SPACE = 10.0f;
@@ -25,7 +25,7 @@ namespace Egret3DExportTools
         [MenuItem("Egret3DExportTools/OpenWindow")]
         public static void ShowWindow()
         {
-            var window = EditorWindow.GetWindow<ExportToolsWindow>(true, "Egret3D Export Tools" + VERSION);
+            var window = EditorWindow.GetWindow<ExportWindow>(true, "Egret3D Export Tools" + VERSION);
             window.minSize = new Vector2(WIN_WIDTH, WIN_HEIGHT);
             window.maxSize = window.minSize;
             window.Show();

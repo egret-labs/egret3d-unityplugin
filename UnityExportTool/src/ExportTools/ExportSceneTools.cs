@@ -114,35 +114,7 @@ namespace Egret3DExportTools
             foreach (var lightmapData in LightmapSettings.lightmaps)
             {
                 Texture2D lmTexture = lightmapData.lightmapColor;
-                // int lmID = lmTexture.GetInstanceID();
-                // if (!ResourceManager.instance.HaveCache(lmID))
-                // {
-                //     //格式转换
-                //     string suffix = "png";
-                //     string relativePath = UnityEditor.AssetDatabase.GetAssetPath(lmTexture);
-                //     MyLog.Log("导出lightmap:" + relativePath);
-                //     string exrPath = Path.Combine(Application.dataPath, relativePath.Replace("Assets/", ""));
-                //     string ralPngPath = PathHelper.CheckFileName(relativePath.Substring(0, relativePath.LastIndexOf('/') + 1) + lmTexture.name + "." + suffix);
-                //     string pngPath = PathHelper.CheckFileName(Path.Combine(exportPath, ralPngPath));
-
-                //     exrPath = exrPath.Replace("\\", "/");
-                //     pngPath = pngPath.Replace("\\", "/");
-                //     var bs = ExportImageTools.instance.EncodeToPNG(lmTexture);
-                //     ResourceManager.instance.AddFileBuffer(ralPngPath, bs);
-                //     // ExportImageTools.instance.AddExr(exrPath, pngPath);
-                //     //添加到 compList 和 assetsList
-                //     SerializeObject.SerializeAsset(lmTexture, AssetType.Texture);
-                //     // ResourceManager.instance.SaveTextureDesc(lmTexture, ralPngPath);
-                //     string name = lmTexture.name + ".image.json";
-                //     var imgdescPath = PathHelper.CheckFileName(ralPngPath.Substring(0, ralPngPath.LastIndexOf("/") + 1) + name);
-
-                //     var assetIndex = ResourceManager.instance.AddAssetUrl(imgdescPath);
-
-                //     var assetItem = new MyJson_Tree();
-                //     assetItem.SetInt("asset", assetIndex);
-                //     lightmapsJson.Add(assetItem);
-                // }
-                var imgdescPath = SerializeObject.SerializeAsset(lmTexture, AssetType.Texture);
+                var imgdescPath = SerializeObject.Serialize(lmTexture, AssetType.Texture);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(imgdescPath);
 
                 var assetItem = new MyJson_Tree();

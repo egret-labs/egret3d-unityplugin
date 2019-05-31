@@ -8,7 +8,7 @@ namespace Egret3DExportTools
 {
     public static class ExportExtendTools
     {
-        [MenuItem("Egret3DExportTools/CheckEmptyTextures")]
+        // [MenuItem("Egret3DExportTools/CheckEmptyTextures")]
         public static void CheckEmptyTexture()
         {
             Selection.activeGameObject = null;
@@ -55,7 +55,7 @@ namespace Egret3DExportTools
             Debug.Log("--------------排查完毕----------------");
         }
 
-        [MenuItem("Egret3DExportTools/CheckDuplicateMeshs")]
+        // [MenuItem("Egret3DExportTools/CheckDuplicateMeshs")]
         public static void CheckDuplicateMeshs()
         {
             var selectedObj = Selection.activeGameObject;
@@ -122,7 +122,7 @@ namespace Egret3DExportTools
             Debug.Log("--------------排查完毕----------------");
         }
 
-        [MenuItem("Egret3DExportTools/OptimizingObjName")]
+        // [MenuItem("Egret3DExportTools/OptimizingObjName")]
         public static void OptimizingObjName()
         {
             var selectedObj = Selection.activeGameObject;
