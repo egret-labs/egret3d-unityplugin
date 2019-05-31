@@ -39,33 +39,33 @@ namespace Egret3DExportTools
     public static class SerializeObject
     {
         public static Transform currentTarget;
-        private readonly static Dictionary<string, List<IComponentParser>> componentParsers = new Dictionary<string, List<IComponentParser>>();
-        private readonly static Dictionary<AssetType, GLTFSerialize> assetParsers = new Dictionary<AssetType, GLTFSerialize>();
+        private readonly static Dictionary<string, List<IComponentSerializer>> componentParsers = new Dictionary<string, List<IComponentSerializer>>();
+        private readonly static Dictionary<AssetType, IAssetSerializer> assetParsers = new Dictionary<AssetType, IAssetSerializer>();
 
         public static void Initialize()
         {
             //初始化组件管理器
             componentParsers.Clear();
-            RegComponentParser(new AnimatorParser(), typeof(UnityEngine.Animator), SerializeClass.Animation);
-            RegComponentParser(new AnimationParser(), typeof(UnityEngine.Animation), SerializeClass.Animation);
-            RegComponentParser(new BoxColliderParser(), typeof(UnityEngine.BoxCollider), SerializeClass.BoxCollider);
-            RegComponentParser(new SphereColliderParser(), typeof(UnityEngine.SphereCollider), SerializeClass.SphereCollider);
-            RegComponentParser(new CameraParser(), typeof(UnityEngine.Camera), SerializeClass.Camera);
-            RegComponentParser(new MeshFilterParser(), typeof(UnityEngine.MeshFilter), SerializeClass.MeshFilter);
-            RegComponentParser(new MeshRendererParser(), typeof(UnityEngine.MeshRenderer), SerializeClass.MeshRenderer);
-            RegComponentParser(new ParticleSystemParser(), typeof(UnityEngine.ParticleSystem), SerializeClass.ParticleComponent);
-            RegComponentParser(new ParticleSystemRendererParser(), typeof(UnityEngine.ParticleSystemRenderer), SerializeClass.ParticleRenderer);
-            RegComponentParser(new SkinnedMeshRendererParser(), typeof(UnityEngine.SkinnedMeshRenderer), SerializeClass.SkinnedMeshRenderer);
-            RegComponentParser(new TransformParser(), typeof(UnityEngine.Transform), SerializeClass.Transform);
-            RegComponentParser(new DirectionalLightParser(), typeof(UnityEngine.Light), SerializeClass.DirectionalLight);
-            RegComponentParser(new SpotLightParser(), typeof(UnityEngine.Light), SerializeClass.SpotLight);
+            RegComponentParser(new AnimatorSerializer(), typeof(UnityEngine.Animator), SerializeClass.Animation);
+            RegComponentParser(new AnimationSerializer(), typeof(UnityEngine.Animation), SerializeClass.Animation);
+            RegComponentParser(new BoxColliderSerializer(), typeof(UnityEngine.BoxCollider), SerializeClass.BoxCollider);
+            RegComponentParser(new SphereColliderSerializer(), typeof(UnityEngine.SphereCollider), SerializeClass.SphereCollider);
+            RegComponentParser(new CameraSerializer(), typeof(UnityEngine.Camera), SerializeClass.Camera);
+            RegComponentParser(new MeshFilterSerializer(), typeof(UnityEngine.MeshFilter), SerializeClass.MeshFilter);
+            RegComponentParser(new MeshRendererSerializer(), typeof(UnityEngine.MeshRenderer), SerializeClass.MeshRenderer);
+            RegComponentParser(new ParticleSystemSerializer(), typeof(UnityEngine.ParticleSystem), SerializeClass.ParticleComponent);
+            RegComponentParser(new ParticleRendererSerializer(), typeof(UnityEngine.ParticleSystemRenderer), SerializeClass.ParticleRenderer);
+            RegComponentParser(new SkinnedMeshRendererSerializer(), typeof(UnityEngine.SkinnedMeshRenderer), SerializeClass.SkinnedMeshRenderer);
+            RegComponentParser(new TransformSerializer(), typeof(UnityEngine.Transform), SerializeClass.Transform);
+            RegComponentParser(new DirectionalLightSerializer(), typeof(UnityEngine.Light), SerializeClass.DirectionalLight);
+            RegComponentParser(new SpotLightSerializer(), typeof(UnityEngine.Light), SerializeClass.SpotLight);
 
-            //
+            //初始化资源
             assetParsers.Clear();
-            RegAssetParser(new TextureWriter(), AssetType.Texture);
-            RegAssetParser(new MeshWriter(), AssetType.Mesh);
-            RegAssetParser(new MaterialWriter(), AssetType.Material);
-            RegAssetParser(new GLTFAnimationParser(), AssetType.Animation);
+            RegAssetParser(new GLTFTextureSerializer(), AssetType.Texture);
+            RegAssetParser(new GLTFMeshSerializer(), AssetType.Mesh);
+            RegAssetParser(new GLTFMaterialSerializer(), AssetType.Material);
+            RegAssetParser(new GLTFAnimationSerializer(), AssetType.Animation);
         }
         /**
          * 注册可序列化组件。
@@ -73,18 +73,18 @@ namespace Egret3DExportTools
          * @param compType 对应Unity的类型。
          * @param className 对应Egret3d的类名(例如：egret3d.Animation)。
          */
-        public static void RegComponentParser(IComponentParser parser, System.Type compType, string className)
+        public static void RegComponentParser(IComponentSerializer parser, System.Type compType, string className)
         {
             parser.compType = compType;
             parser.className = className;
             if (!componentParsers.ContainsKey(compType.Name))
             {
-                componentParsers[compType.Name] = new List<IComponentParser>();
+                componentParsers[compType.Name] = new List<IComponentSerializer>();
             }
             componentParsers[compType.Name].Add(parser);
         }
 
-        public static void RegAssetParser(GLTFSerialize parser, AssetType type)
+        public static void RegAssetParser(IAssetSerializer parser, AssetType type)
         {
             assetParsers.Add(type, parser);
         }
@@ -192,15 +192,15 @@ namespace Egret3DExportTools
                     transform = compJson;
                 }
             }
-            //遍历子对象
-            if (obj.transform.childCount > 0)
-            {
-                for (int i = 0; i < obj.transform.childCount; i++)
-                {
-                    var child = obj.transform.GetChild(i).gameObject;
-                    Serialize(child);
-                }
-            }
+            // //遍历子对象
+            // if (obj.transform.childCount > 0)
+            // {
+            //     for (int i = 0; i < obj.transform.childCount; i++)
+            //     {
+            //         var child = obj.transform.GetChild(i).gameObject;
+            //         Serialize(child);
+            //     }
+            // }
 
             currentTarget = null;
 

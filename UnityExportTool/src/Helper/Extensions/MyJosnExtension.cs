@@ -223,20 +223,8 @@ namespace Egret3DExportTools
 
             foreach (var animationClip in animationClips)
             {
-                // var gltfHash = animationClip.GetInstanceID();
-                // var url = UnityEditor.AssetDatabase.GetAssetPath(animationClip);
-                // url = url.Substring(0, url.LastIndexOf(".")) + "_" + animationClip.name + ".ani.bin";
-                // url = PathHelper.CheckFileName(url);
-                //
                 var url = SerializeObject.SerializeAsset(animationClip, AssetType.Animation);
                 var assetIndex = ResourceManager.instance.AddAssetUrl(url);
-                // if (!ResourceManager.instance.HaveCache(gltfHash))
-                // {
-                //     var glTFWriter = new AnimationWriter();
-                //     ResourceManager.instance.AddFileBuffer(url, glTFWriter.WriteGLTF(animationClip));
-                //     //
-                //     ResourceManager.instance.SaveCache(gltfHash, url);
-                // }
                 exportAnimations.AddAssetIndex(assetIndex);
             }
         }

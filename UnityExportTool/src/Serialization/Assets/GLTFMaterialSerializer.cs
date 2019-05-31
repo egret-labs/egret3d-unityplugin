@@ -45,13 +45,28 @@ namespace Egret3DExportTools
         }
     }
 
-    public class MaterialWriter : GLTFSerialize
+    public class GLTFMaterialSerializer : GLTFSerializer
     {
         protected readonly MaterialData data = new MaterialData();
         private bool _isParticle = false;
         private UnityEngine.Material _material;
 
         private readonly Dictionary<MaterialType, BaseMaterialParser> parsers = new Dictionary<MaterialType, BaseMaterialParser>();
+
+        public GLTFMaterialSerializer()
+        {
+            this.parsers.Clear();
+
+            //
+            this.register(MaterialType.Diffuse, new DiffuseParser(), "builtin/meshbasic.shader.json");
+            this.register(MaterialType.Lambert, new LambertParser(), "builtin/meshlambert.shader.json");
+            this.register(MaterialType.Phong, new PhongParser(), "builtin/meshphong.shader.json");
+            this.register(MaterialType.Standard, new StandardParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.StandardRoughness, new StandardRoughnessParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.StandardSpecular, new StandardSpecularParser(), "builtin/meshphysical.shader.json");
+            this.register(MaterialType.Particle, new ParticleParser(), "builtin/particle.shader.json");
+            this.register(MaterialType.Custom, new CustomParser(), "");
+        }
 
         private void register(MaterialType type, BaseMaterialParser parse, string shaderAsset)
         {
@@ -78,17 +93,7 @@ namespace Egret3DExportTools
                     Extensions = new Dictionary<string, IExtension>(),
                 },
                 Materials = new List<GLTF.Schema.Material>(),
-            };
-
-            //
-            this.register(MaterialType.Diffuse, new DiffuseParser(), "builtin/meshbasic.shader.json");
-            this.register(MaterialType.Lambert, new LambertParser(), "builtin/meshlambert.shader.json");
-            this.register(MaterialType.Phong, new PhongParser(), "builtin/meshphong.shader.json");
-            this.register(MaterialType.Standard, new StandardParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.StandardRoughness, new StandardRoughnessParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.StandardSpecular, new StandardSpecularParser(), "builtin/meshphysical.shader.json");
-            this.register(MaterialType.Particle, new ParticleParser(), "builtin/particle.shader.json");
-            this.register(MaterialType.Custom, new CustomParser(), "");
+            };            
         }
         public override string writePath
         {
@@ -203,17 +208,9 @@ namespace Egret3DExportTools
                 entity.Add("components", entityComps);
 
                 var components = new MyJson_Array();
-                egret.Add("components", components);
+                egret.Add("components", components);                
 
-                var material = new MyJson_Tree();
-                material.SetSerializeClass(material.GetHashCode(), SerializeClass.Material);
-                material.SetInt("glTF", 0);
-                var asset = new MyJson_Tree();
-                asset.SetAsset(0);
-                material.Add("shader", asset);
-                components.Add(material);
-                entityComps.AddUUID(material);
-
+                //TODO 先Defines后Materail， 否则序列化时，Defines.defines会被覆盖
                 if (this.data.defines.Count > 0)
                 {
                     var defines = new MyJson_Tree();
@@ -225,9 +222,18 @@ namespace Egret3DExportTools
                     {
                         defineStrs.AddString(define.name + define.content);
                     }
-
+                    components.Add(defines);
                     entityComps.AddUUID(defines);
                 }
+
+                var material = new MyJson_Tree();
+                material.SetSerializeClass(material.GetHashCode(), SerializeClass.Material);
+                material.SetInt("glTF", 0);
+                var asset = new MyJson_Tree();
+                asset.SetAsset(0);
+                material.Add("shader", asset);
+                components.Add(material);
+                entityComps.AddUUID(material);
             }
         }
 

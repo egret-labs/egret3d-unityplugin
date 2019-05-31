@@ -3,7 +3,7 @@ using System;
 
 namespace Egret3DExportTools
 {
-    public class CameraParser : ComponentParser
+    public class CameraSerializer : ComponentSerializer
     {
         public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {

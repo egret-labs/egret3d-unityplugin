@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Egret3DExportTools
 {
-    public class ParticleSystemRendererParser : ComponentParser
+    public class ParticleRendererSerializer : ComponentSerializer
     {
         public override bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Egret3DExportTools
 {
-    public class AnimationParser : ComponentParser
+    public class AnimationSerializer : ComponentSerializer
     {
         protected UnityEngine.AnimationClip[] _getAnimationClips(Component component)
         {

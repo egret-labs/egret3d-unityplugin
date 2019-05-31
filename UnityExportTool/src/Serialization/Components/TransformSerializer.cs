@@ -3,7 +3,7 @@ using System;
 
 namespace Egret3DExportTools
 {
-    public class TransformParser : ComponentParser
+    public class TransformSerializer : ComponentSerializer
     {
         public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
@@ -35,12 +35,26 @@ namespace Egret3DExportTools
             // }
             var childrenItem = new MyJson_Array();
             compJson["children"] = childrenItem;
-            for (int i = 0; i < comp.childCount; i++)
+            // for (int i = 0; i < comp.childCount; i++)
+            // {
+            //     var child = comp.GetChild(i);
+            //     if (child.gameObject.activeInHierarchy)
+            //     {
+            //         childrenItem.AddHashCode(child);
+            //     }
+            // }
+
+            //遍历子对象
+            if (comp.childCount > 0)
             {
-                var child = comp.GetChild(i);
-                if (child.gameObject.activeInHierarchy)
+                for (int i = 0; i < comp.childCount; i++)
                 {
-                    childrenItem.AddHashCode(child);
+                    var child = comp.GetChild(i).gameObject;
+                    if (child.gameObject.activeInHierarchy)
+                    {
+                        var childJson = SerializeObject.Serialize(child);
+                        childrenItem.AddHashCode(childJson);
+                    }
                 }
             }
 

@@ -3,7 +3,7 @@ using System;
 
 namespace Egret3DExportTools
 {
-    public class SphereColliderParser : ComponentParser
+    public class SphereColliderSerializer : ComponentSerializer
     {
         public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {

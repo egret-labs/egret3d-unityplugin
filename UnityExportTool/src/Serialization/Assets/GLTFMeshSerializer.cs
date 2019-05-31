@@ -8,7 +8,7 @@ namespace Egret3DExportTools
     using UnityGLTF.Extensions;
     using Egret3DExportTools;
 
-    public class MeshWriter : GLTFSerialize
+    public class GLTFMeshSerializer : GLTFSerializer
     {
         private UnityEngine.Mesh _mesh;
         protected override void Init()

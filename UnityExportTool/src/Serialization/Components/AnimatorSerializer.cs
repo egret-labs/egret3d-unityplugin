@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Egret3DExportTools
 {
-    public class AnimatorParser : AnimationParser
+    public class AnimatorSerializer : AnimationSerializer
     {
         public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {

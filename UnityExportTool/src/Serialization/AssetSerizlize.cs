@@ -1,12 +1,21 @@
-﻿namespace Egret3DExportTools
-{
-    using GLTF.Schema;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using UnityEngine;
+using GLTF.Schema;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
-    public abstract class GLTFSerialize
+namespace Egret3DExportTools
+{
+    /**
+     * 组件管理器接口
+     */
+    public interface IAssetSerializer
+    {
+        string writePath { get; }
+        byte[] WriteGLTF(UnityEngine.Object sourceAsset);
+    }
+
+    public abstract class GLTFSerializer : IAssetSerializer
     {
         protected GLTFRoot _root;
         protected BufferId _bufferId;
@@ -16,9 +25,8 @@
 
         protected Transform _target;
 
-        public GLTFSerialize()
+        public GLTFSerializer()
         {
-            this.Init();
         }
 
         public virtual string writePath
@@ -31,6 +39,7 @@
 
         public virtual byte[] WriteGLTF(UnityEngine.Object sourceAsset)
         {
+            this.Init();
             this._target = SerializeObject.currentTarget;
             var gltfJson = new MyJson_Tree();
             gltfJson.isWithFormat = true;

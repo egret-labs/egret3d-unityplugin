@@ -7,7 +7,7 @@
     public class AnimationExtensionFactory : ExtensionFactory
     {
         // Animation.
-        public const string EXTENSION_NAME = "paper";
+        public const string EXTENSION_NAME = "egret";
         public const string FRAME_RATE = "frameRate";
         public const string CLIPS = "clips";
         public const string EVENTS = "events";

@@ -3,7 +3,7 @@ using System;
 
 namespace Egret3DExportTools
 {
-    public class DirectionalLightParser : ComponentParser
+    public class DirectionalLightSerializer : ComponentSerializer
     {
         public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
         {
