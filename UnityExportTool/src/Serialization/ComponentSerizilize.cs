@@ -9,14 +9,15 @@ namespace Egret3DExportTools
     {
         Type compType { set; get; }
         string className { set; get; }
-        bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson);
+        bool Serialize(Component component, ComponentData compData);
     }
 
     public abstract class ComponentSerializer : IComponentSerializer
     {
         protected Type _compType;
         protected string _className;
-        public virtual bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+
+        public virtual bool Serialize(Component component, ComponentData compData)
         {
             return true;
         }

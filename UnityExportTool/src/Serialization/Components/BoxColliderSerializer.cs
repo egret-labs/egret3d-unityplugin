@@ -4,7 +4,7 @@ namespace Egret3DExportTools
 {
     public class BoxColliderSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             BoxCollider comp = component as BoxCollider;
 
@@ -19,7 +19,7 @@ namespace Egret3DExportTools
             aabbItem.AddNumber(maximum.y);
             aabbItem.AddNumber(maximum.z);
             
-            compJson.Add("aabb", aabbItem);
+            compData.props.Add("aabb", aabbItem);
             return true;
         }
     }

@@ -8,6 +8,7 @@ namespace Egret3DExportTools
     using UnityGLTF.Extensions;
 
     using Egret3DExportTools;
+    using Newtonsoft.Json.Linq;
 
     public enum MaterialType
     {
@@ -29,9 +30,13 @@ namespace Egret3DExportTools
 
     public class MaterialData
     {
-        public readonly Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
+        public List<JProperty> values = new List<JProperty>();
+        public Functions functions = new Functions();
+
+
+        // public readonly Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
         public readonly List<EnableState> enables = new List<EnableState>();
-        public readonly Dictionary<string, IJsonNode> functions = new Dictionary<string, IJsonNode>();
+        // public readonly Dictionary<string, IJsonNode> functions = new Dictionary<string, IJsonNode>();
         public readonly List<Define> defines = new List<Define>();
         public string shaderAsset = string.Empty;
 
@@ -79,9 +84,9 @@ namespace Egret3DExportTools
             return this.parsers[type];
         }
 
-        protected override void Init()
+        protected override void InitGLTFRoot()
         {
-            base.Init();
+            base.InitGLTFRoot();
 
             this._root = new GLTFRoot
             {
@@ -89,41 +94,21 @@ namespace Egret3DExportTools
                 Asset = new Asset
                 {
                     Version = "2.0",
-                    Generator = "egret",
+                    Generator = "Unity plugin for egret",
                     Extensions = new Dictionary<string, IExtension>(),
                 },
+                ExtensionsRequired = new List<string>() { "KHR_techniques_webgl", "egret" },
+                ExtensionsUsed = new List<string>() { "KHR_techniques_webgl", "egret" },
+                Extensions = new Dictionary<string, IExtension>() { },
                 Materials = new List<GLTF.Schema.Material>(),
-            };            
-        }
-        public override string writePath
-        {
-            get
-            {
-                var mat = this._material;
-                string tempMatPath = UnityEditor.AssetDatabase.GetAssetPath(mat);
-                if (tempMatPath == "Resources/unity_builtin_extra")
-                {
-                    tempMatPath = "Library/" + mat.name + ".mat";
-                }
-                if (!tempMatPath.Contains(".mat"))
-                {
-                    tempMatPath += "." + mat.name + ".mat";//.obj文件此时应该导出不同的材质文件，GetAssetPath获取的确实同一个
-                }
-                var name = PathHelper.CheckFileName(tempMatPath + ".json");
-                return name;
-            }
-        }
-        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
-        {
-            this._material = sourceAsset as UnityEngine.Material;
-            return base.WriteGLTF(sourceAsset);
+            };
         }
 
-        protected override void WriteJson(MyJson_Tree gltfJson)
+        protected override void _Serialize(UnityEngine.Object sourceAsset)
         {
-            //TODO
+            this._material = sourceAsset as UnityEngine.Material;
+
             this._isParticle = this._target.GetComponent<ParticleSystem>() != null;
-            base.WriteJson(gltfJson);
             var source = this._material;
             var data = this.data;
             //
@@ -132,109 +117,37 @@ namespace Egret3DExportTools
             var parser = this.getParser(this.GetMaterialType());
             parser.Parse(source, data);
 
-            {
-                var materials = new MyJson_Array();
-                var material = new MyJson_Tree();
-                materials.Add(material);
-                gltfJson.Add("materials", materials);
+            var materialGLTF = new GLTF.Schema.Material();
+            materialGLTF.Name = source.name;
 
-                material.SetString("name", source.name);
-
-                var extensions = new MyJson_Tree();
-                material.Add("extensions", extensions);
-                var KHR_techniques_webgl = new MyJson_Tree();
-                extensions.Add("KHR_techniques_webgl", KHR_techniques_webgl);
-                KHR_techniques_webgl.SetInt("technique", 0);
-
-                var values = new MyJson_Tree();
-                KHR_techniques_webgl.Add("values", values);
-
-                foreach (var pair in this.data.values)
+            materialGLTF.Extensions = new Dictionary<string, IExtension>(){
                 {
-                    values.Add(pair.Key, pair.Value);
+                    "KHR_techniques_webgl",
+                    new KhrTechniquesWebglMaterialExtension() { technique = 0, values = data.values }
                 }
-            }
+            };
 
+            var techniqueExt = new KhrTechniqueWebglGlTfExtension();
+            var technique = new Techniques();
+            technique.states = new States();
+            technique.states.enable = data.enables.ToArray();
+            technique.states.functions = data.functions;
+            techniqueExt.techniques.Add(technique);
+            this._root.Extensions.Add("egret", new MaterialAssetExtension()
             {
-                var extensions = gltfJson["extensions"] as MyJson_Tree;
-                var KHR_techniques_webgl = new MyJson_Tree();
-                extensions.Add("KHR_techniques_webgl", KHR_techniques_webgl);
+                version = "5.0",
+                minVersion = "5.0",
+                asset = this.data.shaderAsset,
+                defines = this.data.defines,
+            });
+            this._root.Extensions.Add("KHR_techniques_webgl", techniqueExt);
 
-                var techniques = new MyJson_Array();
-                KHR_techniques_webgl.Add("techniques", techniques);
+            this._root.Materials.Add(materialGLTF);
 
-                var technique = new MyJson_Tree();
-                techniques.Add(technique);
+            // var writer = new StringWriter();
+            // this._root.Serialize(writer);
 
-                if (this.data.enables.Count + this.data.functions.Count > 0)
-                {
-                    var states = new MyJson_Tree();
-                    technique.Add("states", states);
-                    var enable = new MyJson_Array();
-                    states.Add("enable", enable);
-
-                    foreach (var v in this.data.enables)
-                    {
-                        enable.AddInt((int)v);
-                    }
-
-                    var functions = new MyJson_Tree();
-                    states.Add("functions", functions);
-                    foreach (var pair in this.data.functions)
-                    {
-                        functions.Add(pair.Key, pair.Value);
-                    }
-                }
-
-                //TODO gltf 必须带
-                var uniforms = new MyJson_Tree();
-                technique.Add("uniforms", uniforms);
-            }
-
-            {
-                var extensions = gltfJson["extensions"] as MyJson_Tree;
-                var egret = extensions["egret"] as MyJson_Tree;
-
-                var assets = new MyJson_Array();
-                assets.AddUri(this.data.shaderAsset);
-                egret.Add("assets", assets);
-
-                var entities = new MyJson_Array();
-                egret.Add("entities", entities);
-                var entity = new MyJson_Tree();
-                entities.Add(entity);
-                entity.SetSerializeClass(entity.GetHashCode(), SerializeClass.AssetEntity);
-                var entityComps = new MyJson_Array();
-                entity.Add("components", entityComps);
-
-                var components = new MyJson_Array();
-                egret.Add("components", components);                
-
-                //TODO 先Defines后Materail， 否则序列化时，Defines.defines会被覆盖
-                if (this.data.defines.Count > 0)
-                {
-                    var defines = new MyJson_Tree();
-                    defines.SetSerializeClass(defines.GetHashCode(), SerializeClass.Defines);
-
-                    var defineStrs = new MyJson_Array();
-                    defines.Add("defines", defineStrs);
-                    foreach (var define in this.data.defines)
-                    {
-                        defineStrs.AddString(define.name + define.content);
-                    }
-                    components.Add(defines);
-                    entityComps.AddUUID(defines);
-                }
-
-                var material = new MyJson_Tree();
-                material.SetSerializeClass(material.GetHashCode(), SerializeClass.Material);
-                material.SetInt("glTF", 0);
-                var asset = new MyJson_Tree();
-                asset.SetAsset(0);
-                material.Add("shader", asset);
-                components.Add(material);
-                entityComps.AddUUID(material);
-            }
+            // asset.buffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
         }
 
         private MaterialType GetMaterialType()

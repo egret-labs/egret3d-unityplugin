@@ -5,11 +5,10 @@ namespace Egret3DExportTools
 {
     public class MeshFilterSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             MeshFilter comp = component as MeshFilter;
-            compJson.SetMesh(obj, comp.sharedMesh);
-
+            compData.SetMesh(component.gameObject, comp.sharedMesh);
             return true;
         }
     }

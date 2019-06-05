@@ -5,26 +5,28 @@ namespace Egret3DExportTools
 {
     public class ParticleRendererSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject _object, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
+            var obj = component.gameObject;
             ParticleSystemRenderer comp = component as ParticleSystemRenderer;
-            ParticleSystem c = _object.GetComponent<ParticleSystem>();
+            ParticleSystem c = obj.GetComponent<ParticleSystem>();
             if (c == null || !c.emission.enabled)
             {
-                MyLog.LogWarning("无效的粒子组件:" + _object.name);
+                MyLog.LogWarning("无效的粒子组件:" + obj.name);
                 return false;
             }
-            compJson.SetNumber("velocityScale", comp.velocityScale);
-            compJson.SetNumber("lengthScale", comp.lengthScale);
-            compJson.SetEnum("_renderMode", comp.renderMode);
+            compData.SetNumber("velocityScale", comp.velocityScale);
+            compData.SetNumber("lengthScale", comp.lengthScale);
+            compData.SetEnum("_renderMode", comp.renderMode);
             if (comp.renderMode == ParticleSystemRenderMode.Mesh && comp.mesh == null)
             {
-                throw new Exception(_object.name + ": mesh 丢失");
+                throw new Exception(obj.name + ": mesh 丢失");
             }
             //Mesh
-            compJson.SetMesh(_object, comp.mesh);
+            compData.SetMesh(obj, comp.mesh);
             //Material粒子系统不支持多材质
-            compJson.SetMaterials(_object, new Material[] { comp.sharedMaterial }, true);
+            compData.SetMaterials(obj, new Material[] { comp.sharedMaterial }, true);
+
             return true;
         }
     }

@@ -127,7 +127,7 @@ namespace Egret3DExportTools
         /**
         *gltf导出格式是否缩进
         */
-        public bool reduceGltfJsonSize = true;
+        public bool jsonFormatting = true;
         /**
         *估算一个合理的最大粒子数
         */

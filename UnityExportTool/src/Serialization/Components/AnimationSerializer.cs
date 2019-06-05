@@ -12,8 +12,8 @@ namespace Egret3DExportTools
             return AnimationUtility.GetAnimationClips(component.gameObject);
         }
 
-        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson, MyJson_Object entityJson)
-        {            
+        public override bool Serialize(Component component, ComponentData compData)
+        {
             var animation = component as Animation;
             var animationClips = new List<UnityEngine.AnimationClip>();
             if (animation.clip)
@@ -40,8 +40,8 @@ namespace Egret3DExportTools
                 return false;
             }
 
-            compJson.SetBool("autoPlay", animation.playAutomatically);
-            compJson.SetAnimation(gameObject, animationClips.ToArray());
+            compData.SetBool("autoPlay", animation.playAutomatically);
+            compData.SetAnimation(component.gameObject, animationClips.ToArray());
             return true;
         }
     }

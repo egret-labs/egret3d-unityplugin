@@ -25,15 +25,19 @@ namespace Egret3DExportTools
                 string type = materialProperty.type.ToString();
                 if (type == "Float" || type == "Range")
                 {
-                    values.SetNumber(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f));
+                    
+                    // values.SetNumber(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f));
+                    this.SetFloat(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f), null);
                 }
                 else if (type == "Vector")
                 {
-                    values.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
+                    // values.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
+                    this.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
                 }
                 else if (type == "Color")
                 {
-                    values.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
+                    this.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
+                    // values.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
                 }
                 else if (type == "Texture")
                 {
@@ -48,7 +52,8 @@ namespace Egret3DExportTools
                             string propertyName = materialProperty.name + "_ST";
                             if (target.HasProperty(propertyName))
                             {
-                                values.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
+                                // values.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
+                                this.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
                             }
                         }
                         else

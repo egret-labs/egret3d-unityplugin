@@ -8,14 +8,15 @@ namespace Egret3DExportTools
     using UnityGLTF.Extensions;
 
     using Egret3DExportTools;
+    using Newtonsoft.Json;
 
     public class GLTFTextureSerializer : GLTFSerializer
     {
         private UnityEngine.Texture2D texture;
 
-        protected override void Init()
+        protected override void InitGLTFRoot()
         {
-            base.Init();
+            base.InitGLTFRoot();
 
             this._root = new GLTFRoot
             {
@@ -23,10 +24,24 @@ namespace Egret3DExportTools
                 Asset = new Asset
                 {
                     Version = "2.0",
-                    Generator = "egret",
+                    Generator = "Unity plugin for egret",
                     Extensions = new Dictionary<string, IExtension>(),
                 },
-                Materials = new List<GLTF.Schema.Material>(),
+                ExtensionsRequired = new List<string>() { "egret" },
+                ExtensionsUsed = new List<string>() { "egret" },
+                Extensions = new Dictionary<string, IExtension>(){
+                    {
+                        "egret",
+                            new AssetVersionExtension()
+                            {
+                                version = "5.0",
+                                minVersion = "5.0",
+                            }
+                    }
+                },
+                Images = new List<Image>(),
+                Samplers = new List<Sampler>(),
+                Textures = new List<GLTF.Schema.Texture>(),
             };
         }
 
@@ -52,135 +67,117 @@ namespace Egret3DExportTools
                 bs = ExportImageTools.instance.EncodeToPNG(tex, ext);
             }
 
+            if (!SerializeObject.assetsData.ContainsKey(path))
+            {
+                var assetData = AssetData.Create(path);
+                assetData.buffer = bs;
+                SerializeObject.assetsData.Add(path, assetData);
+            }
+
             ResourceManager.instance.AddFileBuffer(path, bs);
         }
 
-        public override string writePath
-        {
-            get
-            {
-                string name = PathHelper.CheckFileName(this.texture.name + ".image.json");
-                var texPath = ExportImageTools.GetTexturePath(this.texture);
-            // //相对路径
-                var imgdescPath = texPath.Substring(0, texPath.LastIndexOf("/") + 1) + name;
-                return imgdescPath;
-            }
-        }
-
-        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
+        protected override void _Serialize(UnityEngine.Object sourceAsset)
         {
             this.texture = sourceAsset as UnityEngine.Texture2D;
-            return base.WriteGLTF(sourceAsset);
-        }
-
-        protected override void WriteJson(MyJson_Tree gltfJson)
-        {   
             //先把原始图片导出来
             this.ExportTexture();
 
-            base.WriteJson(gltfJson);
-
+            var path = ExportImageTools.GetTexturePath(this.texture);
             var mipmap = this.texture.mipmapCount > 1;
-
-            var images = new MyJson_Array();
-            var samplers = new MyJson_Array();
-            var textures = new MyJson_Array();
-
-            gltfJson.Add("images", images);
-            gltfJson.Add("samplers", samplers);
-            gltfJson.Add("textures", textures);
-
             //
             {
-                var path = ExportImageTools.GetTexturePath(this.texture);
-                var image = new MyJson_Tree();
-                image.SetUri("uri", path);
-                images.Add(image);
+                this._root.Images.Add(new Image() { Uri = path.Replace("Assets", ExportConfig.instance.rootDir) });
             }
-
+            //
             {
-                var sampler = new MyJson_Tree();
                 var filterMode = this.texture.filterMode;
                 var wrapMode = this.texture.wrapMode;
 
+                var sampler = new Sampler();
+                this._root.Samplers.Add(sampler);
                 if (wrapMode == TextureWrapMode.Repeat)
                 {
-                    sampler.SetInt("wrapS", 10497);
-                    sampler.SetInt("wrapT", 10497);
+                    sampler.WrapS = GLTF.Schema.WrapMode.Repeat;
+                    sampler.WrapT = GLTF.Schema.WrapMode.Repeat;
                 }
                 else
                 {
-                    sampler.SetInt("wrapS", 33071);
-                    sampler.SetInt("wrapT", 33071);
+                    sampler.WrapS = GLTF.Schema.WrapMode.ClampToEdge;
+                    sampler.WrapT = GLTF.Schema.WrapMode.ClampToEdge;
                 }
-
-                sampler.SetInt("magFilter", filterMode == FilterMode.Point ? 9728 : 9729);
+                sampler.MagFilter = filterMode == FilterMode.Point ? MagFilterMode.Nearest : MagFilterMode.Linear;
                 if (!mipmap)
                 {
-                    sampler.SetInt("minFilter", filterMode == FilterMode.Point ? 9728 : 9729);
+                    sampler.MagFilter = filterMode == FilterMode.Point ? MagFilterMode.Nearest : MagFilterMode.Linear;
                 }
                 else if (filterMode == FilterMode.Point)
                 {
-                    sampler.SetInt("minFilter", 9984);
+                    sampler.MinFilter = MinFilterMode.NearestMipmapNearest;
                 }
                 else if (filterMode == FilterMode.Bilinear)
                 {
-                    sampler.SetInt("minFilter", 9985);
+                    sampler.MinFilter = MinFilterMode.LinearMipmapNearest;
                 }
                 else if (filterMode == FilterMode.Trilinear)
                 {
-                    sampler.SetInt("minFilter", 9987);
+                    sampler.MinFilter = MinFilterMode.LinearMipmapLinear;
                 }
-
-                samplers.Add(sampler);
             }
-
+            //
             {
-                var texture = new MyJson_Tree();
-                texture.SetInt("sampler", 0);
-                texture.SetInt("source", 0);
-                var extensions = new MyJson_Tree();
-                var egret = new MyJson_Tree();
-                if (this.texture.anisoLevel > 1)
-                {
-                    egret.SetInt("anisotropy", this.texture.anisoLevel);
-                }
+                var gltfTexture = new GLTF.Schema.Texture();
+                this._root.Textures.Add(gltfTexture);
 
-                var texExt = ExportImageTools.GetTextureExt(this.texture);
-                if (this.texture.format == TextureFormat.Alpha8)
-                {
-                    egret.SetInt("format", 6409);
-                }
-                else if (texExt == "jpg" ||
-                 this.texture.format == TextureFormat.RGB24 ||
-                 this.texture.format == TextureFormat.PVRTC_RGB2 ||
-                 this.texture.format == TextureFormat.PVRTC_RGB4 ||
-                 this.texture.format == TextureFormat.RGB565 ||
-                 this.texture.format == TextureFormat.ETC_RGB4 ||
-                 this.texture.format == TextureFormat.ATC_RGB4 ||
-                 this.texture.format == TextureFormat.ETC2_RGB ||
-                 this.texture.format == TextureFormat.ASTC_RGB_4x4 ||
-                 this.texture.format == TextureFormat.ASTC_RGB_5x5 ||
-                 this.texture.format == TextureFormat.ASTC_RGB_6x6 ||
-                 this.texture.format == TextureFormat.ASTC_RGB_8x8 ||
-                 this.texture.format == TextureFormat.ASTC_RGB_10x10 ||
-                 this.texture.format == TextureFormat.ASTC_RGB_12x12
-                 )
-                {
-                    egret.SetInt("format", 6407);
-                }
-                else
-                {
-                    egret.SetInt("format", 6408);
-                }
-
-                egret.SetInt("levels", mipmap ? 0 : 1);
-
-
-                extensions.Add("egret", egret);
-                texture.Add("extensions", extensions);
-                textures.Add(texture);
+                gltfTexture.Sampler = new SamplerId();
+                gltfTexture.Source = new ImageId();
+                gltfTexture.Extensions = new Dictionary<string, IExtension>(){
+                    {
+                        "egret",
+                        new TextureExtension(){
+                            anisotropy = this.texture.anisoLevel,
+                            format = GetTextureFormat(),
+                            levels = mipmap ? 0 : 1
+                        }
+                    }
+                };
             }
+
+            // var writer = new StringWriter();
+            // this._root.Serialize(writer);
+
+            // asset.buffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
+        }
+
+        public int GetTextureFormat()
+        {
+            var texExt = ExportImageTools.GetTextureExt(this.texture);
+            var format = this.texture.format;
+            if (format == TextureFormat.Alpha8)
+            {
+                return 6409;
+            }
+            else if (texExt == "jpg" ||
+             format == TextureFormat.RGB24 ||
+             format == TextureFormat.PVRTC_RGB2 ||
+             format == TextureFormat.PVRTC_RGB4 ||
+             format == TextureFormat.RGB565 ||
+             format == TextureFormat.ETC_RGB4 ||
+             format == TextureFormat.ATC_RGB4 ||
+             format == TextureFormat.ETC2_RGB ||
+             format == TextureFormat.ASTC_RGB_4x4 ||
+             format == TextureFormat.ASTC_RGB_5x5 ||
+             format == TextureFormat.ASTC_RGB_6x6 ||
+             format == TextureFormat.ASTC_RGB_8x8 ||
+             format == TextureFormat.ASTC_RGB_10x10 ||
+             format == TextureFormat.ASTC_RGB_12x12
+             )
+            {
+                return 6407;
+            }
+
+
+            return 6408;
         }
     }
 }

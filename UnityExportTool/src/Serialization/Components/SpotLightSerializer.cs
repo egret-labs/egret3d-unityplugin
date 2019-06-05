@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class SpotLightSerializer : DirectionalLightSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             Light comp = component as Light;
             if (comp.type != LightType.Spot)
@@ -13,10 +13,9 @@ namespace Egret3DExportTools
                 return false;
             }
 
-            base.WriteToJson(obj, component, compJson, entityJson);
-            
-            compJson.SetNumber("distance", comp.range);
-            compJson.SetNumber("angle", comp.spotAngle * Math.PI / 180.0f);
+            base.Serialize(component, compData);
+            compData.SetNumber("distance", comp.range);
+            compData.SetNumber("angle", comp.spotAngle * Math.PI / 180.0f);
 
             return true;
         }

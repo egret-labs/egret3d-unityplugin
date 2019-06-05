@@ -133,5 +133,56 @@ namespace Egret3DExportTools
 
             return relPath;
         }
+
+        public static string GetPath(UnityEngine.Mesh mesh)
+        {
+            var path = UnityEditor.AssetDatabase.GetAssetPath(mesh);
+            //obj
+            var extendName = "";
+            var extend = path.Substring(path.LastIndexOf(".") + 1);
+            if (extend == "obj")
+            {
+                extendName = path.Substring(path.LastIndexOf("/") + 1);
+                extendName = extendName.Substring(0, extendName.LastIndexOf(".")) + "_";
+            }
+            path = path.Substring(0, path.LastIndexOf("/") + 1);
+
+            path = PathHelper.CheckFileName(path + extendName + mesh.name + ".mesh.bin");
+            return path;
+        }
+
+        public static string GetPath(UnityEngine.Material material)
+        {
+            var mat = material;
+            string path = UnityEditor.AssetDatabase.GetAssetPath(mat);
+            if (path == "Resources/unity_builtin_extra")
+            {
+                path = "Library/" + mat.name + ".mat";
+            }
+            if (!path.Contains(".mat"))
+            {
+                path += "." + mat.name + ".mat";//.obj文件此时应该导出不同的材质文件，GetAssetPath获取的确实同一个
+            }
+            path = PathHelper.CheckFileName(path + ".json");
+            return path;
+        }
+
+        public static string GetPath(UnityEngine.AnimationClip clip)
+        {
+            var path = UnityEditor.AssetDatabase.GetAssetPath(clip);
+            path = path.Substring(0, path.LastIndexOf(".")) + "_" + clip.name + ".ani.bin";
+            path = PathHelper.CheckFileName(path);
+            return path;
+        }
+
+        public static string GetPath(UnityEngine.Texture texture)
+        {
+            //TODO
+            var path = ExportImageTools.GetTexturePath(texture);
+            // //相对路径
+            path = path.Substring(0, path.LastIndexOf("/") + 1) + texture.name + ".image.json";
+            path = PathHelper.CheckFileName(path);
+            return path;
+        }
     }
 }

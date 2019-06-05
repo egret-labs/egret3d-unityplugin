@@ -5,8 +5,9 @@ namespace Egret3DExportTools
 {
     public class ParticleSystemSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
+            var obj = component.gameObject;
             ParticleSystem comp = component as ParticleSystem;
             if (!comp.emission.enabled || obj.GetComponent<ParticleSystemRenderer>() == null)
             {
@@ -18,7 +19,7 @@ namespace Egret3DExportTools
             {
                 var main = comp.main;
                 var mainItem = new MyJson_Tree(false);
-                compJson["main"] = mainItem;
+                compData.props["main"] = mainItem;
                 mainItem.SetNumber("duration", main.duration);
                 mainItem.SetBool("loop", main.loop);
                 this.AddMinMaxCurve(mainItem, "startDelay", main.startDelay);
@@ -73,7 +74,7 @@ namespace Egret3DExportTools
             //emission
             {
                 var emissionItem = new MyJson_Tree(false);
-                compJson["emission"] = emissionItem;
+                compData.props["emission"] = emissionItem;
                 this.AddMinMaxCurve(emissionItem, "rateOverTime", comp.emission.rateOverTime);
                 emissionItem["bursts"] = new MyJson_Array();
                 var bursts = new ParticleSystem.Burst[comp.emission.burstCount];
@@ -93,7 +94,7 @@ namespace Egret3DExportTools
             if (comp.shape.enabled)
             {
                 var shapItem = new MyJson_Tree(false);
-                compJson["shape"] = shapItem;
+                compData.props["shape"] = shapItem;
                 shapItem.SetEnum("shapeType", comp.shape.shapeType);
                 shapItem.SetNumber("angle", comp.shape.angle);
                 shapItem.SetNumber("length", comp.shape.length);
@@ -112,7 +113,7 @@ namespace Egret3DExportTools
             if (comp.velocityOverLifetime.enabled)
             {
                 var velocityOverItem = new MyJson_Tree(false);
-                compJson["velocityOverLifetime"] = velocityOverItem;
+                compData.props["velocityOverLifetime"] = velocityOverItem;
                 velocityOverItem.SetEnum("_mode", comp.velocityOverLifetime.x.mode);
                 velocityOverItem.SetEnum("_space", comp.velocityOverLifetime.space);
                 this.AddMinMaxCurve(velocityOverItem, "_x", comp.velocityOverLifetime.x);
@@ -123,14 +124,14 @@ namespace Egret3DExportTools
             if (comp.colorOverLifetime.enabled)
             {
                 var colorOverItem = new MyJson_Tree(false);
-                compJson["colorOverLifetime"] = colorOverItem;
+                compData.props["colorOverLifetime"] = colorOverItem;
                 this.AddMinMaxGradient(colorOverItem, "_color", comp.colorOverLifetime.color);
             }
             //sizeOverLifetime
             if (comp.sizeOverLifetime.enabled)
             {
                 var sizeOverItem = new MyJson_Tree(false);
-                compJson["sizeOverLifetime"] = sizeOverItem;
+                compData.props["sizeOverLifetime"] = sizeOverItem;
                 sizeOverItem.SetBool("_separateAxes", comp.sizeOverLifetime.separateAxes);
                 this.AddMinMaxCurve(sizeOverItem, "_size", comp.sizeOverLifetime.size);
                 this.AddMinMaxCurve(sizeOverItem, "_x", comp.sizeOverLifetime.x);
@@ -141,7 +142,7 @@ namespace Egret3DExportTools
             if (comp.rotationOverLifetime.enabled)
             {
                 var rotationOverItem = new MyJson_Tree(false);
-                compJson["rotationOverLifetime"] = rotationOverItem;
+                compData.props["rotationOverLifetime"] = rotationOverItem;
                 rotationOverItem.SetBool("_separateAxes", comp.rotationOverLifetime.separateAxes);
                 this.AddMinMaxCurve(rotationOverItem, "_x", comp.rotationOverLifetime.x);
                 this.AddMinMaxCurve(rotationOverItem, "_y", comp.rotationOverLifetime.y);
@@ -151,7 +152,7 @@ namespace Egret3DExportTools
             if (comp.textureSheetAnimation.enabled)
             {
                 var textureSheetAnimation = new MyJson_Tree(false);
-                compJson["textureSheetAnimation"] = textureSheetAnimation;
+                compData.props["textureSheetAnimation"] = textureSheetAnimation;
                 textureSheetAnimation.SetInt("_numTilesX", comp.textureSheetAnimation.numTilesX);
                 textureSheetAnimation.SetInt("_numTilesY", comp.textureSheetAnimation.numTilesY);
                 textureSheetAnimation.SetEnum("_animation", comp.textureSheetAnimation.animation);

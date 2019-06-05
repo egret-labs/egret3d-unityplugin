@@ -5,19 +5,17 @@ namespace Egret3DExportTools
 {
     public class SkinnedMeshRendererSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             SkinnedMeshRenderer comp = component as SkinnedMeshRenderer;
 
-            var meshFilter = new MyJson_Object();
-            meshFilter.SetSerializeClass(meshFilter.GetHashCode(), SerializeClass.MeshFilter);
-            meshFilter.SetMesh(obj, comp.sharedMesh);
-            (entityJson["components"] as MyJson_Array).AddHashCode(meshFilter);
-            ResourceManager.instance.AddCompJson(meshFilter);
+            var meshFilter = ComponentData.Create(SerializeClass.MeshFilter);
+            meshFilter.SetMesh(component.gameObject, comp.sharedMesh);
+            compData.entity.AddComponent(meshFilter);
             
-            compJson.SetBool("_castShadows", comp.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off);
-            compJson.SetBool("_receiveShadows", comp.receiveShadows);
-            compJson.SetMaterials(obj, comp.sharedMaterials, false, true);            
+            compData.SetBool("_castShadows", comp.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off);
+            compData.SetBool("_receiveShadows", comp.receiveShadows);
+            compData.SetMaterials(component.gameObject, comp.sharedMaterials, false, true);  
 
             return true;
         }

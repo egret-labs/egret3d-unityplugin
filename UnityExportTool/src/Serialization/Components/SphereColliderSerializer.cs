@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class SphereColliderSerializer : ComponentSerializer
     {
-        public override bool WriteToJson(GameObject obj, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             SphereCollider comp = component as SphereCollider;
             var sphereItem = new MyJson_Array();
@@ -14,7 +14,7 @@ namespace Egret3DExportTools
             sphereItem.AddNumber(comp.center.z);
             sphereItem.AddNumber(comp.radius);
 
-            compJson.Add("sphere", sphereItem);
+            compData.props.Add("sphere", sphereItem);
 
             return true;
         }

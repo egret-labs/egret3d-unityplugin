@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class AnimatorSerializer : AnimationSerializer
     {
-        public override bool WriteToJson(GameObject gameObject, Component component, MyJson_Object compJson, MyJson_Object entityJson)
+        public override bool Serialize(Component component, ComponentData compData)
         {
             var aniamtior = component as Animator;
             if (aniamtior.runtimeAnimatorController == null)
@@ -20,9 +20,8 @@ namespace Egret3DExportTools
                 return false;
             }
 
-            compJson.SetBool("autoPlay", true); // TODO
-            compJson.SetAnimation(gameObject, clips);
-
+            compData.SetBool("autoPlay", true); // TODO
+            compData.SetAnimation(component.gameObject, clips);
             return true;
         }
     }

@@ -168,8 +168,11 @@
     <Compile Include="src\Serialization\AssetSerizlize.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtensionFactory.cs" />
+    <Compile Include="src\Serialization\Assets\Extensions\AssetVersion.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtensionFactory.cs" />
+    <Compile Include="src\Serialization\Assets\Extensions\MaterialExtension.cs" />
+    <Compile Include="src\Serialization\Assets\Extensions\TextureExtension.cs" />
     <Compile Include="src\Serialization\Assets\GLTFAnimationSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMaterialSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMeshSerializer.cs" />
@@ -198,6 +201,7 @@
     <Compile Include="src\Serialization\Components\SpotLightSerializer.cs" />
     <Compile Include="src\Serialization\Components\TransformSerializer.cs" />
     <Compile Include="src\Serialization\GLTFInitialize.cs" />
+    <Compile Include="src\Serialization\SerializedData.cs" />
     <Compile Include="src\Serialization\SerializeObject.cs" />
   </ItemGroup>
   <ItemGroup>

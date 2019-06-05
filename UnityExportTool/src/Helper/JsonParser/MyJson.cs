@@ -12,28 +12,38 @@ namespace Egret3DExportTools
     {
         void CovertToStringWithFormat(StringBuilder sb, int spaceSub);
         string ToString();
+        System.Object value { get; }
+    }
+
+    public abstract class MyJson : IJsonNode
+    {
+        protected System.Object _value;
+        public abstract void CovertToStringWithFormat(StringBuilder sb, int spaceSub);
+        public abstract override string ToString();
+
+        public System.Object value { get { return this._value; } }
     }
 
     /**
 	 * 数值类型
 	 */
-    public class MyJson_Number : IJsonNode
+    public class MyJson_Number : MyJson
     {
-        public double value;
+        // public double value;
         bool isBool;
         public MyJson_Number(double value)
         {
-            this.value = value;
+            this._value = value;
             this.isBool = false;
         }
         public MyJson_Number(bool value)
         {
-            this.value = value ? 1 : 0;
+            this._value = value ? 1 : 0;
             this.isBool = true;
         }
         public MyJson_Number(System.Enum value)
         {
-            this.value = (int)System.Enum.Parse(value.GetType(), value.ToString());
+            this._value = (int)System.Enum.Parse(value.GetType(), value.ToString());
         }
         public string HashToString()
         {
@@ -43,7 +53,7 @@ namespace Egret3DExportTools
         /**
 		 * 将数据写成树结构
 		 */
-        public void CovertToStringWithFormat(StringBuilder sb, int spacesub)
+        public override void CovertToStringWithFormat(StringBuilder sb, int spacesub)
         {
             sb.Append(ToString());
         }
@@ -52,7 +62,7 @@ namespace Egret3DExportTools
         {
             if (this.isBool)
             {
-                return (this.value == 1) ? "true" : "false";
+                return ((int)this._value == 1) ? "true" : "false";
             }
             else
             {
@@ -64,21 +74,20 @@ namespace Egret3DExportTools
     /**
 	 * 字符串类型
 	 */
-    public class MyJson_String : IJsonNode
+    public class MyJson_String : MyJson
     {
-        public string value;
         public MyJson_String(string value)
         {
-            this.value = value;
+            this._value = value;
         }
         public MyJson_String(System.Enum value)
         {
-            this.value = value.ToString();
+            this._value = value.ToString();
         }
         /**
 		 * 将数据写成树结构
 		 */
-        public void CovertToStringWithFormat(StringBuilder sb, int spacesub)
+        public override void CovertToStringWithFormat(StringBuilder sb, int spacesub)
         {
             sb.Append(ToString());
         }
@@ -86,6 +95,7 @@ namespace Egret3DExportTools
         public override string ToString()
         {
             string v = "";
+            var value = (string)this._value;
             if (value != null)
             {
                 v = value.Replace("\\", "\\\\");
@@ -97,6 +107,7 @@ namespace Egret3DExportTools
         }
         public string HashToString()
         {
+            var value = (string)this._value;
             var uuidStr = ResourceManager.instance.ResetHash((int.Parse(value))).ToString();
             string v = "";
             if (uuidStr != null)
@@ -113,19 +124,19 @@ namespace Egret3DExportTools
     /**
 	 * hashCode类型
 	 */
-    public class MyJson_HashCode : IJsonNode
+    public class MyJson_HashCode : MyJson
     {
-        public int value;
         public MyJson_HashCode(int value)
         {
-            this.value = value;
+            this._value = value;
         }
-        public void CovertToStringWithFormat(StringBuilder sb, int spacesub)
+        public override void CovertToStringWithFormat(StringBuilder sb, int spacesub)
         {
         }
 
         public string HashToString()
         {
+            var value = (int)this._value;
             var uuidStr = ResourceManager.instance.ResetHash(value).ToString();
             string v = "";
             if (uuidStr != null)
@@ -144,11 +155,44 @@ namespace Egret3DExportTools
         }
     }
 
+    public class MyJson_Reference : MyJson
+    {
+        public MyJson_Reference(System.Object value)
+        {
+            this._value = value;
+        }
+        public override string ToString()
+        {
+            return "";
+            // return "{" + "\"" + "uuid" + "\":" + "\"" + ResourceManager.instance.ResetHash((int)value).ToString() + "\"" + "}";
+        }
+        public override void CovertToStringWithFormat(StringBuilder sb, int spacesub)
+        {
+        }
+    }
+
+     public class MyJson_Asset : MyJson
+    {
+        public MyJson_Asset(string value)
+        {
+            this._value = value;
+        }
+        public override string ToString()
+        {
+            return "";
+            // return "{" + "\"" + "uuid" + "\":" + "\"" + ResourceManager.instance.ResetHash((int)value).ToString() + "\"" + "}";
+        }
+        public override void CovertToStringWithFormat(StringBuilder sb, int spacesub)
+        {
+        }
+    }
+
     /**
 	 * 数组类型
 	 */
     public class MyJson_Array : List<IJsonNode>, IJsonNode
     {
+        public System.Object value { get { return this; } }
         /**
 		 * 将数据写成树结构
 		 */
@@ -199,6 +243,7 @@ namespace Egret3DExportTools
 	 */
     public class MyJson_Tree : Dictionary<string, IJsonNode>, IJsonNode
     {
+        public System.Object value { get { return this; } }
         public bool isWithFormat = true;
         public MyJson_Tree()
         {
@@ -320,6 +365,7 @@ namespace Egret3DExportTools
 	 */
     public class MyJson_Object : Dictionary<string, IJsonNode>, IJsonNode
     {
+        public System.Object value { get { return this; } }
         public void CovertToStringWithFormat(StringBuilder sb, int spacesub)
         {
         }

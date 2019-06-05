@@ -340,13 +340,13 @@ namespace GLTF.Schema
 		public void Serialize(TextWriter textWriter)
 		{
 			JsonWriter jsonWriter = new JsonTextWriter(textWriter);
-			if(Egret3DExportTools.ExportToolsSetting.instance.reduceGltfJsonSize)
+			if(Egret3DExportTools.ExportToolsSetting.instance.jsonFormatting)
 			{
-				jsonWriter.Formatting = Formatting.None;//无格式，减少文件大小
+				jsonWriter.Formatting = Formatting.Indented;
 			}
 			else
 			{
-				jsonWriter.Formatting = Formatting.Indented;
+				jsonWriter.Formatting = Formatting.None;
 			}
 			
 			jsonWriter.WriteStartObject();

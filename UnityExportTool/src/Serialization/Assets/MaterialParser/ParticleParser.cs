@@ -19,7 +19,8 @@ namespace Egret3DExportTools
                 var mainST = this.GetVector4("_MainTex_ST", defaultValue);
                 if (!mainST.Equals(defaultValue))
                 {
-                    values.SetUVTransform("uvTransform", mainST);
+                    // values.SetUVTransform("uvTransform", mainST);
+                    this.SetUVTransform("uvTransform", mainST);
                 }
             }
 

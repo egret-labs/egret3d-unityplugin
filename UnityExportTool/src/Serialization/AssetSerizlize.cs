@@ -11,8 +11,7 @@ namespace Egret3DExportTools
      */
     public interface IAssetSerializer
     {
-        string writePath { get; }
-        byte[] WriteGLTF(UnityEngine.Object sourceAsset);
+        void Serialize(UnityEngine.Object sourceAsset, AssetData asset);
     }
 
     public abstract class GLTFSerializer : IAssetSerializer
@@ -21,111 +20,84 @@ namespace Egret3DExportTools
         protected BufferId _bufferId;
         protected GLTF.Schema.Buffer _buffer;
         protected BinaryWriter _bufferWriter;
-        protected StreamWriter _streamWriter;
 
-        protected Transform _target;
+        public Transform _target;
 
-        public GLTFSerializer()
+        protected virtual void _Serialize(UnityEngine.Object sourceAsset)
         {
+
         }
 
-        public virtual string writePath
+        public virtual void Serialize(UnityEngine.Object sourceAsset, AssetData asset)
         {
-            get
-            {
-                return "";
-            }
-        }
-
-        public virtual byte[] WriteGLTF(UnityEngine.Object sourceAsset)
-        {
-            this.Init();
             this._target = SerializeObject.currentTarget;
-            var gltfJson = new MyJson_Tree();
-            gltfJson.isWithFormat = true;
-            this.WriteJson(gltfJson);
-            return System.Text.Encoding.UTF8.GetBytes(gltfJson.ToString());
-        }
+            this.InitGLTFRoot();
+            this._Serialize(sourceAsset);
 
-        protected virtual void Init()
-        {
-
-        }
-
-        protected virtual void WriteJson(MyJson_Tree gltfJson)
-        {
-            var assetJson = new MyJson_Tree();
-            assetJson.SetString("version", "2.0");
-            assetJson.SetString("generator", "Unity plugin for egret");
-            gltfJson.Add("asset", assetJson);
-            //
-            var extensionsRequired = new MyJson_Array();
-            extensionsRequired.AddString("KHR_techniques_webgl");
-            extensionsRequired.AddString("egret");
-            gltfJson.Add("extensionsRequired", extensionsRequired);
-
-            var extensionsUsed = new MyJson_Array();
-            extensionsUsed.AddString("KHR_techniques_webgl");
-            extensionsUsed.AddString("egret");
-            gltfJson.Add("extensionsUsed", extensionsUsed);
-            //
-            var extensionsJson = new MyJson_Tree();
-            var egret = new MyJson_Tree();
-            egret.SetString("version", "5.0");
-            egret.SetString("minVersion", "5.0");
-            extensionsJson.Add("egret", egret);
-            gltfJson.Add("extensions", extensionsJson);
-        }
-
-        protected void BeginWrite()
-        {
-            var ms = new MemoryStream();
-            this._bufferWriter = new BinaryWriter(ms);
-        }
-
-        protected byte[] EndWrite()
-        {
-            var ms = this._bufferWriter.BaseStream as MemoryStream;
-            var binArr = new List<byte>(ms.ToArray());
-            while (binArr.Count % 4 != 0)
+            if (this._bufferWriter != null)
             {
-                binArr.Add(0);
+                //二进制数据
+                var ms = this._bufferWriter.BaseStream as MemoryStream;
+                var binBuffer = this.Resize(ms.ToArray());
+                this._bufferWriter.Close();
+
+                this._buffer.Uri = "";
+                this._buffer.ByteLength = binBuffer.Length;
+
+                ms = new MemoryStream();
+                var streamWriter = new StreamWriter(ms);
+                this._root.Serialize(streamWriter);
+                streamWriter.Close();
+                var jsonBuffer = this.Resize(ms.ToArray());
+
+                var writer = new BinaryWriter(new MemoryStream());
+                asset.buffer = this.WriteBinary(jsonBuffer, binBuffer, writer);
+                writer.Close();
             }
-            var binBuffer = binArr.ToArray();
-            _bufferWriter.Close();
-
-            _buffer.Uri = "";
-            _buffer.ByteLength = binBuffer.Length;
-
-            ms = new MemoryStream();
-
-            _streamWriter = new StreamWriter(ms);
-            _root.Serialize(_streamWriter);
-            _streamWriter.Close();
-            var jsonList = new List<byte>(ms.ToArray());
-
-            while (jsonList.Count % 4 != 0)
+            else
             {
-                jsonList.Add(0);
+                //JSON数据                
+                var writer = new StringWriter();
+                this._root.Serialize(writer);
+                var jsonBuffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
+                asset.buffer = jsonBuffer;
+                writer.Close();
             }
-            var jsonBuffer = jsonList.ToArray();
 
-            ms = new MemoryStream();
+            this._bufferWriter = null;
+        }
 
-            var writer = new System.IO.BinaryWriter(ms);
+        protected virtual void InitGLTFRoot()
+        {
+
+        }
+
+        private byte[] Resize(byte[] buffer)
+        {
+            var l = new List<byte>(buffer);
+            while (l.Count % 4 != 0)
+            {
+                l.Add(0);
+            }
+
+            return l.ToArray();
+        }
+
+        protected byte[] WriteBinary(byte[] json, byte[] bin, BinaryWriter writer)
+        {
             writer.Write(0x46546c67);
             writer.Write(2);
             writer.Write(0);
             //JSON CHUNK
-            writer.Write(jsonBuffer.Length);
+            writer.Write(json.Length);
             writer.Write(0x4e4f534a);
-            writer.Write(jsonBuffer);
+            writer.Write(json);
             //BIN CHUNK
-            writer.Write(binBuffer.Length);
+            writer.Write(bin.Length);
             writer.Write(0x004e4942);
-            writer.Write(binBuffer);
-
+            writer.Write(bin);
             //全部写完，长度重写
+            var ms = writer.BaseStream as MemoryStream;
             var length = (uint)ms.Length;
             ms.Position = 8;
             ms.Write(BitConverter.GetBytes((UInt32)length), 0, 4);
@@ -378,29 +350,9 @@ namespace Egret3DExportTools
 
             foreach (var vec in arr)
             {
-                if (root != null)
-                {
-                    if (normalized)
-                    {
-                        var v = mB.MultiplyVector(mA.MultiplyVector(vec));
-                        _bufferWriter.Write(v.x);
-                        _bufferWriter.Write(v.y);
-                        _bufferWriter.Write(v.z);
-                    }
-                    else
-                    {
-                        var v = mB.MultiplyPoint(mA.MultiplyPoint(vec));
-                        _bufferWriter.Write(v.x);
-                        _bufferWriter.Write(v.y);
-                        _bufferWriter.Write(v.z);
-                    }
-                }
-                else
-                {
-                    _bufferWriter.Write(vec.x);
-                    _bufferWriter.Write(vec.y);
-                    _bufferWriter.Write(vec.z);
-                }
+                _bufferWriter.Write(vec.x);
+                _bufferWriter.Write(vec.y);
+                _bufferWriter.Write(vec.z);
             }
 
             var byteLength = _bufferWriter.BaseStream.Position - byteOffset;

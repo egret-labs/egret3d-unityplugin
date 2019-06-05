@@ -12,9 +12,9 @@
         private UnityEngine.AnimationClip _animationClip;
         private List<Transform> _animationTargets = new List<Transform>(); // TODO 完善 children.
 
-        protected override void Init()
+        protected override void InitGLTFRoot()
         {
-            base.Init();
+            base.InitGLTFRoot();
 
             _root = new GLTFRoot
             {
@@ -165,29 +165,14 @@
             return 1;
         }
 
-        public override string writePath
+        protected override void _Serialize(UnityEngine.Object sourceAsset)
         {
-            get
-            {
-                var url = UnityEditor.AssetDatabase.GetAssetPath(_animationClip);
-                url = url.Substring(0, url.LastIndexOf(".")) + "_" + _animationClip.name + ".ani.bin";
-                url = PathHelper.CheckFileName(url);
-
-                return url;
-            }
-        }
-
-        public override byte[] WriteGLTF(UnityEngine.Object sourceAsset)
-        {
-            base.WriteGLTF(sourceAsset);
             this._animationClip = sourceAsset as UnityEngine.AnimationClip;
+            
             this._animationTargets.Clear();
-            this.BeginWrite();
+            this._bufferWriter = new BinaryWriter(new MemoryStream());
 
             _exportAnimation(_animationClip);
-
-            var res = this.EndWrite();
-            return res;
         }
 
         private void _exportAnimation(UnityEngine.AnimationClip animationClip)

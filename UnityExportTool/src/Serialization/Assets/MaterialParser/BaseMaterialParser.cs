@@ -2,6 +2,7 @@ namespace Egret3DExportTools
 {
     using System;
     using System.Collections.Generic;
+    using Newtonsoft.Json.Linq;
     using UnityEngine;
 
     public enum BlendMode
@@ -201,67 +202,110 @@ namespace Egret3DExportTools
             }
         }
 
-        protected void SetBlendEquationSeparate(Dictionary<string, IJsonNode> functions, int[] blendEquationSeparateValue)
+        protected void SetBlendEquationSeparate(Functions functions, int[] blendEquationSeparateValue)
         {
-            var blendEquationSeparate = new MyJson_Array();
-            foreach (var v in blendEquationSeparateValue)
+            // var blendEquationSeparate = new MyJson_Array();
+            // foreach (var v in blendEquationSeparateValue)
+            // {
+            //     blendEquationSeparate.AddInt((int)v);
+            // }
+            // functions.Add("blendEquationSeparate", blendEquationSeparate);
+
+
+            // foreach (var v in blendEquationSeparateValue)
+            // {
+
+            //     blendEquationSeparate.AddInt((int)v);
+            // }
+
+            functions.blendEquationSeparate = new BlendEquation[blendEquationSeparateValue.Length];
+            for (int i = 0; i < blendEquationSeparateValue.Length; i++)
             {
-                blendEquationSeparate.AddInt((int)v);
+                functions.blendEquationSeparate[i] = (BlendEquation)blendEquationSeparateValue[i];
             }
-            functions.Add("blendEquationSeparate", blendEquationSeparate);
         }
 
-        protected void SetBlendFuncSeparate(Dictionary<string, IJsonNode> functions, int[] blendFuncSeparateValue)
+        protected void SetBlendFuncSeparate(Functions functions, int[] blendFuncSeparateValue)
         {
-            var blendFuncSeparate = new MyJson_Array();
-            foreach (var v in blendFuncSeparateValue)
+            // var blendFuncSeparate = new MyJson_Array();
+            // foreach (var v in blendFuncSeparateValue)
+            // {
+            //     blendFuncSeparate.AddInt((int)v);
+            // }
+            // functions.Add("blendFuncSeparate", blendFuncSeparate);
+
+            functions.blendFuncSeparate = new BlendFactor[blendFuncSeparateValue.Length];
+            for (int i = 0; i < blendFuncSeparateValue.Length; i++)
             {
-                blendFuncSeparate.AddInt((int)v);
+                functions.blendFuncSeparate[i] = (BlendFactor)blendFuncSeparateValue[i];
             }
-            functions.Add("blendFuncSeparate", blendFuncSeparate);
         }
 
-        protected void SetFrontFace(Dictionary<string, IJsonNode> functions, int[] frontFaceValue)
+        protected void SetFrontFace(Functions functions, int[] frontFaceValue)
         {
-            var frontFace = new MyJson_Array();
-            foreach (var v in frontFaceValue)
+            // var frontFace = new MyJson_Array();
+            // foreach (var v in frontFaceValue)
+            // {
+            //     frontFace.AddInt(v);
+            // }
+            // functions.Add("frontFace", frontFace);
+
+            functions.frontFace = new FrontFace[frontFaceValue.Length];
+            for (int i = 0; i < frontFaceValue.Length; i++)
             {
-                frontFace.AddInt(v);
+                functions.frontFace[i] = (FrontFace)frontFaceValue[i];
             }
-            functions.Add("frontFace", frontFace);
         }
 
-        protected void SetCullFace(Dictionary<string, IJsonNode> functions, int[] cullFaceValue)
+        protected void SetCullFace(Functions functions, int[] cullFaceValue)
         {
-            var cullFace = new MyJson_Array();
-            foreach (var v in cullFaceValue)
+            // var cullFace = new MyJson_Array();
+            // foreach (var v in cullFaceValue)
+            // {
+            //     cullFace.AddInt(v);
+            // }
+            // functions.Add("cullFace", cullFace);
+
+            functions.cullFace = new CullFace[cullFaceValue.Length];
+            for (int i = 0; i < cullFaceValue.Length; i++)
             {
-                cullFace.AddInt(v);
+                functions.cullFace[i] = (CullFace)cullFaceValue[i];
             }
-            functions.Add("cullFace", cullFace);
         }
 
-        protected void SetDepthFunc(Dictionary<string, IJsonNode> functions, int[] depthFuncValue)
+        protected void SetDepthFunc(Functions functions, int[] depthFuncValue)
         {
-            var depthFunc = new MyJson_Array();
-            foreach (var v in depthFuncValue)
+            // var depthFunc = new MyJson_Array();
+            // foreach (var v in depthFuncValue)
+            // {
+            //     depthFunc.AddInt(v);
+            // }
+            // functions.Add("depthFunc", depthFunc);
+
+            functions.depthFunc = new DepthFunc[depthFuncValue.Length];
+            for (int i = 0; i < depthFuncValue.Length; i++)
             {
-                depthFunc.AddInt(v);
+                functions.depthFunc[i] = (DepthFunc)depthFuncValue[i];
             }
-            functions.Add("depthFunc", depthFunc);
         }
 
-        protected void SetDepthMask(Dictionary<string, IJsonNode> functions, int[] depthMaskValue)
+        protected void SetDepthMask(Functions functions, int[] depthMaskValue)
         {
-            var depthMask = new MyJson_Array();
-            foreach (var v in depthMaskValue)
+            // var depthMask = new MyJson_Array();
+            // foreach (var v in depthMaskValue)
+            // {
+            //     depthMask.AddBool(v != 0);
+            // }
+            // functions.Add("depthMask", depthMask);
+
+            functions.depthMask = new bool[depthMaskValue.Length];
+            for (int i = 0; i < depthMaskValue.Length; i++)
             {
-                depthMask.AddBool(v != 0);
+                functions.depthMask[i] = depthMaskValue[i] > 0 ? true : false;
             }
-            functions.Add("depthMask", depthMask);
         }
 
-        protected void SetBlend(List<EnableState> enables, Dictionary<string, IJsonNode> functions, BlendMode blend)
+        protected void SetBlend(List<EnableState> enables, Functions functions, BlendMode blend)
         {
             if (blend == BlendMode.None)
             {
@@ -315,7 +359,7 @@ namespace Egret3DExportTools
             this.SetBlendFuncSeparate(functions, blendFuncSeparate);
         }
 
-        protected void SetCull(List<EnableState> enables, Dictionary<string, IJsonNode> functions, bool cull)
+        protected void SetCull(List<EnableState> enables, Functions functions, bool cull)
         {
             if (cull)
             {
@@ -328,7 +372,7 @@ namespace Egret3DExportTools
             }
         }
 
-        protected void SetDepth(List<EnableState> enables, Dictionary<string, IJsonNode> functions, bool zTest, bool zWrite)
+        protected void SetDepth(List<EnableState> enables, Functions functions, bool zTest, bool zWrite)
         {
             if (zTest && zWrite)
             {
@@ -346,11 +390,13 @@ namespace Egret3DExportTools
             this.SetDepthMask(functions, depthMask);
         }
 
-        protected void SetFloat(string key, float value, float defalutValue = 0.0f)
+        protected void SetFloat(string key, float value, float? defalutValue = 0.0f)
         {
             if (value != defalutValue)
             {
-                this.data.values.SetNumber(key, value);
+                // this.data.values.SetNumber(key, value);
+
+                this.data.values.Add(new JProperty(key, value));
             }
         }
 
@@ -358,7 +404,30 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                this.data.values.SetColor3(key, value);
+                // this.data.values.SetColor3(key, value);
+
+                var arr = new JArray();
+                arr.Add(value.r);
+                arr.Add(value.g);
+                arr.Add(value.b);
+
+                this.data.values.Add(new JProperty(key, arr));
+            }
+        }
+
+        protected void SetColor(string key, Color value, Color? defalutValue = null)
+        {
+            if (value != defalutValue)
+            {
+                // this.data.values.SetColor3(key, value);
+
+                var arr = new JArray();
+                arr.Add(value.r);
+                arr.Add(value.g);
+                arr.Add(value.b);
+                arr.Add(value.a);
+
+                this.data.values.Add(new JProperty(key, arr));
             }
         }
 
@@ -366,8 +435,11 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                this.data.values.SetColor3("diffuse", value);
-                this.data.values.SetNumber("opacity", value.a);
+                // this.data.values.SetColor3("diffuse", value);
+                // this.data.values.SetNumber("opacity", value.a);
+
+                this.SetColor3("diffuse", value, defalutValue);
+                this.data.values.Add(new JProperty("opacity", value.a));
             }
         }
 
@@ -375,15 +447,29 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                this.data.values.SetVector2(key, value);
+                // this.data.values.SetVector2(key, value);
+
+                var arr = new JArray();
+                arr.Add(value.x);
+                arr.Add(value.y);
+
+                this.data.values.Add(new JProperty(key, arr));
             }
         }
 
-        protected void SetVector4(string key, Vector4 value, Vector4 defalutValue)
+        protected void SetVector4(string key, Vector4 value, Vector4? defalutValue = null)
         {
             if (value != defalutValue)
             {
-                this.data.values.SetVector4(key, value);
+                // this.data.values.SetVector4(key, value);
+
+                var arr = new JArray();
+                arr.Add(value.x);
+                arr.Add(value.y);
+                arr.Add(value.z);
+                arr.Add(value.w);
+
+                this.data.values.Add(new JProperty(key, arr));
             }
         }
 
@@ -391,10 +477,44 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                var texPath = SerializeObject.Serialize(value, AssetType.Texture);
-                this.data.values.SetUri(key, texPath);
+                var path = PathHelper.GetPath(value);
+                var assetData = SerializeObject.SerializeAsset(value, path, AssetType.Texture);
+                // this.data.values.SetUri(key, assetData.uri);
+
+                var uri = assetData.uri;
+                uri = uri.Replace("Assets", ExportConfig.instance.rootDir);
+                this.data.values.Add(new JProperty(key, uri));
+
             }
         }
+
+        public void SetUVTransform(string key, Vector4 data, int? digits = null)
+        {
+            var tx = data.z;
+            var ty = data.w;
+            var sx = data.x;
+            var sy = data.y;
+            var cx = 0.0f;
+            var cy = 0.0f;
+            var rotation = 0.0f;
+            var c = Math.Cos(rotation);
+            var s = Math.Sin(rotation);
+
+            var arr = new JArray();
+            arr.Add(sx * c);
+            arr.Add(sx * s);
+            arr.Add(-sx * (c * cx + s * cy) + cx + tx);
+            arr.Add(-sy * s);
+            arr.Add(sy * c);
+            arr.Add(-sy * (-s * cx + c * cy) + cy + ty);
+            arr.Add(0.0);
+            arr.Add(0.0);
+            arr.Add(1.0);
+
+            this.data.values.Add(new JProperty(key, arr));
+        }
+
+
 
 
         protected float GetFloat(string key, float defalutValue)
@@ -469,17 +589,15 @@ namespace Egret3DExportTools
             get
             {
                 var blend = BlendMode.None;
-                var shaderName = this.shaderName.ToLower();
+                var shaderName = this.shaderName;
                 if (source.GetTag("RenderType", false, "") == "Transparent")
                 {
-                    var additive = shaderName.Contains("additive");
-                    var multiply = shaderName.Contains("multiply");
-                    var premultiply = shaderName.Contains("premultiply");
-                    if (additive)
+                    var premultiply = shaderName.Contains("Premultiply");
+                    if (shaderName.Contains("Additive"))
                     {
                         blend = premultiply ? BlendMode.Add_PreMultiply : BlendMode.Add;
                     }
-                    else if (multiply)
+                    else if (shaderName.Contains("Multiply"))
                     {
                         blend = premultiply ? BlendMode.Multiply_PreMultiply : BlendMode.Multiply;
                     }

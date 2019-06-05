@@ -180,54 +180,54 @@ namespace Egret3DExportTools
             uri = uri.Replace("Assets", ExportConfig.instance.rootDir);
             jsonNode.SetString(key, uri);
         }
-        public static void SetMesh(this MyJson_Object jsonNode, GameObject obj, Mesh mesh)
-        {
-            if (mesh == null)
-            {
-                return;
-            }
+        // public static void SetMesh(this MyJson_Object jsonNode, GameObject obj, Mesh mesh)
+        // {
+        //     if (mesh == null)
+        //     {
+        //         return;
+        //     }
 
-            int meshHash = mesh.GetInstanceID();
-            string url = SerializeObject.Serialize(mesh, AssetType.Mesh);
-            var assetIndex = ResourceManager.instance.AddAssetUrl(url);
+        //     int meshHash = mesh.GetInstanceID();
+        //     string url = SerializeObject.Serialize(mesh, AssetType.Mesh);
+        //     var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
-            //mesh
-            var meshItem = new MyJson_Tree(false);
-            meshItem.SetAsset(assetIndex);
-            jsonNode["mesh"] = meshItem;
-        }
-        public static void SetMaterials(this MyJson_Object jsonNode, GameObject obj, Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
-        {
-            var materialsItem = new MyJson_Array();
-            jsonNode["materials"] = materialsItem;
-            //写材质
-            foreach (var material in materials)
-            {
-                if (!material)
-                {
-                    Debug.LogWarning(obj.gameObject.name + " 材质缺失，请检查资源");
-                    continue;
-                }
+        //     //mesh
+        //     var meshItem = new MyJson_Tree(false);
+        //     meshItem.SetAsset(assetIndex);
+        //     jsonNode["mesh"] = meshItem;
+        // }
+        // public static void SetMaterials(this MyJson_Object jsonNode, GameObject obj, Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
+        // {
+        //     var materialsItem = new MyJson_Array();
+        //     jsonNode["materials"] = materialsItem;
+        //     //写材质
+        //     foreach (var material in materials)
+        //     {
+        //         if (!material)
+        //         {
+        //             Debug.LogWarning(obj.gameObject.name + " 材质缺失，请检查资源");
+        //             continue;
+        //         }
 
-                string url = SerializeObject.Serialize(material, AssetType.Material);
-                var assetIndex = ResourceManager.instance.AddAssetUrl(url);
+        //         string url = SerializeObject.Serialize(material, AssetType.Material);
+        //         var assetIndex = ResourceManager.instance.AddAssetUrl(url);
 
-                materialsItem.AddAssetIndex(assetIndex);
-            }
-        }
+        //         materialsItem.AddAssetIndex(assetIndex);
+        //     }
+        // }
 
-        public static void SetAnimation(this MyJson_Object jsonNode, GameObject obj, UnityEngine.AnimationClip[] animationClips)
-        {
-            var exportAnimations = new MyJson_Array();
-            jsonNode["_animations"] = exportAnimations;
+        // public static void SetAnimation(this MyJson_Object jsonNode, GameObject obj, UnityEngine.AnimationClip[] animationClips)
+        // {
+        //     var exportAnimations = new MyJson_Array();
+        //     jsonNode["_animations"] = exportAnimations;
 
-            foreach (var animationClip in animationClips)
-            {
-                var url = SerializeObject.Serialize(animationClip, AssetType.Animation);
-                var assetIndex = ResourceManager.instance.AddAssetUrl(url);
-                exportAnimations.AddAssetIndex(assetIndex);
-            }
-        }
+        //     foreach (var animationClip in animationClips)
+        //     {
+        //         var url = SerializeObject.Serialize(animationClip, AssetType.Animation);
+        //         var assetIndex = ResourceManager.instance.AddAssetUrl(url);
+        //         exportAnimations.AddAssetIndex(assetIndex);
+        //     }
+        // }
     }
 
     public static class MyJosnArrayExtension

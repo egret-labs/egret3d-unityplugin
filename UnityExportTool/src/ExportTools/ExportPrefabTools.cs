@@ -26,7 +26,7 @@ namespace Egret3DExportTools
                 curObj.transform.localPosition = Vector3.zero;
             }
 
-            SerializeObject.Serialize(curObj);
+            // SerializeObject.Serialize(curObj);
             curObj.transform.localPosition = savePosition;
             ResourceManager.instance.ExportFiles(prefabPath, exportPath);
         }
