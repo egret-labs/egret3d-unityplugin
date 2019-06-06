@@ -5,31 +5,9 @@ using UnityEditor;
 
 namespace Egret3DExportTools
 {
-    public class ExportImageTools
+    public static class ExportImageTools
     {
-        private static ExportImageTools _instance;
-        public static ExportImageTools instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ExportImageTools();
-                }
-                return _instance;
-            }
-        }       
-
-        private readonly List<string> taskString = new List<string>();
-        public ExportImageTools()
-        {
-            this.Clear();
-        }
-        public void Clear()
-        {
-            this.taskString.Clear();
-        }
-        public byte[] EncodeToPNG(Texture2D source, string ext = "png")
+        public static byte[] EncodeToPNG(Texture2D source, string ext = "png")
         {
             var path = AssetDatabase.GetAssetPath(source);
             TextureImporter importer = (TextureImporter)TextureImporter.GetAtPath(path);

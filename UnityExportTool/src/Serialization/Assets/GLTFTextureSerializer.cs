@@ -45,7 +45,7 @@ namespace Egret3DExportTools
             }
             else
             {
-                bs = ExportImageTools.instance.EncodeToPNG(tex, ext);
+                bs = ExportImageTools.EncodeToPNG(tex, ext);
             }
 
             if (!SerializeObject.assetsData.ContainsKey(path))

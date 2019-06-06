@@ -9,7 +9,6 @@ namespace Egret3DExportTools
         public static void ExportScene(List<GameObject> roots, string exportPath = "")
         {
             string sceneName = PathHelper.CurSceneName;
-            ExportImageTools.instance.Clear();
             SerializeObject.Clear();
 
             SerializeObject.currentData.Clear();
