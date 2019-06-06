@@ -118,8 +118,8 @@ public class Functions : IExtension
 
 public class States : IExtension
 {
-    public EnableState[] enable;
-    public Functions functions;
+    public List<EnableState> enable = new List<EnableState>();
+    public Functions functions = new Functions();
 
     public IExtension Clone(GLTFRoot root)
     {
@@ -134,7 +134,7 @@ public class States : IExtension
     {
         var b = false;
         JObject ext = new JObject();
-        if (this.enable != null && this.enable.Length > 0)
+        if (this.enable.Count > 0)
         {
             b = true;
             var es = new JArray();
@@ -162,7 +162,7 @@ public class Techniques : IExtension
 {
     // public int program = 0;
     // public Dictionary<string, System.Object> attributes = new Dictionary<string, object>();
-    public States states;
+    public States states = new States();
     public Dictionary<string, string> uniforms = new Dictionary<string, string>();
 
     public IExtension Clone(GLTFRoot root)
@@ -216,10 +216,10 @@ public class KhrTechniqueWebglGlTfExtension : IExtension
                 if (technique.states != null)
                 {
                     var json = technique.states.Serialize();
-                    if(json != null)
+                    if (json != null)
                     {
                         tj.Add(json);
-                    }                    
+                    }
                 }
                 tj.Add(new JProperty("uniforms", new JObject()));
                 ts.Add(tj);
@@ -230,14 +230,15 @@ public class KhrTechniqueWebglGlTfExtension : IExtension
         }
 
 
-        return new JProperty("KHR_techniques_webgl", ext);
+        return new JProperty(KhrTechniquesWebglMaterialExtension.EXTENSION_NAME, ext);
     }
 }
 
 public class KhrTechniquesWebglMaterialExtension : IExtension
 {
+    public const string EXTENSION_NAME = "KHR_techniques_webgl";
     public int technique = 0;
-    public List<JProperty> values = new List<JProperty>();
+    public JObject values = new JObject();
 
     public IExtension Clone(GLTFRoot root)
     {
@@ -252,20 +253,13 @@ public class KhrTechniquesWebglMaterialExtension : IExtension
     {
         JObject ext = new JObject();
 
-        ext.Add(new JProperty(
-            "technique",
-            technique
-        ));
-
-        var valueProps = new JObject();
-        foreach (var item in this.values)
+        ext.Add(new JProperty("technique", this.technique));
+        if (this.values.Count != 0)
         {
-            valueProps.Add(item);
+            ext.Add("values", this.values);
         }
 
-        ext.Add("values", valueProps);
-
-        return new JProperty("KHR_techniques_webgl", ext);
+        return new JProperty(EXTENSION_NAME, ext);
     }
 }
 
@@ -281,7 +275,7 @@ public class MaterialAssetExtension : AssetVersionExtension
         JObject ext = res.First as JObject;
 
         var assets = new JArray();
-        assets.Add(this.asset.Replace("Assets", ExportConfig.instance.rootDir));//TODO
+        assets.Add(ExportConfig.instance.GetExportPath(this.asset));
         ext.Add("assets", assets);
 
         var entities = new JArray();

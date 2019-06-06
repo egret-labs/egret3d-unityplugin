@@ -14,17 +14,17 @@ namespace Egret3DExportTools
             var mainColor = this.MainColor;
             if (mainTex != null)
             {
-                this.SetTexture("map", mainTex);
+                this.data.values.SetTexture("map", mainTex);
                 var defaultValue = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
-                var mainST = this.GetVector4("_MainTex_ST", defaultValue);
+                var mainST = this.source.GetVector4("_MainTex_ST", defaultValue);
                 if (!mainST.Equals(defaultValue))
                 {
-                    // values.SetUVTransform("uvTransform", mainST);
-                    this.SetUVTransform("uvTransform", mainST);
+                    this.data.values.SetUVTransform("uvTransform", mainST);
                 }
             }
 
-            this.SetColor3AndOpacity(mainColor, Color.white);
+            this.data.values.SetColor3("diffuse", mainColor, Color.white);
+            this.data.values.SetNumber("opacity", mainColor.a, Color.white.a);
         }
 
         protected UnityEngine.Texture MainText

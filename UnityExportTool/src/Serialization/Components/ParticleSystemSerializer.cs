@@ -27,7 +27,10 @@ namespace Egret3DExportTools
             {
                 var main = comp.main;
                 var mainItem = new JObject();
-                compData.properties.Add("main", mainItem);
+                compData.properties.Add(new JProperty("main", mainItem));
+                //jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_ASSET, assetIndex))));
+
+                // compData.properties.Add("main", mainItem);
                 // compData.props["main"] = mainItem;
                 mainItem.SetNumber("duration", main.duration);
                 mainItem.SetBool("loop", main.loop);
@@ -83,7 +86,8 @@ namespace Egret3DExportTools
             //emission
             {
                 var emissionItem = new JObject();
-                compData.properties.Add("emission", emissionItem);
+                compData.properties.Add(new JProperty("emission", emissionItem));
+                // compData.properties.Add("emission", emissionItem);
                 this.AddMinMaxCurve(emissionItem, "rateOverTime", comp.emission.rateOverTime);
                 var burstsArr = new JArray();
                 emissionItem.Add("bursts", burstsArr);
@@ -104,7 +108,9 @@ namespace Egret3DExportTools
             if (comp.shape.enabled)
             {
                 var shapItem = new JObject();
-                compData.properties.Add("shape", shapItem);
+                compData.properties.Add(new JProperty("shape", shapItem));
+                // compData.properties.Add("shape", shapItem);
+
                 shapItem.SetEnum("shapeType", comp.shape.shapeType);
                 shapItem.SetNumber("angle", comp.shape.angle);
                 shapItem.SetNumber("length", comp.shape.length);
@@ -123,7 +129,9 @@ namespace Egret3DExportTools
             if (comp.velocityOverLifetime.enabled)
             {
                 var velocityOverItem = new JObject();
-                compData.properties.Add("velocityOverLifetime", velocityOverItem);
+                compData.properties.Add(new JProperty("velocityOverLifetime", velocityOverItem));
+                // compData.properties.Add("velocityOverLifetime", velocityOverItem);
+
                 velocityOverItem.SetEnum("_mode", comp.velocityOverLifetime.x.mode);
                 velocityOverItem.SetEnum("_space", comp.velocityOverLifetime.space);
                 this.AddMinMaxCurve(velocityOverItem, "_x", comp.velocityOverLifetime.x);
@@ -134,14 +142,18 @@ namespace Egret3DExportTools
             if (comp.colorOverLifetime.enabled)
             {
                 var colorOverItem = new JObject();
-                compData.properties.Add("colorOverLifetime", colorOverItem);
+                compData.properties.Add(new JProperty("colorOverLifetime", colorOverItem));
+                // compData.properties.Add("colorOverLifetime", colorOverItem);
+
                 this.AddMinMaxGradient(colorOverItem, "_color", comp.colorOverLifetime.color);
             }
             //sizeOverLifetime
             if (comp.sizeOverLifetime.enabled)
             {
                 var sizeOverItem = new JObject();
-                compData.properties.Add("sizeOverLifetime", sizeOverItem);
+                compData.properties.Add(new JProperty("sizeOverLifetime", sizeOverItem));
+                // compData.properties.Add("sizeOverLifetime", sizeOverItem);
+
                 sizeOverItem.SetBool("_separateAxes", comp.sizeOverLifetime.separateAxes);
                 this.AddMinMaxCurve(sizeOverItem, "_size", comp.sizeOverLifetime.size);
                 this.AddMinMaxCurve(sizeOverItem, "_x", comp.sizeOverLifetime.x);
@@ -152,7 +164,9 @@ namespace Egret3DExportTools
             if (comp.rotationOverLifetime.enabled)
             {
                 var rotationOverItem = new JObject();
-                compData.properties.Add("rotationOverLifetime", rotationOverItem);
+                compData.properties.Add(new JProperty("rotationOverLifetime", rotationOverItem));
+                // compData.properties.Add("rotationOverLifetime", rotationOverItem);
+
                 rotationOverItem.SetBool("_separateAxes", comp.rotationOverLifetime.separateAxes);
                 this.AddMinMaxCurve(rotationOverItem, "_x", comp.rotationOverLifetime.x);
                 this.AddMinMaxCurve(rotationOverItem, "_y", comp.rotationOverLifetime.y);
@@ -162,7 +176,9 @@ namespace Egret3DExportTools
             if (comp.textureSheetAnimation.enabled)
             {
                 var textureSheetAnimation = new JObject();
-                compData.properties.Add("textureSheetAnimation", textureSheetAnimation);
+                compData.properties.Add(new JProperty("textureSheetAnimation", textureSheetAnimation));
+                // compData.properties.Add("textureSheetAnimation", textureSheetAnimation);
+
                 textureSheetAnimation.SetInt("_numTilesX", comp.textureSheetAnimation.numTilesX);
                 textureSheetAnimation.SetInt("_numTilesY", comp.textureSheetAnimation.numTilesY);
                 textureSheetAnimation.SetEnum("_animation", comp.textureSheetAnimation.animation);
@@ -285,7 +301,8 @@ namespace Egret3DExportTools
                     break;
             }
 
-            compItem.Add(key, curveItem);
+            compItem.Add(new JProperty(key, curveItem));
+            // compItem.Add(key, curveItem);
         }
 
         protected void AddMinMaxGradient(JObject compItem, string key, ParticleSystem.MinMaxGradient gradient)
@@ -311,7 +328,8 @@ namespace Egret3DExportTools
                     break;
             }
 
-            compItem.Add(key, gradientItem);
+            compItem.Add(new JProperty(key, gradientItem));
+            // compItem.Add(key, gradientItem);
         }
 
         protected void AddCurve(JObject curveItem, string key, Keyframe[] keys)
@@ -461,8 +479,8 @@ namespace Egret3DExportTools
             gradients.SetEnum("mode", gradient.mode);
             var alphaKeysItem = new JArray();
             var colorKeysItem = new JArray();
-            gradients.Add("alphaKeys", alphaKeysItem);
-            gradients.Add("colorKeys", colorKeysItem);
+            gradients.Add(new JProperty("alphaKeys", alphaKeysItem));
+            gradients.Add(new JProperty("colorKeys", colorKeysItem));
 
             //alphaKey
             foreach (GradientAlphaKey _ak in alphaKeys)
@@ -484,7 +502,8 @@ namespace Egret3DExportTools
                 colorKeysItem.Add(ckItem);
             }
 
-            gradientItem.Add(key, gradients);
+            // gradientItem.Add(key, gradients);
+            gradientItem.Add(new JProperty(key, gradients));
         }
     }
 }

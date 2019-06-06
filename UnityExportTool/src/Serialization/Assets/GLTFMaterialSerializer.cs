@@ -30,29 +30,13 @@ namespace Egret3DExportTools
 
     public class MaterialData
     {
-        public List<JProperty> values = new List<JProperty>();
-        public Functions functions = new Functions();
-
-
-        // public readonly Dictionary<string, IJsonNode> values = new Dictionary<string, IJsonNode>();
-        public readonly List<EnableState> enables = new List<EnableState>();
-        // public readonly Dictionary<string, IJsonNode> functions = new Dictionary<string, IJsonNode>();
-        public readonly List<Define> defines = new List<Define>();
-        public string shaderAsset = string.Empty;
-
-        public void CleanUp()
-        {
-            this.values.Clear();
-            this.enables.Clear();
-            this.functions.Clear();
-            this.defines.Clear();
-            this.shaderAsset = string.Empty;
-        }
+        public Techniques technique;
+        public JObject values;
+        public MaterialAssetExtension asset;
     }
 
     public class GLTFMaterialSerializer : GLTFSerializer
     {
-        protected readonly MaterialData data = new MaterialData();
         private bool _isParticle = false;
         private UnityEngine.Material _material;
 
@@ -88,20 +72,13 @@ namespace Egret3DExportTools
         {
             base.InitGLTFRoot();
 
-            this._root = new GLTFRoot
-            {
-                Accessors = new List<Accessor>(),
-                Asset = new Asset
-                {
-                    Version = "2.0",
-                    Generator = "Unity plugin for egret",
-                    Extensions = new Dictionary<string, IExtension>(),
-                },
-                ExtensionsRequired = new List<string>() { "KHR_techniques_webgl", "egret" },
-                ExtensionsUsed = new List<string>() { "KHR_techniques_webgl", "egret" },
-                Extensions = new Dictionary<string, IExtension>() { },
-                Materials = new List<GLTF.Schema.Material>(),
-            };
+            this._root.ExtensionsRequired.Add(KhrTechniquesWebglMaterialExtension.EXTENSION_NAME);
+            this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
+
+            this._root.ExtensionsUsed.Add(KhrTechniquesWebglMaterialExtension.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
+
+            this._root.Materials = new List<GLTF.Schema.Material>();
         }
 
         protected override void _Serialize(UnityEngine.Object sourceAsset)
@@ -110,9 +87,14 @@ namespace Egret3DExportTools
 
             this._isParticle = this._target.GetComponent<ParticleSystem>() != null;
             var source = this._material;
-            var data = this.data;
+            var data = new MaterialData();
+            var technique = new Techniques();
+            var materialExtension = new KhrTechniquesWebglMaterialExtension();
+            var assetExtension = new MaterialAssetExtension() { version = "5.0", minVersion = "5.0" };
             //
-            data.CleanUp();
+            data.values = materialExtension.values;
+            data.technique = technique;
+            data.asset = assetExtension;
 
             var parser = this.getParser(this.GetMaterialType());
             parser.Parse(source, data);
@@ -120,40 +102,24 @@ namespace Egret3DExportTools
             var materialGLTF = new GLTF.Schema.Material();
             materialGLTF.Name = source.name;
 
-            materialGLTF.Extensions = new Dictionary<string, IExtension>(){
-                {
-                    "KHR_techniques_webgl",
-                    new KhrTechniquesWebglMaterialExtension() { technique = 0, values = data.values }
-                }
-            };
+            materialGLTF.Extensions = new Dictionary<string, IExtension>() { { KhrTechniquesWebglMaterialExtension.EXTENSION_NAME, materialExtension } };
 
             var techniqueExt = new KhrTechniqueWebglGlTfExtension();
-            var technique = new Techniques();
-            technique.states = new States();
-            technique.states.enable = data.enables.ToArray();
-            technique.states.functions = data.functions;
+
             techniqueExt.techniques.Add(technique);
-            this._root.Extensions.Add("egret", new MaterialAssetExtension()
+            if(this._root.Extensions.ContainsKey(AssetVersionExtension.EXTENSION_NAME))
             {
-                version = "5.0",
-                minVersion = "5.0",
-                asset = this.data.shaderAsset,
-                defines = this.data.defines,
-            });
-            this._root.Extensions.Add("KHR_techniques_webgl", techniqueExt);
-
+                this._root.Extensions.Remove(AssetVersionExtension.EXTENSION_NAME);
+            }
+            this._root.Extensions.Add(AssetVersionExtension.EXTENSION_NAME, assetExtension);
+            this._root.Extensions.Add(KhrTechniquesWebglMaterialExtension.EXTENSION_NAME, techniqueExt);
             this._root.Materials.Add(materialGLTF);
-
-            // var writer = new StringWriter();
-            // this._root.Serialize(writer);
-
-            // asset.buffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
         }
 
         private MaterialType GetMaterialType()
         {
             var shaderName = this._material.shader.name;
-            var customShaderConfig = ExportConfig.instance.getCustomShader(shaderName);
+            var customShaderConfig = ExportConfig.instance.GetCustomShader(shaderName);
 
             if (this._isParticle)
             {

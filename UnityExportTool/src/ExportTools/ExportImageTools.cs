@@ -18,45 +18,7 @@ namespace Egret3DExportTools
                 }
                 return _instance;
             }
-        }
-
-        //TODO
-        public static string GetTextureExt(Texture tex)
-        {
-            string ext = "png";
-            string path = AssetDatabase.GetAssetPath(tex);
-            int i = path.LastIndexOf(".");
-            if (i >= 0)
-            {
-                ext = path.Substring(i + 1);
-            }
-
-            return ext;
-        }
-
-        public static bool IsSupportedExt(Texture tex)
-        {
-            var ext = GetTextureExt(tex);
-            return (ext == "png" || ext == "jpg" || ext == "jpeg");
-        }
-
-        public static string GetTexturePath(Texture tex)
-        {
-            var path = AssetDatabase.GetAssetPath(tex);
-            var ext = GetTextureExt(tex);
-            if (path == "Resources/unity_builtin_extra" || string.IsNullOrEmpty(path))
-            {
-                path = "Library/" + tex.name + "." + ext;
-            }
-
-            if (ext != "png" && ext != "jpg" && ext != "jpeg")
-            {
-                //非png、jpg都导出为png
-                path = path.Substring(0, path.LastIndexOf(".") + 1) + "png";
-            }
-
-            return PathHelper.CheckFileName(path);
-        }
+        }       
 
         private readonly List<string> taskString = new List<string>();
         public ExportImageTools()

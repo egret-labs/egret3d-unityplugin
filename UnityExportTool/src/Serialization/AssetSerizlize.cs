@@ -69,7 +69,19 @@ namespace Egret3DExportTools
 
         protected virtual void InitGLTFRoot()
         {
-
+            this._root = new GLTFRoot
+            {
+                Accessors = new List<Accessor>(),
+                Asset = new Asset
+                {
+                    Version = "2.0",
+                    Generator = "Unity plugin for egret",
+                    Extensions = new Dictionary<string, IExtension>(),
+                },
+                ExtensionsRequired = new List<string>(),
+                ExtensionsUsed = new List<string>(),
+                Extensions = new Dictionary<string, IExtension>() { { "egret", new AssetVersionExtension() { version = "5.0", minVersion = "5.0" } } },
+            };
         }
 
         private byte[] Resize(byte[] buffer)

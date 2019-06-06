@@ -18,43 +18,24 @@ namespace Egret3DExportTools
         {
             base.InitGLTFRoot();
 
-            this._root = new GLTFRoot
-            {
-                Accessors = new List<Accessor>(),
-                Asset = new Asset
-                {
-                    Version = "2.0",
-                    Generator = "Unity plugin for egret",
-                    Extensions = new Dictionary<string, IExtension>(),
-                },
-                ExtensionsRequired = new List<string>() { "egret" },
-                ExtensionsUsed = new List<string>() { "egret" },
-                Extensions = new Dictionary<string, IExtension>(){
-                    {
-                        "egret",
-                            new AssetVersionExtension()
-                            {
-                                version = "5.0",
-                                minVersion = "5.0",
-                            }
-                    }
-                },
-                Images = new List<Image>(),
-                Samplers = new List<Sampler>(),
-                Textures = new List<GLTF.Schema.Texture>(),
-            };
+            this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
+            
+            this._root.Images = new List<Image>();
+            this._root.Samplers = new List<Sampler>();
+            this._root.Textures = new List<GLTF.Schema.Texture>();
         }
 
         private void ExportTexture()
         {
             var tex = this.texture;
-            var path = ExportImageTools.GetTexturePath(tex);
+            var path = PathHelper.GetTexturePath(tex);
             UnityEditor.TextureImporter importer = (UnityEditor.TextureImporter)UnityEditor.TextureImporter.GetAtPath(path);
             bool isNormal = importer && importer.textureType == UnityEditor.TextureImporterType.NormalMap;
-            string ext = ExportImageTools.GetTextureExt(tex);
+            string ext = PathHelper.GetTextureExt(tex);
             byte[] bs;
 
-            var isSupported = ExportImageTools.IsSupportedExt(tex);
+            var isSupported = PathHelper.IsSupportedExt(tex);
             //只有jpg、png可以原始图片导出，其他类型不支持
             var filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), path);
             if (ExportToolsSetting.instance.exportOriginalImage && isSupported && System.IO.File.Exists(filename))
@@ -73,8 +54,6 @@ namespace Egret3DExportTools
                 assetData.buffer = bs;
                 SerializeObject.assetsData.Add(path, assetData);
             }
-
-            // ResourceManager.instance.AddFileBuffer(path, bs);
         }
 
         protected override void _Serialize(UnityEngine.Object sourceAsset)
@@ -83,11 +62,11 @@ namespace Egret3DExportTools
             //先把原始图片导出来
             this.ExportTexture();
 
-            var path = ExportImageTools.GetTexturePath(this.texture);
+            var path = PathHelper.GetTexturePath(this.texture);
             var mipmap = this.texture.mipmapCount > 1;
             //
             {
-                this._root.Images.Add(new Image() { Uri = path.Replace("Assets", ExportConfig.instance.rootDir) });
+                this._root.Images.Add(new Image() { Uri = ExportConfig.instance.GetExportPath(path) });
             }
             //
             {
@@ -142,16 +121,11 @@ namespace Egret3DExportTools
                     }
                 };
             }
-
-            // var writer = new StringWriter();
-            // this._root.Serialize(writer);
-
-            // asset.buffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
         }
 
         public int GetTextureFormat()
         {
-            var texExt = ExportImageTools.GetTextureExt(this.texture);
+            var texExt = PathHelper.GetTextureExt(this.texture);
             var format = this.texture.format;
             if (format == TextureFormat.Alpha8)
             {

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEditor;
 
 namespace Egret3DExportTools
 {
@@ -45,20 +46,6 @@ namespace Egret3DExportTools
                 }
                 return _saveRootDirectory;
             }
-        }
-
-        /**
-		 * 判断命名是否合法
-		 */
-        public static bool LegalName(string name, string objType)
-        {
-            Regex regex = new Regex("[^0-9a-zA-Z_+-.@() /]");
-            Match match = regex.Match(name);
-            if (match.Success)
-            {
-                MyLog.LogError(objType + "不合法的命名：" + name + "只支持字母、数字、_+-.@");
-            }
-            return !match.Success;
         }
 
         public static string CheckFileName(string fileName)
@@ -134,7 +121,7 @@ namespace Egret3DExportTools
             return relPath;
         }
 
-        public static string GetPath(UnityEngine.Mesh mesh)
+        public static string GetMeshPath(UnityEngine.Mesh mesh)
         {
             var path = UnityEditor.AssetDatabase.GetAssetPath(mesh);
             //obj
@@ -151,7 +138,7 @@ namespace Egret3DExportTools
             return path;
         }
 
-        public static string GetPath(UnityEngine.Material material)
+        public static string GetMaterialPath(UnityEngine.Material material)
         {
             var mat = material;
             string path = UnityEditor.AssetDatabase.GetAssetPath(mat);
@@ -167,22 +154,59 @@ namespace Egret3DExportTools
             return path;
         }
 
-        public static string GetPath(UnityEngine.AnimationClip clip)
+        public static string GetAnimationClipPath(UnityEngine.AnimationClip clip)
         {
             var path = UnityEditor.AssetDatabase.GetAssetPath(clip);
             path = path.Substring(0, path.LastIndexOf(".")) + "_" + clip.name + ".ani.bin";
             path = PathHelper.CheckFileName(path);
             return path;
         }
+        
+        public static string GetTexturePath(Texture tex)
+        {
+            var path = AssetDatabase.GetAssetPath(tex);
+            var ext = GetTextureExt(tex);
+            if (path == "Resources/unity_builtin_extra" || string.IsNullOrEmpty(path))
+            {
+                path = "Library/" + tex.name + "." + ext;
+            }
 
-        public static string GetPath(UnityEngine.Texture texture)
+            if (ext != "png" && ext != "jpg" && ext != "jpeg")
+            {
+                //非png、jpg都导出为png
+                path = path.Substring(0, path.LastIndexOf(".") + 1) + "png";
+            }
+
+            return PathHelper.CheckFileName(path);
+        }
+
+        public static string GetTextureDescPath(UnityEngine.Texture texture)
         {
             //TODO
-            var path = ExportImageTools.GetTexturePath(texture);
+            var path = GetTexturePath(texture);
             // //相对路径
             path = path.Substring(0, path.LastIndexOf("/") + 1) + texture.name + ".image.json";
             path = PathHelper.CheckFileName(path);
             return path;
+        }
+
+        public static string GetTextureExt(Texture tex)
+        {
+            string ext = "png";
+            string path = AssetDatabase.GetAssetPath(tex);
+            int i = path.LastIndexOf(".");
+            if (i >= 0)
+            {
+                ext = path.Substring(i + 1);
+            }
+
+            return ext;
+        }
+
+        public static bool IsSupportedExt(Texture tex)
+        {
+            var ext = GetTextureExt(tex);
+            return (ext == "png" || ext == "jpg" || ext == "jpeg");
         }
     }
 }

@@ -10,33 +10,34 @@ namespace Egret3DExportTools
             var source = this.source;
             var values = this.data.values;
 
-            var tex = this.GetTexture("_MainTex", null);
+            var tex = this.source.GetTexture("_MainTex", null);
             if (tex != null)
             {
-                this.SetTexture("map", tex);
+                this.data.values.SetTexture("map", tex);
 
                 var defaultValue = new Vector4(1.0f, 1.0f, 0.0f, 0.0f);
-                var mainST = this.GetVector4("_MainTex_ST", defaultValue);
+                var mainST = this.source.GetVector4("_MainTex_ST", defaultValue);
                 if (!mainST.Equals(defaultValue))
                 {
                     // values.SetUVTransform("uvTransform", mainST);
-                    this.SetUVTransform("uvTransform", mainST);
+                    this.data.values.SetUVTransform("uvTransform", mainST);
                 }
             }
 
             Color color = Color.white;
             if (source.HasProperty("_TintColor"))
             {
-                color = this.GetColor("_TintColor", Color.white);
+                color = this.source.GetColor("_TintColor", Color.white);
             }
             else if (source.HasProperty("_Color"))
             {
-                color = this.GetColor("_Color", Color.white);
+                color = this.source.GetColor("_Color", Color.white);
             }
-            this.SetColor3AndOpacity(color, Color.white);
+            this.data.values.SetColor3("diffuse", color, Color.white);
+            this.data.values.SetNumber("opacity", color.a, Color.white.a);
         }
 
-        protected  override bool isDoubleSide
+        protected override bool isDoubleSide
         {
             get
             {

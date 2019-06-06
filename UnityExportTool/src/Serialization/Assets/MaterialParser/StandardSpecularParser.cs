@@ -7,17 +7,17 @@ namespace Egret3DExportTools
         {
             // var roughness = this.GetFloat("_Glossiness", 0.0f);
             var roughness = 1.0f;
-            var metalness = this.GetFloat("_Metallic", 0.0f);
-            var emissive = this.GetColor("_EmissionColor", Color.black);
+            var metalness = this.source.GetFloat("_Metallic", 0.0f);
+            var emissive = this.source.GetColor("_EmissionColor", Color.black);
 
-            this.SetColor3("emissive", emissive, Color.black);
-            this.SetFloat("roughness", roughness, 0.5f);
-            this.SetFloat("metalness", metalness, 0.5f);
+            this.data.values.SetColor3("emissive", emissive, Color.black);
+            this.data.values.SetNumber("roughness", roughness, 0.5f);
+            this.data.values.SetNumber("metalness", metalness, 0.5f);
 
-            var specularMap = this.GetTexture("_SpecGlossMap", null);
+            var specularMap = this.source.GetTexture("_SpecGlossMap", null);
             if (specularMap != null)
             {
-                this.SetTexture("specularMap", specularMap);
+                this.data.values.SetTexture("specularMap", specularMap);
             }
         }
     }

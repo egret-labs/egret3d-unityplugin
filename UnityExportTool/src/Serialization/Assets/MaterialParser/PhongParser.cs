@@ -11,41 +11,41 @@ namespace Egret3DExportTools
             var shininess = 30.0f;
             if (this.source.HasProperty("_Shininess"))
             {
-                shininess = this.GetFloat("_Shininess", 30.0f);
+                shininess = this.source.GetFloat("_Shininess", 30.0f);
                 if (shininess > 0.0f)
                 {
                     shininess = 1 / shininess;
                 }
             }
-            this.SetFloat("shininess", shininess, 30.0f);
+            this.data.values.SetNumber("shininess", shininess, 30.0f);
 
-            var specularMap = this.GetTexture("_SpecGlossMap", null);
+            var specularMap = this.source.GetTexture("_SpecGlossMap", null);
             if (specularMap != null)
             {
-                this.SetTexture("specularMap", specularMap);
+                this.data.values.SetTexture("specularMap", specularMap);
             }
-            var aoMap = this.GetTexture("_OcclusionMap", null);
+            var aoMap = this.source.GetTexture("_OcclusionMap", null);
             if (aoMap != null)
             {
-                this.SetTexture("aoMap", aoMap);
-                this.SetFloat("aoMapIntensity", this.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
+                this.data.values.SetTexture("aoMap", aoMap);
+                this.data.values.SetNumber("aoMapIntensity", this.source.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
             }
-            var emissiveMap = this.GetTexture("_EmissionMap", null);
+            var emissiveMap = this.source.GetTexture("_EmissionMap", null);
             if (emissiveMap != null)
             {
-                this.SetTexture("emissiveMap", emissiveMap);
+                this.data.values.SetTexture("emissiveMap", emissiveMap);
             }
-            var normalMap = this.GetTexture("_BumpMap", null);
+            var normalMap = this.source.GetTexture("_BumpMap", null);
             if (normalMap != null)
             {
-                this.SetTexture("normalMap", normalMap);
+                this.data.values.SetTexture("normalMap", normalMap);
             }
-            var displacementMap = this.GetTexture("_ParallaxMap", null);
+            var displacementMap = this.source.GetTexture("_ParallaxMap", null);
             if (displacementMap != null)
             {
-                this.SetTexture("displacementMap", displacementMap);
-                this.SetFloat("displacementScale", this.GetFloat("_Parallax", 1.0f), 1.0f);
-                this.SetFloat("displacementBias", 0.0f, 0.0f);
+                this.data.values.SetTexture("displacementMap", displacementMap);
+                this.data.values.SetNumber("displacementScale", this.source.GetFloat("_Parallax", 1.0f), 1.0f);
+                this.data.values.SetNumber("displacementBias", 0.0f, 0.0f);
             }
         }
     }

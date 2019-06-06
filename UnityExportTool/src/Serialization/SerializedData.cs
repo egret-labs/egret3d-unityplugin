@@ -94,7 +94,7 @@ namespace Egret3DExportTools
                 writer.WriteStartArray();
                 foreach (var p in property)
                 {
-                    this.SerializeProperty("", p, writer);
+                    this.SerializeProperty(string.Empty, p, writer);
                 }
 
                 writer.WriteEndArray();
@@ -110,7 +110,15 @@ namespace Egret3DExportTools
             }
             else if (property.Type == JTokenType.Property)
             {
-                writer.WriteValue((property as JProperty).Value);
+                var value = (property as JProperty).Value;
+                if (value is JContainer)
+                {
+                    this.SerializeProperty(string.Empty, value, writer);
+                }
+                else
+                {
+                    writer.WriteValue(value);
+                }
             }
             else
             {
@@ -133,23 +141,6 @@ namespace Egret3DExportTools
 
         public void Serizile(SerializedData data, JsonWriter writer)
         {
-            // writer.WriteStartObject();
-
-            // writer.WritePropertyName(KEY_UUID);
-            // writer.WriteValue(data.GetUUID(this.GetHashCode()));
-
-            // writer.WritePropertyName(KEY_CLASS);
-            // writer.WriteValue(this.__class);
-
-            // foreach (var name in this.props.Keys)
-            // {
-            //     var propertyValue = this.props[name];
-            //     // Debug.Log("name:" + name + " value:" + propertyValue);
-            //     this.SerializeProperty(name, propertyValue, data, writer);
-            // }
-
-            // writer.WriteEndObject();
-
             writer.WriteStartObject();
 
             writer.WritePropertyName(KEY_UUID);
@@ -161,7 +152,6 @@ namespace Egret3DExportTools
             foreach (var property in this.properties)
             {
                 this.SerializeProperty(property.Key, property.Value, writer);
-
             }
 
             writer.WriteEndObject();
@@ -292,7 +282,7 @@ namespace Egret3DExportTools
             jsonWriter.WriteStartArray();
             foreach (var asset in this.assets)
             {
-                jsonWriter.WriteValue(asset.uri.Replace("Assets", ExportConfig.instance.rootDir));
+                jsonWriter.WriteValue(ExportConfig.instance.GetExportPath(asset.uri));
             }
             jsonWriter.WriteEndArray();
 
@@ -331,7 +321,7 @@ namespace Egret3DExportTools
                 return;
             }
 
-            var path = PathHelper.GetPath(mesh);
+            var path = PathHelper.GetMeshPath(mesh);
             var asset = SerializeObject.SerializeAsset(mesh, path, AssetType.Mesh);
 
             // comp.props["mesh"] = new MyJson_Asset(path);
@@ -354,7 +344,7 @@ namespace Egret3DExportTools
                     continue;
                 }
 
-                var path = PathHelper.GetPath(material);
+                var path = PathHelper.GetMaterialPath(material);
                 var asset = SerializeObject.SerializeAsset(material, path, AssetType.Material);
 
                 // materialsItem.Add(new MyJson_Asset(path));
@@ -372,7 +362,7 @@ namespace Egret3DExportTools
 
             foreach (var animationClip in animationClips)
             {
-                var path = PathHelper.GetPath(animationClip);
+                var path = PathHelper.GetAnimationClipPath(animationClip);
                 var asset = SerializeObject.SerializeAsset(animationClip, path, AssetType.Animation);
 
                 // exportAnimations.Add(new MyJson_Asset(path));
@@ -392,7 +382,7 @@ namespace Egret3DExportTools
             {
                 Texture2D lightmap = lightmapData.lightmapColor;
 
-                var path = PathHelper.GetPath(lightmap);
+                var path = PathHelper.GetTextureDescPath(lightmap);
                 var asset = SerializeObject.SerializeAsset(lightmap, path, AssetType.Texture);
 
                 // lightmapsJson.Add(new MyJson_Asset(path));

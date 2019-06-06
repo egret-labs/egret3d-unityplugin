@@ -15,29 +15,27 @@ namespace Egret3DExportTools
         {
             base.InitGLTFRoot();
 
-            this._root = new GLTFRoot
-            {
-                Accessors = new List<Accessor>(),
-                Asset = new Asset
-                {
-                    Version = "2.0",
-                    Generator = "egret",
-                    Extensions = new Dictionary<string, IExtension>(),
-                },
-                Buffers = new List<GLTF.Schema.Buffer>(),
-                BufferViews = new List<BufferView>(),
-                Meshes = new List<GLTF.Schema.Mesh>()
-            };
+            this._root.ExtensionsRequired.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME);
+            this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
 
-            _root.Asset.Extensions.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
+            this._root.Accessors = new List<Accessor>();
+            this._root.Buffers = new List<GLTF.Schema.Buffer>();
+            this._root.BufferViews = new List<BufferView>();
+            this._root.Meshes = new List<GLTF.Schema.Mesh>();
 
-            _buffer = new GLTF.Schema.Buffer();
-            _bufferId = new BufferId
+            this._root.Asset.Extensions.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
+            
+            
+
+            this._buffer = new GLTF.Schema.Buffer();
+            this._bufferId = new BufferId
             {
-                Id = _root.Buffers.Count,
-                Root = _root
+                Id = this._root.Buffers.Count,
+                Root = this._root
             };
-            _root.Buffers.Add(_buffer);
+            this._root.Buffers.Add(this._buffer);
         }
         protected override void _Serialize(UnityEngine.Object sourceAsset)
         {

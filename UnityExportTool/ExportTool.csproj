@@ -151,9 +151,9 @@
     <Compile Include="src\GLTF\UnityGLTF\UniformMaps\UniformMap.cs" />
     <Compile Include="src\GLTF\UnityGLTF\URIHelper.cs" />
     <Compile Include="src\Helper\Extensions\JsonExtension.cs" />
+    <Compile Include="src\Helper\Extensions\MaterialExtension.cs" />
     <Compile Include="src\Helper\MyLog.cs" />
     <Compile Include="src\Helper\PathHelper.cs" />
-    <Compile Include="src\Helper\ResourceManager.cs" />
     <Compile Include="src\Serialization\AssetSerizlize.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtensionFactory.cs" />

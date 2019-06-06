@@ -24,35 +24,31 @@ namespace Egret3DExportTools
                 string type = materialProperty.type.ToString();
                 if (type == "Float" || type == "Range")
                 {
-                    
-                    // values.SetNumber(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f));
-                    this.SetFloat(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f), null);
+                    this.data.values.SetNumber(materialProperty.name, this.source.GetFloat(materialProperty.name, 0.0f), null);
+                    // this.SetFloat(materialProperty.name, this.GetFloat(materialProperty.name, 0.0f), null);
                 }
                 else if (type == "Vector")
                 {
-                    // values.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
-                    this.SetVector4(materialProperty.name, this.GetVector4(materialProperty.name, Vector4.zero));
+                    this.data.values.SetVector4(materialProperty.name, this.source.GetVector4(materialProperty.name, Vector4.zero));
                 }
                 else if (type == "Color")
                 {
-                    this.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
-                    // values.SetColor(materialProperty.name, this.GetColor(materialProperty.name, Color.white));
+                    this.data.values.SetColor(materialProperty.name, this.source.GetColor(materialProperty.name, Color.white));
                 }
                 else if (type == "Texture")
                 {
-                    var tex = this.GetTexture(materialProperty.name, null);
+                    var tex = this.source.GetTexture(materialProperty.name, null);
                     if (tex != null)
                     {
                         string texdim = materialProperty.textureDimension.ToString();
                         if (texdim == "Tex2D")
                         {
-                            this.SetTexture(materialProperty.name, tex);
+                            this.data.values.SetTexture(materialProperty.name, tex);
 
                             string propertyName = materialProperty.name + "_ST";
                             if (target.HasProperty(propertyName))
                             {
-                                // values.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
-                                this.SetVector4(propertyName, this.GetVector4(propertyName, Vector4.zero));
+                                this.data.values.SetVector4(propertyName, this.source.GetVector4(propertyName, Vector4.zero));
                             }
                         }
                         else

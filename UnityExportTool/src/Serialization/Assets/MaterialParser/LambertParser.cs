@@ -7,21 +7,22 @@ namespace Egret3DExportTools
         public override void CollectUniformValues()
         {
             base.CollectUniformValues();
-            var aoMap = this.GetTexture("_OcclusionMap", null);
+            var aoMap = this.source.GetTexture("_OcclusionMap", null);
             if (aoMap != null)
             {
-                this.SetTexture("aoMap", aoMap);
-                this.SetFloat("aoMapIntensity", this.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
+                this.data.values.SetTexture("aoMap", aoMap);
+                // this.SetFloat("aoMapIntensity", this.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
+                this.data.values.SetNumber("aoMapIntensity", this.source.GetFloat("_OcclusionStrength", 1.0f), 1.0f);
             }
-            var emissiveMap = this.GetTexture("_EmissionMap", null);
+            var emissiveMap = this.source.GetTexture("_EmissionMap", null);
             if (emissiveMap != null)
             {
-                this.SetTexture("emissiveMap", emissiveMap);
+                this.data.values.SetTexture("emissiveMap", emissiveMap);
             }
-            var specGlossMap = this.GetTexture("_SpecGlossMap", null);
+            var specGlossMap = this.source.GetTexture("_SpecGlossMap", null);
             if (specGlossMap != null)
             {
-                this.SetTexture("specularMap", specGlossMap);
+                this.data.values.SetTexture("specularMap", specGlossMap);
             }
         }
     }

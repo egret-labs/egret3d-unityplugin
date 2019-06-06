@@ -15,42 +15,40 @@
         protected override void InitGLTFRoot()
         {
             base.InitGLTFRoot();
-
-            _root = new GLTFRoot
+            
+            this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
+            
+            this._root.Accessors = new List<Accessor>();
+            this._root.Buffers = new List<GLTF.Schema.Buffer>();
+            this._root.BufferViews = new List<BufferView>()
             {
-                Accessors = new List<Accessor>(),
-                Asset = new Asset
-                {
-                    Version = "2.0",
-                    Generator = "egret",
-                },
-                Buffers = new List<GLTF.Schema.Buffer>(),
-                BufferViews = new List<BufferView>() {
-                    new BufferView {
-                        Buffer = new BufferId(){
+                new BufferView
+                 {
+                        Buffer = new BufferId()
+                        {
                             Id = 0,
                             Root = _root,
                         },
                         ByteOffset = 0,
                         ByteLength = 0,
                     }
-                },
-                Nodes = new List<Node>(),
-                Scenes = new List<Scene>() {
-                    new Scene() {
+                };
+            this._root.Nodes = new List<Node>();
+            this._root.Scenes = new List<Scene>(){
+                new Scene() {
                         Nodes = new List<NodeId>(),
                     }
-                },
-                Animations = new List<GLTF.Schema.Animation>(),
             };
+            this._root.Animations = new List<GLTF.Schema.Animation>();
 
-            _buffer = new GLTF.Schema.Buffer();
-            _bufferId = new BufferId
+            this._buffer = new GLTF.Schema.Buffer();
+            this._bufferId = new BufferId
             {
-                Id = _root.Buffers.Count,
-                Root = _root
+                Id = this._root.Buffers.Count,
+                Root = this._root
             };
-            _root.Buffers.Add(_buffer);
+            this._root.Buffers.Add(_buffer);
         }
 
         private UnityEditor.EditorCurveBinding[] _getCurveGroup(UnityEditor.EditorCurveBinding[] curves, UnityEditor.EditorCurveBinding curve)
@@ -168,7 +166,7 @@
         protected override void _Serialize(UnityEngine.Object sourceAsset)
         {
             this._animationClip = sourceAsset as UnityEngine.AnimationClip;
-            
+
             this._animationTargets.Clear();
             this._bufferWriter = new BinaryWriter(new MemoryStream());
 

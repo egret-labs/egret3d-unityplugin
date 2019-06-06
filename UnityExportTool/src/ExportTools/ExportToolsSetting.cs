@@ -68,7 +68,7 @@ namespace Egret3DExportTools
             System.IO.File.WriteAllText(configPath, JsonConvert.SerializeObject(this));
         }
 
-        public CustomShaderConfig getCustomShader(string shaderName)
+        public CustomShaderConfig GetCustomShader(string shaderName)
         {
             if (this.customShaders != null)
             {
@@ -82,6 +82,11 @@ namespace Egret3DExportTools
             }
 
             return null;
+        }
+
+        public string GetExportPath(string path)
+        {
+            return path.Replace("Assets", ExportConfig.instance.rootDir);
         }
     }
 

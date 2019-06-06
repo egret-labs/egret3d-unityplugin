@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 
 public class AssetVersionExtension : IExtension
 {
+    public const string EXTENSION_NAME = "egret";
     public string version = "5.0";
     public string minVersion = "5.0";
 

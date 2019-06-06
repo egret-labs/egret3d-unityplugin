@@ -119,10 +119,8 @@ namespace Egret3DExportTools
             //States
             this.CollectStates();
             //Egret
-            this.data.shaderAsset = this.shaderAsset;
+            this.data.asset.asset = this.shaderAsset;
         }
-
-
 
         public virtual void CollectUniformValues()
         {
@@ -130,31 +128,30 @@ namespace Egret3DExportTools
 
         public virtual void CollectDefines()
         {
-            var defines = this.data.defines;
+            var defines = this.data.asset.defines;
             var cutoff = 0.0f;
             var tag = source.GetTag("RenderType", false, "");
             if (UNITY_RENDER_TYPE.Contains(tag))
             {
                 if (tag == "TransparentCutout")
                 {
-                    cutoff = this.GetFloat("_Cutoff", 0.0f);
+                    cutoff = this.source.GetFloat("_Cutoff", 0.0f);
                 }
             }
             else if (source.HasProperty("_Cutoff"))
             {
-                cutoff = this.GetFloat("_Cutoff", 0.0f);
+                cutoff = this.source.GetFloat("_Cutoff", 0.0f);
             }
             //
             if (cutoff > 0.0f)
             {
                 defines.Add(new Define { name = "ALPHATEST " + cutoff.ToString("0.0####") });
-                // defines.Add("ALPHATEST " + cutoff.ToString("0.0####"));
             }
         }
 
         public virtual void CollectStates()
         {
-            var customConfig = ExportConfig.instance.getCustomShader(this.shaderName);
+            var customConfig = ExportConfig.instance.GetCustomShader(this.shaderName);
             var isDoubleSide = this.isDoubleSide;
             var isTransparent = this.isTransparent;
 
@@ -165,59 +162,45 @@ namespace Egret3DExportTools
                 {
                     foreach (var value in customConfig.enable)
                     {
-                        this.data.enables.Add((EnableState)value);
+                        this.data.technique.states.enable.Add((EnableState)value);
                     }
                     //
                     if (customConfig.blendEquationSeparate != null)
                     {
-                        this.SetBlendEquationSeparate(this.data.functions, customConfig.blendEquationSeparate);
+                        this.SetBlendEquationSeparate(this.data.technique.states.functions, customConfig.blendEquationSeparate);
                     }
                     if (customConfig.blendFuncSeparate != null)
                     {
-                        this.SetBlendFuncSeparate(this.data.functions, customConfig.blendFuncSeparate);
+                        this.SetBlendFuncSeparate(this.data.technique.states.functions, customConfig.blendFuncSeparate);
                     }
                     if (customConfig.frontFace != null)
                     {
-                        this.SetFrontFace(this.data.functions, customConfig.frontFace);
+                        this.SetFrontFace(this.data.technique.states.functions, customConfig.frontFace);
                     }
                     if (customConfig.cullFace != null)
                     {
-                        this.SetCullFace(this.data.functions, customConfig.cullFace);
+                        this.SetCullFace(this.data.technique.states.functions, customConfig.cullFace);
                     }
                     if (customConfig.depthFunc != null)
                     {
-                        this.SetDepthFunc(this.data.functions, customConfig.depthFunc);
+                        this.SetDepthFunc(this.data.technique.states.functions, customConfig.depthFunc);
                     }
                     if (customConfig.depthMask != null)
                     {
-                        this.SetDepthMask(this.data.functions, customConfig.depthMask);
+                        this.SetDepthMask(this.data.technique.states.functions, customConfig.depthMask);
                     }
                 }
                 else
                 {
-                    this.SetBlend(this.data.enables, this.data.functions, blend);
-                    this.SetCull(this.data.enables, this.data.functions, !isDoubleSide);
-                    this.SetDepth(this.data.enables, this.data.functions, true, !isTransparent);
+                    this.SetBlend(this.data.technique.states.enable, this.data.technique.states.functions, blend);
+                    this.SetCull(this.data.technique.states.enable, this.data.technique.states.functions, !isDoubleSide);
+                    this.SetDepth(this.data.technique.states.enable, this.data.technique.states.functions, true, !isTransparent);
                 }
             }
         }
 
         protected void SetBlendEquationSeparate(Functions functions, int[] blendEquationSeparateValue)
         {
-            // var blendEquationSeparate = new MyJson_Array();
-            // foreach (var v in blendEquationSeparateValue)
-            // {
-            //     blendEquationSeparate.AddInt((int)v);
-            // }
-            // functions.Add("blendEquationSeparate", blendEquationSeparate);
-
-
-            // foreach (var v in blendEquationSeparateValue)
-            // {
-
-            //     blendEquationSeparate.AddInt((int)v);
-            // }
-
             functions.blendEquationSeparate = new BlendEquation[blendEquationSeparateValue.Length];
             for (int i = 0; i < blendEquationSeparateValue.Length; i++)
             {
@@ -227,13 +210,6 @@ namespace Egret3DExportTools
 
         protected void SetBlendFuncSeparate(Functions functions, int[] blendFuncSeparateValue)
         {
-            // var blendFuncSeparate = new MyJson_Array();
-            // foreach (var v in blendFuncSeparateValue)
-            // {
-            //     blendFuncSeparate.AddInt((int)v);
-            // }
-            // functions.Add("blendFuncSeparate", blendFuncSeparate);
-
             functions.blendFuncSeparate = new BlendFactor[blendFuncSeparateValue.Length];
             for (int i = 0; i < blendFuncSeparateValue.Length; i++)
             {
@@ -243,13 +219,6 @@ namespace Egret3DExportTools
 
         protected void SetFrontFace(Functions functions, int[] frontFaceValue)
         {
-            // var frontFace = new MyJson_Array();
-            // foreach (var v in frontFaceValue)
-            // {
-            //     frontFace.AddInt(v);
-            // }
-            // functions.Add("frontFace", frontFace);
-
             functions.frontFace = new FrontFace[frontFaceValue.Length];
             for (int i = 0; i < frontFaceValue.Length; i++)
             {
@@ -259,13 +228,6 @@ namespace Egret3DExportTools
 
         protected void SetCullFace(Functions functions, int[] cullFaceValue)
         {
-            // var cullFace = new MyJson_Array();
-            // foreach (var v in cullFaceValue)
-            // {
-            //     cullFace.AddInt(v);
-            // }
-            // functions.Add("cullFace", cullFace);
-
             functions.cullFace = new CullFace[cullFaceValue.Length];
             for (int i = 0; i < cullFaceValue.Length; i++)
             {
@@ -275,13 +237,6 @@ namespace Egret3DExportTools
 
         protected void SetDepthFunc(Functions functions, int[] depthFuncValue)
         {
-            // var depthFunc = new MyJson_Array();
-            // foreach (var v in depthFuncValue)
-            // {
-            //     depthFunc.AddInt(v);
-            // }
-            // functions.Add("depthFunc", depthFunc);
-
             functions.depthFunc = new DepthFunc[depthFuncValue.Length];
             for (int i = 0; i < depthFuncValue.Length; i++)
             {
@@ -291,13 +246,6 @@ namespace Egret3DExportTools
 
         protected void SetDepthMask(Functions functions, int[] depthMaskValue)
         {
-            // var depthMask = new MyJson_Array();
-            // foreach (var v in depthMaskValue)
-            // {
-            //     depthMask.AddBool(v != 0);
-            // }
-            // functions.Add("depthMask", depthMask);
-
             functions.depthMask = new bool[depthMaskValue.Length];
             for (int i = 0; i < depthMaskValue.Length; i++)
             {
@@ -388,173 +336,6 @@ namespace Egret3DExportTools
 
             int[] depthMask = { zWrite ? 1 : 0 };
             this.SetDepthMask(functions, depthMask);
-        }
-
-        protected void SetFloat(string key, float value, float? defalutValue = 0.0f)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetNumber(key, value);
-
-                this.data.values.Add(new JProperty(key, value));
-            }
-        }
-
-        protected void SetColor3(string key, Color value, Color defalutValue)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetColor3(key, value);
-
-                var arr = new JArray();
-                arr.Add(value.r);
-                arr.Add(value.g);
-                arr.Add(value.b);
-
-                this.data.values.Add(new JProperty(key, arr));
-            }
-        }
-
-        protected void SetColor(string key, Color value, Color? defalutValue = null)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetColor3(key, value);
-
-                var arr = new JArray();
-                arr.Add(value.r);
-                arr.Add(value.g);
-                arr.Add(value.b);
-                arr.Add(value.a);
-
-                this.data.values.Add(new JProperty(key, arr));
-            }
-        }
-
-        protected void SetColor3AndOpacity(Color value, Color defalutValue)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetColor3("diffuse", value);
-                // this.data.values.SetNumber("opacity", value.a);
-
-                this.SetColor3("diffuse", value, defalutValue);
-                this.data.values.Add(new JProperty("opacity", value.a));
-            }
-        }
-
-        protected void SetVector2(string key, Vector2 value, Vector2 defalutValue)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetVector2(key, value);
-
-                var arr = new JArray();
-                arr.Add(value.x);
-                arr.Add(value.y);
-
-                this.data.values.Add(new JProperty(key, arr));
-            }
-        }
-
-        protected void SetVector4(string key, Vector4 value, Vector4? defalutValue = null)
-        {
-            if (value != defalutValue)
-            {
-                // this.data.values.SetVector4(key, value);
-
-                var arr = new JArray();
-                arr.Add(value.x);
-                arr.Add(value.y);
-                arr.Add(value.z);
-                arr.Add(value.w);
-
-                this.data.values.Add(new JProperty(key, arr));
-            }
-        }
-
-        protected void SetTexture(string key, Texture value, Texture defalutValue = null)
-        {
-            if (value != defalutValue)
-            {
-                var path = PathHelper.GetPath(value);
-                var assetData = SerializeObject.SerializeAsset(value, path, AssetType.Texture);
-                // this.data.values.SetUri(key, assetData.uri);
-
-                var uri = assetData.uri;
-                uri = uri.Replace("Assets", ExportConfig.instance.rootDir);
-                this.data.values.Add(new JProperty(key, uri));
-
-            }
-        }
-
-        public void SetUVTransform(string key, Vector4 data, int? digits = null)
-        {
-            var tx = data.z;
-            var ty = data.w;
-            var sx = data.x;
-            var sy = data.y;
-            var cx = 0.0f;
-            var cy = 0.0f;
-            var rotation = 0.0f;
-            var c = Math.Cos(rotation);
-            var s = Math.Sin(rotation);
-
-            var arr = new JArray();
-            arr.Add(sx * c);
-            arr.Add(sx * s);
-            arr.Add(-sx * (c * cx + s * cy) + cx + tx);
-            arr.Add(-sy * s);
-            arr.Add(sy * c);
-            arr.Add(-sy * (-s * cx + c * cy) + cy + ty);
-            arr.Add(0.0);
-            arr.Add(0.0);
-            arr.Add(1.0);
-
-            this.data.values.Add(new JProperty(key, arr));
-        }
-
-
-
-
-        protected float GetFloat(string key, float defalutValue)
-        {
-            if (this.source.HasProperty(key))
-            {
-                return this.source.GetFloat(key);
-            }
-
-            return defalutValue;
-        }
-
-        protected Color GetColor(string key, Color defalutValue)
-        {
-            if (this.source.HasProperty(key))
-            {
-                return this.source.GetColor(key);
-            }
-
-            return defalutValue;
-        }
-
-        protected Vector4 GetVector4(string key, Vector4 defalutValue)
-        {
-            if (this.source.HasProperty(key))
-            {
-                return this.source.GetVector(key);
-            }
-
-            return defalutValue;
-        }
-
-        protected Texture GetTexture(string key, Texture defalutValue)
-        {
-            if (this.source.HasProperty(key))
-            {
-                return this.source.GetTexture(key);
-            }
-
-            return defalutValue;
         }
 
         protected virtual bool isDoubleSide
