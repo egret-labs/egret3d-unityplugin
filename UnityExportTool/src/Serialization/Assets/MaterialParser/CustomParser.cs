@@ -21,7 +21,6 @@ namespace Egret3DExportTools
                     continue;
                 }
 
-                var uniform = new MyJson_Tree();
                 string type = materialProperty.type.ToString();
                 if (type == "Float" || type == "Range")
                 {

@@ -74,7 +74,7 @@ namespace Egret3DExportTools
                 SerializeObject.assetsData.Add(path, assetData);
             }
 
-            ResourceManager.instance.AddFileBuffer(path, bs);
+            // ResourceManager.instance.AddFileBuffer(path, bs);
         }
 
         protected override void _Serialize(UnityEngine.Object sourceAsset)

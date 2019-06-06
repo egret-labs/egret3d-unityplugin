@@ -10,7 +10,7 @@ namespace Egret3DExportTools
         {
             string sceneName = PathHelper.CurSceneName;
             ExportImageTools.instance.Clear();
-            ResourceManager.instance.Clean();
+            // ResourceManager.instance.Clean();
             SerializeObject.Clear();
 
             SerializeObject.currentData.Clear();
@@ -22,37 +22,47 @@ namespace Egret3DExportTools
 
             var entity = SerializeObject.currentData.CreateEntity();
 
-            var sceneComp = ComponentData.Create(SerializeClass.Scene);
-            sceneComp.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
+            var sceneComp = SerializeObject.currentData.CreateComponent(SerializeClass.Scene);
+            sceneComp.properties.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
+            // sceneComp.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
             entity.AddComponent(sceneComp);
 
-            var treeComp = ComponentData.Create(SerializeClass.TreeNode);
-            treeComp.SetString("name", "Root");
+            var treeComp = SerializeObject.currentData.CreateComponent(SerializeClass.TreeNode);
+            treeComp.properties.SetString("name", "Root");
+            // treeComp.SetString("name", "Root");
             entity.AddComponent(treeComp);
 
             // 环境光和光照贴图
-            var sceneLightComp = ComponentData.Create(SerializeClass.SceneLight);
-            sceneLightComp.SetColor("ambientColor", RenderSettings.ambientLight);
-            sceneLightComp.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
+            var sceneLightComp = SerializeObject.currentData.CreateComponent(SerializeClass.SceneLight);
+            sceneLightComp.properties.SetColor("ambientColor", RenderSettings.ambientLight);
+            sceneLightComp.properties.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
+            // sceneLightComp.SetColor("ambientColor", RenderSettings.ambientLight);
+            // sceneLightComp.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
             sceneLightComp.SetLightmaps(exportPath);
             entity.AddComponent(sceneLightComp);
 
             // 雾
             if (RenderSettings.fog)
             {
-                var fogComp = ComponentData.Create(SerializeClass.Fog);
+                var fogComp = SerializeObject.currentData.CreateComponent(SerializeClass.Fog);
                 if (RenderSettings.fogMode == FogMode.Linear)
                 {
-                    fogComp.SetInt("mode", 0);
-                    fogComp.SetNumber("near", RenderSettings.fogStartDistance);
-                    fogComp.SetNumber("far", RenderSettings.fogEndDistance);
+                    fogComp.properties.SetInt("mode", 0);
+                    fogComp.properties.SetNumber("near", RenderSettings.fogStartDistance);
+                    fogComp.properties.SetNumber("far", RenderSettings.fogEndDistance);
+                    // fogComp.SetInt("mode", 0);
+                    // fogComp.SetNumber("near", RenderSettings.fogStartDistance);
+                    // fogComp.SetNumber("far", RenderSettings.fogEndDistance);
                 }
                 else
                 {
-                    fogComp.SetInt("mode", 1);
-                    fogComp.SetNumber("density", RenderSettings.fogDensity);
+                    fogComp.properties.SetInt("mode", 1);
+                    fogComp.properties.SetNumber("far", RenderSettings.fogDensity);
+                    // fogComp.SetInt("mode", 1);
+                    // fogComp.SetNumber("density", RenderSettings.fogDensity);
                 }
-                fogComp.SetColor("color", RenderSettings.fogColor);
+                fogComp.properties.SetColor("color", RenderSettings.fogColor);
+                // fogComp.SetColor("color", RenderSettings.fogColor); 
                 entity.AddComponent(fogComp);
             }
 

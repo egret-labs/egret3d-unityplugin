@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class TransformSerializer : ComponentSerializer
     {
-        public override bool Serialize(Component component, ComponentData compData)
+        public override void Serialize(Component component, ComponentData compData)
         {
             var obj = component.gameObject;
             Transform comp = component as Transform;
@@ -14,16 +14,16 @@ namespace Egret3DExportTools
             Quaternion localRotation = comp.localRotation;
             Vector3 localScale = comp.localScale;
 
-            compData.SetString("name", obj.name);
-            compData.SetString("tag", obj.tag);
-            compData.SetInt("layer", 1 << obj.layer);
-            compData.SetBool("isStatic", obj.isStatic);
+            compData.properties.SetString("name", obj.name);
+            compData.properties.SetString("tag", obj.tag);
+            compData.properties.SetInt("layer", 1 << obj.layer);
+            compData.properties.SetBool("isStatic", obj.isStatic);
             //localPosition
-            compData.SetVector3("_localPosition", localPosition);
+            compData.properties.SetVector3("_localPosition", localPosition);
             //localRotation
-            compData.SetQuaternion("_localRotation", localRotation);
+            compData.properties.SetQuaternion("_localRotation", localRotation);
             //localScale
-            compData.SetVector3("_localScale", localScale);
+            compData.properties.SetVector3("_localScale", localScale);
 
             if (comp.childCount > 0)
             {
@@ -37,7 +37,6 @@ namespace Egret3DExportTools
                     }
                 }
             }
-            return true;
         }
     }
 }

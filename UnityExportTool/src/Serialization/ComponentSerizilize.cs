@@ -9,7 +9,8 @@ namespace Egret3DExportTools
     {
         Type compType { set; get; }
         string className { set; get; }
-        bool Serialize(Component component, ComponentData compData);
+        bool Match(Component component);
+        void Serialize(Component component, ComponentData compData);
     }
 
     public abstract class ComponentSerializer : IComponentSerializer
@@ -17,9 +18,13 @@ namespace Egret3DExportTools
         protected Type _compType;
         protected string _className;
 
-        public virtual bool Serialize(Component component, ComponentData compData)
+        public virtual bool Match(Component component)
         {
             return true;
+        }
+
+        public virtual void Serialize(Component component, ComponentData compData)
+        {
         }
 
         public Type compType { get => _compType; set => _compType = value; }

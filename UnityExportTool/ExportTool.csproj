@@ -151,8 +151,7 @@
     <Compile Include="src\GLTF\UnityGLTF\UniformMaps\UniformMap.cs" />
     <Compile Include="src\GLTF\UnityGLTF\URIHelper.cs" />
     <Compile Include="src\Helper\Extensions\BitExtension.cs" />
-    <Compile Include="src\Helper\Extensions\MyJosnExtension.cs" />
-    <Compile Include="src\Helper\JsonParser\MyJson.cs" />
+    <Compile Include="src\Helper\Extensions\JsonExtension.cs" />
     <Compile Include="src\Helper\MyLog.cs" />
     <Compile Include="src\Helper\PathHelper.cs" />
     <Compile Include="src\Helper\ResourceManager.cs" />

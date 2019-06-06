@@ -3,6 +3,7 @@ namespace Egret3DExportTools
     using System.Collections.Generic;
     using System.IO;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using UnityEngine;
 
     public interface ISerizileData
@@ -20,6 +21,7 @@ namespace Egret3DExportTools
         public const string KEY_ASSET = "__asset";
         public const string KEY_EXTRAS = "__extras";
 
+        public SerializedData data;
 
         protected string _uuid;
         protected string _className;
@@ -78,73 +80,76 @@ namespace Egret3DExportTools
     public class ComponentData : SerizileData
     {
         public EntityData entity;
-        public Dictionary<string, IJsonNode> props = new Dictionary<string, IJsonNode>();
-        public static ComponentData Create(string className)
+        public JObject properties = new JObject();
+        private void SerializeProperty(string name, JToken property, JsonWriter writer)
         {
-            ComponentData comp = new ComponentData();
-            comp.__class = className;
-            return comp;
-        }
-
-        private void SerializeProperty(string name, IJsonNode propertyValue, SerializedData data, JsonWriter writer)
-        {
-            if(name != string.Empty)
+            // Debug.Log("name:" + name + " value:" + property + " type:" + property.Type);
+            if (name != string.Empty)
             {
                 writer.WritePropertyName(name);
             }
-            
-            if (propertyValue is MyJson_Reference)
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName(KEY_UUID);
-                writer.WriteValue(data.GetUUID(propertyValue.value.GetHashCode()));
-                writer.WriteEndObject();
-            }
-            else if (propertyValue is MyJson_Asset)
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName(KEY_ASSET);
-                writer.WriteValue(data.GetAssetIndex((string)propertyValue.value));
-                writer.WriteEndObject();
-            }
-            else if (propertyValue is MyJson_Tree)
-            {
-                var dic = propertyValue as Dictionary<string, IJsonNode>;
-                writer.WriteStartObject();
-                foreach (var item in dic)
-                {
-                    this.SerializeProperty(item.Key, item.Value, data, writer);
-                }
-                writer.WriteEndObject();
-            }
-            else if (propertyValue is MyJson_Array)
+
+            if (property.Type == JTokenType.Array)
             {
                 writer.WriteStartArray();
-                foreach (var json in (propertyValue as List<IJsonNode>))
+                foreach (var p in property)
                 {
-                    this.SerializeProperty(string.Empty, json, data, writer);
+                    this.SerializeProperty("", p, writer);
                 }
+
                 writer.WriteEndArray();
+            }
+            else if (property.Type == JTokenType.Object)
+            {
+                writer.WriteStartObject();
+                foreach (JProperty p in property)
+                {
+                    this.SerializeProperty(p.Name, p, writer);
+                }
+                writer.WriteEndObject();
+            }
+            else if (property.Type == JTokenType.Property)
+            {
+                writer.WriteValue((property as JProperty).Value);
             }
             else
             {
-                writer.WriteValue(propertyValue.value);
+                writer.WriteValue(property);
             }
         }
 
         public void AddChild(ComponentData child)
         {
-            IJsonNode children;
-            if (!this.props.TryGetValue(KEY_CHILDREN, out (children)))
+            JToken children;
+            if (!this.properties.TryGetValue(KEY_CHILDREN, out children))
             {
-                children = new MyJson_Array();
-                this.props.Add(KEY_CHILDREN, children);
+                children = new JArray();
+                this.properties.Add(KEY_CHILDREN, children);
             }
-            (children as MyJson_Array).Add(new MyJson_Reference(child));
+
+            (children as JArray).Add(new JObject(new JProperty(KEY_UUID, child.uuid)));
         }
+
 
         public void Serizile(SerializedData data, JsonWriter writer)
         {
+            // writer.WriteStartObject();
+
+            // writer.WritePropertyName(KEY_UUID);
+            // writer.WriteValue(data.GetUUID(this.GetHashCode()));
+
+            // writer.WritePropertyName(KEY_CLASS);
+            // writer.WriteValue(this.__class);
+
+            // foreach (var name in this.props.Keys)
+            // {
+            //     var propertyValue = this.props[name];
+            //     // Debug.Log("name:" + name + " value:" + propertyValue);
+            //     this.SerializeProperty(name, propertyValue, data, writer);
+            // }
+
+            // writer.WriteEndObject();
+
             writer.WriteStartObject();
 
             writer.WritePropertyName(KEY_UUID);
@@ -153,11 +158,10 @@ namespace Egret3DExportTools
             writer.WritePropertyName(KEY_CLASS);
             writer.WriteValue(this.__class);
 
-            foreach (var name in this.props.Keys)
+            foreach (var property in this.properties)
             {
-                var propertyValue = this.props[name];
-                // Debug.Log("name:" + name + " value:" + propertyValue);
-                this.SerializeProperty(name, propertyValue, data, writer);
+                this.SerializeProperty(property.Key, property.Value, writer);
+
             }
 
             writer.WriteEndObject();
@@ -224,12 +228,22 @@ namespace Egret3DExportTools
         public EntityData CreateEntity()
         {
             var entity = new EntityData();
+            entity.data = this;
+            entity.uuid = this.GetUUID(entity.GetHashCode());
             entity.__class = SerializeClass.GameEntity;
             this.entities.Add(entity);
             return entity;
         }
 
-        public void AddAsset(AssetData asset)
+        public ComponentData CreateComponent(string className)
+        {
+            ComponentData comp = new ComponentData();
+            comp.uuid = this.GetUUID(comp.GetHashCode());
+            comp.__class = className;
+            return comp;
+        }
+
+        public int AddAsset(AssetData asset)
         {
             for (int i = 0, l = this.assets.Count; i < l; i++)
             {
@@ -237,11 +251,13 @@ namespace Egret3DExportTools
                 if (item.uri == asset.uri)
                 {
                     this.assets[i] = asset;
-                    return;
+                    return i;
                 }
             }
 
             this.assets.Add(asset);
+
+            return this.assets.Count - 1;
         }
 
         public AssetData CreateAsset(string uri)
@@ -308,160 +324,6 @@ namespace Egret3DExportTools
 
     public static class ComponentDataWriter
     {
-
-        public static void SetInt(this ComponentData comp, string key, int value)
-        {
-            comp.props[key] = new MyJson_Number(value);
-        }
-        public static void SetNumber(this ComponentData comp, string key, float value, int? digits = null)
-        {
-            comp.props[key] = new MyJson_Number(System.Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
-        }
-        public static void SetNumber(this ComponentData comp, string key, double value, int? digits = null)
-        {
-            comp.props[key] = new MyJson_Number(System.Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
-        }
-        public static void SetString(this ComponentData comp, string key, string value)
-        {
-            comp.props[key] = new MyJson_String(value);
-        }
-        public static void SetReference(this ComponentData comp, string key, System.Object value)
-        {
-            comp.props[key] = new MyJson_Reference(value);
-        }
-        public static void SetBool(this ComponentData comp, string key, bool value)
-        {
-            comp.props[key] = new MyJson_Number(value);
-        }
-        public static void SetEnum(this ComponentData comp, string key, System.Enum value, bool toString = false)
-        {
-            if (toString)
-            {
-                comp.props[key] = new MyJson_String(value);
-            }
-            else
-            {
-                comp.props[key] = new MyJson_Number(value);
-            }
-        }
-
-        //-------------------------------扩展部分--------------------------------
-        /**
-         * 组件的公共部分，Vector2
-         */
-        public static void SetVector2(this ComponentData comp, string desc, UnityEngine.Vector2 data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.x, digits);
-            cItemArr.AddNumber(data.y, digits);
-            comp.props[desc] = cItemArr;
-        }
-        /**
-         * 组件的公共部分，Vector3
-         */
-        public static void SetVector3(this ComponentData comp, string desc, UnityEngine.Vector3 data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.x, digits);
-            cItemArr.AddNumber(data.y, digits);
-            cItemArr.AddNumber(data.z, digits);
-            comp.props[desc] = cItemArr;
-        }
-        /**
-         * 组件的公共部分 Vector4
-         */
-        public static void SetVector4(this ComponentData comp, string desc, UnityEngine.Vector4 data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.x, digits);
-            cItemArr.AddNumber(data.y, digits);
-            cItemArr.AddNumber(data.z, digits);
-            cItemArr.AddNumber(data.w, digits);
-
-            comp.props[desc] = cItemArr;
-        }
-        /**
-         * 组件的公共部分 Quaternion
-         */
-        public static void SetQuaternion(this ComponentData comp, string desc, UnityEngine.Quaternion data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.x, digits);
-            cItemArr.AddNumber(data.y, digits);
-            cItemArr.AddNumber(data.z, digits);
-            cItemArr.AddNumber(data.w, digits);
-
-            comp.props[desc] = cItemArr;
-        }
-        /**
-         * 组件的公共部分 Color
-         */
-        public static void SetColor(this ComponentData comp, string desc, UnityEngine.Color data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.r, digits);
-            cItemArr.AddNumber(data.g, digits);
-            cItemArr.AddNumber(data.b, digits);
-            cItemArr.AddNumber(data.a, digits);
-
-            comp.props[desc] = cItemArr;
-        }
-        public static void SetColor3(this ComponentData comp, string desc, UnityEngine.Color data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.r, digits);
-            cItemArr.AddNumber(data.g, digits);
-            cItemArr.AddNumber(data.b, digits);
-
-            comp.props[desc] = cItemArr;
-        }
-        /**
-         * 组件的公共部分 Rect
-         */
-        public static void SetRect(this ComponentData comp, string desc, UnityEngine.Rect data, int? digits = null)
-        {
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(data.x, digits);
-            cItemArr.AddNumber(data.y, digits);
-            cItemArr.AddNumber(data.width, digits);
-            cItemArr.AddNumber(data.height, digits);
-
-            comp.props[desc] = cItemArr;
-        }
-        public static void SetUVTransform(this ComponentData comp, string desc, UnityEngine.Vector4 data, int? digits = null)
-        {
-            var tx = data.z;
-            var ty = data.w;
-            var sx = data.x;
-            var sy = data.y;
-            var cx = 0.0f;
-            var cy = 0.0f;
-            var rotation = 0.0f;
-            var c = System.Math.Cos(rotation);
-            var s = System.Math.Sin(rotation);
-
-            MyJson_Array cItemArr = new MyJson_Array();
-            cItemArr.AddNumber(sx * c);
-            cItemArr.AddNumber(sx * s);
-            cItemArr.AddNumber(-sx * (c * cx + s * cy) + cx + tx);
-            cItemArr.AddNumber(-sy * s);
-            cItemArr.AddNumber(sy * c);
-            cItemArr.AddNumber(-sy * (-s * cx + c * cy) + cy + ty);
-            cItemArr.AddNumber(0.0);
-            cItemArr.AddNumber(0.0);
-            cItemArr.AddNumber(1.0);
-
-            comp.props[desc] = cItemArr;
-        }
-
-        public static void SetTexture(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.Texture2D texture)
-        {
-            if (texture == null)
-            {
-                return;
-            }
-        }
-
         public static void SetMesh(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.Mesh mesh)
         {
             if (mesh == null)
@@ -472,15 +334,17 @@ namespace Egret3DExportTools
             var path = PathHelper.GetPath(mesh);
             var asset = SerializeObject.SerializeAsset(mesh, path, AssetType.Mesh);
 
-            comp.props["mesh"] = new MyJson_Asset(path);
+            // comp.props["mesh"] = new MyJson_Asset(path);
 
-            SerializeObject.currentData.AddAsset(asset);
+            var assetIndex = SerializeObject.currentData.AddAsset(asset);
+            comp.properties.SetAsset("mesh", assetIndex);
         }
 
         public static void SetMaterials(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
         {
-            var materialsItem = new MyJson_Array();
-            comp.props["materials"] = materialsItem;
+            var materialsItem = new JArray();
+            comp.properties.Add("materials", materialsItem);
+            // comp.props["materials"] = materialsItem;
             //写材质
             foreach (var material in materials)
             {
@@ -493,30 +357,37 @@ namespace Egret3DExportTools
                 var path = PathHelper.GetPath(material);
                 var asset = SerializeObject.SerializeAsset(material, path, AssetType.Material);
 
-                materialsItem.Add(new MyJson_Asset(path));
+                // materialsItem.Add(new MyJson_Asset(path));
+                // SerializeObject.currentData.AddAsset(asset);
 
-                SerializeObject.currentData.AddAsset(asset);
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                materialsItem.AddAsset(assetIndex);
             }
         }
         public static void SetAnimation(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.AnimationClip[] animationClips)
         {
-            var exportAnimations = new MyJson_Array();
-            comp.props["_animations"] = exportAnimations;
+            var exportAnimations = new JArray();
+            comp.properties.Add("_animations", exportAnimations);
+            // comp.props["_animations"] = exportAnimations;
 
             foreach (var animationClip in animationClips)
             {
                 var path = PathHelper.GetPath(animationClip);
                 var asset = SerializeObject.SerializeAsset(animationClip, path, AssetType.Animation);
 
-                exportAnimations.Add(new MyJson_Asset(path));
+                // exportAnimations.Add(new MyJson_Asset(path));
+                // SerializeObject.currentData.AddAsset(asset);
 
-                SerializeObject.currentData.AddAsset(asset);
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                exportAnimations.AddAsset(assetIndex);
             }
         }
 
         public static void SetLightmaps(this ComponentData comp, string exportPath)
         {
-            var lightmapsJson = new MyJson_Array();
+            var lightmapsJson = new JArray();
+            comp.properties.Add("lightmaps", lightmapsJson);
+            // comp.props["lightmaps"] = lightmapsJson;
             foreach (var lightmapData in LightmapSettings.lightmaps)
             {
                 Texture2D lightmap = lightmapData.lightmapColor;
@@ -524,11 +395,13 @@ namespace Egret3DExportTools
                 var path = PathHelper.GetPath(lightmap);
                 var asset = SerializeObject.SerializeAsset(lightmap, path, AssetType.Texture);
 
-                lightmapsJson.Add(new MyJson_Asset(path));
-                SerializeObject.currentData.AddAsset(asset);
+                // lightmapsJson.Add(new MyJson_Asset(path));
+                // SerializeObject.currentData.AddAsset(asset);
+
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                lightmapsJson.AddAsset(assetIndex);
             }
 
-            comp.props["lightmaps"] = lightmapsJson;
         }
     }
 }

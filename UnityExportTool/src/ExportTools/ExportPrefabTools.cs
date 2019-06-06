@@ -9,7 +9,7 @@ namespace Egret3DExportTools
          */
         public static void ExportPrefab(GameObject curObj, string exportPath = "")
         {
-            ResourceManager.instance.Clean();
+            // ResourceManager.instance.Clean();
             string prefabPath = "Assets/" + curObj.name + ".prefab.json";
             //如果是Unity预制体那么就导出所在目录，如果是场景的一个普通GameObject,那么导出Assets下
             if (UnityEditor.PrefabUtility.GetPrefabType(curObj) == UnityEditor.PrefabType.PrefabInstance)
@@ -28,7 +28,7 @@ namespace Egret3DExportTools
 
             // SerializeObject.Serialize(curObj);
             curObj.transform.localPosition = savePosition;
-            ResourceManager.instance.ExportFiles(prefabPath, exportPath);
+            // ResourceManager.instance.ExportFiles(prefabPath, exportPath);
         }
     }
 }

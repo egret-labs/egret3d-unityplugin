@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace Egret3DExportTools
 {
     public class ParticleSystemSerializer : ComponentSerializer
     {
-        public override bool Serialize(Component component, ComponentData compData)
+        public override bool Match(Component component)
         {
             var obj = component.gameObject;
             ParticleSystem comp = component as ParticleSystem;
@@ -15,11 +16,19 @@ namespace Egret3DExportTools
                 return false;
             }
 
+            return true;
+        }
+        public override void Serialize(Component component, ComponentData compData)
+        {
+            var obj = component.gameObject;
+            ParticleSystem comp = component as ParticleSystem;
+
             //main
             {
                 var main = comp.main;
-                var mainItem = new MyJson_Tree(false);
-                compData.props["main"] = mainItem;
+                var mainItem = new JObject();
+                compData.properties.Add("main", mainItem);
+                // compData.props["main"] = mainItem;
                 mainItem.SetNumber("duration", main.duration);
                 mainItem.SetBool("loop", main.loop);
                 this.AddMinMaxCurve(mainItem, "startDelay", main.startDelay);
@@ -73,28 +82,29 @@ namespace Egret3DExportTools
 
             //emission
             {
-                var emissionItem = new MyJson_Tree(false);
-                compData.props["emission"] = emissionItem;
+                var emissionItem = new JObject();
+                compData.properties.Add("emission", emissionItem);
                 this.AddMinMaxCurve(emissionItem, "rateOverTime", comp.emission.rateOverTime);
-                emissionItem["bursts"] = new MyJson_Array();
+                var burstsArr = new JArray();
+                emissionItem.Add("bursts", burstsArr);
                 var bursts = new ParticleSystem.Burst[comp.emission.burstCount];
                 comp.emission.GetBursts(bursts);
                 foreach (var burst in bursts)
                 {
-                    MyJson_Array burstItem = new MyJson_Array();
+                    JArray burstItem = new JArray();
                     burstItem.AddNumber(burst.time);
                     burstItem.AddInt(burst.minCount);
                     burstItem.AddInt(burst.maxCount);
                     burstItem.AddInt(burst.cycleCount);
                     burstItem.AddNumber(burst.repeatInterval);
-                    (emissionItem["bursts"] as MyJson_Array).Add(burstItem);
+                    burstsArr.Add(burstItem);
                 }
             }
             //shape
             if (comp.shape.enabled)
             {
-                var shapItem = new MyJson_Tree(false);
-                compData.props["shape"] = shapItem;
+                var shapItem = new JObject();
+                compData.properties.Add("shape", shapItem);
                 shapItem.SetEnum("shapeType", comp.shape.shapeType);
                 shapItem.SetNumber("angle", comp.shape.angle);
                 shapItem.SetNumber("length", comp.shape.length);
@@ -112,8 +122,8 @@ namespace Egret3DExportTools
             //velocityOverLifetiem
             if (comp.velocityOverLifetime.enabled)
             {
-                var velocityOverItem = new MyJson_Tree(false);
-                compData.props["velocityOverLifetime"] = velocityOverItem;
+                var velocityOverItem = new JObject();
+                compData.properties.Add("velocityOverLifetime", velocityOverItem);
                 velocityOverItem.SetEnum("_mode", comp.velocityOverLifetime.x.mode);
                 velocityOverItem.SetEnum("_space", comp.velocityOverLifetime.space);
                 this.AddMinMaxCurve(velocityOverItem, "_x", comp.velocityOverLifetime.x);
@@ -123,15 +133,15 @@ namespace Egret3DExportTools
             //colorOverLifetime
             if (comp.colorOverLifetime.enabled)
             {
-                var colorOverItem = new MyJson_Tree(false);
-                compData.props["colorOverLifetime"] = colorOverItem;
+                var colorOverItem = new JObject();
+                compData.properties.Add("colorOverLifetime", colorOverItem);
                 this.AddMinMaxGradient(colorOverItem, "_color", comp.colorOverLifetime.color);
             }
             //sizeOverLifetime
             if (comp.sizeOverLifetime.enabled)
             {
-                var sizeOverItem = new MyJson_Tree(false);
-                compData.props["sizeOverLifetime"] = sizeOverItem;
+                var sizeOverItem = new JObject();
+                compData.properties.Add("sizeOverLifetime", sizeOverItem);
                 sizeOverItem.SetBool("_separateAxes", comp.sizeOverLifetime.separateAxes);
                 this.AddMinMaxCurve(sizeOverItem, "_size", comp.sizeOverLifetime.size);
                 this.AddMinMaxCurve(sizeOverItem, "_x", comp.sizeOverLifetime.x);
@@ -141,8 +151,8 @@ namespace Egret3DExportTools
             //rotationOverLifetime
             if (comp.rotationOverLifetime.enabled)
             {
-                var rotationOverItem = new MyJson_Tree(false);
-                compData.props["rotationOverLifetime"] = rotationOverItem;
+                var rotationOverItem = new JObject();
+                compData.properties.Add("rotationOverLifetime", rotationOverItem);
                 rotationOverItem.SetBool("_separateAxes", comp.rotationOverLifetime.separateAxes);
                 this.AddMinMaxCurve(rotationOverItem, "_x", comp.rotationOverLifetime.x);
                 this.AddMinMaxCurve(rotationOverItem, "_y", comp.rotationOverLifetime.y);
@@ -151,8 +161,8 @@ namespace Egret3DExportTools
             //textureSheetAnimationModule
             if (comp.textureSheetAnimation.enabled)
             {
-                var textureSheetAnimation = new MyJson_Tree(false);
-                compData.props["textureSheetAnimation"] = textureSheetAnimation;
+                var textureSheetAnimation = new JObject();
+                compData.properties.Add("textureSheetAnimation", textureSheetAnimation);
                 textureSheetAnimation.SetInt("_numTilesX", comp.textureSheetAnimation.numTilesX);
                 textureSheetAnimation.SetInt("_numTilesY", comp.textureSheetAnimation.numTilesY);
                 textureSheetAnimation.SetEnum("_animation", comp.textureSheetAnimation.animation);
@@ -162,8 +172,6 @@ namespace Egret3DExportTools
                 this.AddMinMaxCurve(textureSheetAnimation, "_frameOverTime", comp.textureSheetAnimation.frameOverTime, comp.textureSheetAnimation.numTilesX * comp.textureSheetAnimation.numTilesY);
                 this.AddMinMaxCurve(textureSheetAnimation, "_startFrame", comp.textureSheetAnimation.startFrame);
             }
-
-            return true;
         }
         /**
         *获取生命周期内爆发的粒子总数
@@ -255,9 +263,9 @@ namespace Egret3DExportTools
             return main.maxParticles > estimateValue ? estimateValue : main.maxParticles;
         }
 
-        protected void AddMinMaxCurve(MyJson_Tree compItem, string key, ParticleSystem.MinMaxCurve curve, float scale = 1.0f)
+        protected void AddMinMaxCurve(JObject compItem, string key, ParticleSystem.MinMaxCurve curve, float scale = 1.0f)
         {
-            MyJson_Tree curveItem = new MyJson_Tree(false);
+            JObject curveItem = new JObject();
             curveItem.SetEnum("mode", curve.mode);
             switch (curve.mode)
             {
@@ -277,12 +285,12 @@ namespace Egret3DExportTools
                     break;
             }
 
-            compItem[key] = curveItem;
+            compItem.Add(key, curveItem);
         }
 
-        protected void AddMinMaxGradient(MyJson_Tree compItem, string key, ParticleSystem.MinMaxGradient gradient)
+        protected void AddMinMaxGradient(JObject compItem, string key, ParticleSystem.MinMaxGradient gradient)
         {
-            MyJson_Tree gradientItem = new MyJson_Tree(false);
+            JObject gradientItem = new JObject();
             gradientItem.SetEnum("mode", gradient.mode);
 
             switch (gradient.mode)
@@ -303,20 +311,20 @@ namespace Egret3DExportTools
                     break;
             }
 
-            compItem[key] = gradientItem;
+            compItem.Add(key, gradientItem);
         }
 
-        protected void AddCurve(MyJson_Tree curveItem, string key, Keyframe[] keys)
+        protected void AddCurve(JObject curveItem, string key, Keyframe[] keys)
         {
-            MyJson_Array frmes = new MyJson_Array();
+            JArray frmes = new JArray();
             foreach (Keyframe k in keys)
             {
-                MyJson_Array keyItem = new MyJson_Array();
+                JArray keyItem = new JArray();
                 keyItem.AddNumber(k.time);
                 keyItem.AddNumber(k.value);
                 frmes.Add(keyItem);
             }
-            curveItem[key] = frmes;
+            curveItem.Add(key, frmes);
         }
 
         protected Keyframe[] FillCurve(AnimationCurve curve, float scale)
@@ -443,23 +451,23 @@ namespace Egret3DExportTools
             return res;
         }
 
-        protected void AddGradient(MyJson_Tree gradientItem, string key, Gradient gradient)
+        protected void AddGradient(JObject gradientItem, string key, Gradient gradient)
         {
             //alpha和color过渡值最大为4，如果不够手动填充,如果超过，中间的截掉
             GradientAlphaKey[] alphaKeys = this.FillGradientAlpha(gradient);
             GradientColorKey[] colorKeys = this.FillGradientColor(gradient);
 
-            MyJson_Tree gradients = new MyJson_Tree(false);
+            JObject gradients = new JObject();
             gradients.SetEnum("mode", gradient.mode);
-            var alphaKeysItem = new MyJson_Array();
-            var colorKeysItem = new MyJson_Array();
-            gradients["alphaKeys"] = alphaKeysItem;
-            gradients["colorKeys"] = colorKeysItem;
+            var alphaKeysItem = new JArray();
+            var colorKeysItem = new JArray();
+            gradients.Add("alphaKeys", alphaKeysItem);
+            gradients.Add("colorKeys", colorKeysItem);
 
             //alphaKey
             foreach (GradientAlphaKey _ak in alphaKeys)
             {
-                MyJson_Tree akItem = new MyJson_Tree(false);
+                JObject akItem = new JObject();
                 int akHash = akItem.GetHashCode();
                 akItem.SetNumber("alpha", _ak.alpha);
                 akItem.SetNumber("time", _ak.time);
@@ -469,14 +477,14 @@ namespace Egret3DExportTools
             //colorKey
             foreach (GradientColorKey _ck in colorKeys)
             {
-                MyJson_Tree ckItem = new MyJson_Tree(false);
+                JObject ckItem = new JObject();
                 int ckHash = ckItem.GetHashCode();
                 ckItem.SetColor("color", _ck.color);
                 ckItem.SetNumber("time", _ck.time);
                 colorKeysItem.Add(ckItem);
             }
 
-            gradientItem[key] = gradients;
+            gradientItem.Add(key, gradients);
         }
     }
 }

@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
 using System;
+using Newtonsoft.Json.Linq;
 namespace Egret3DExportTools
 {
     public class BoxColliderSerializer : ComponentSerializer
     {
-        public override bool Serialize(Component component, ComponentData compData)
+        public override void Serialize(Component component, ComponentData compData)
         {
             BoxCollider comp = component as BoxCollider;
 
             var halfSize = comp.size * 0.5f;
             var minimum = comp.center - halfSize;
             var maximum = comp.center + halfSize;
-            MyJson_Array aabbItem = new MyJson_Array();
+            JArray aabbItem = new JArray();
             aabbItem.AddNumber(minimum.x);
             aabbItem.AddNumber(minimum.y);
             aabbItem.AddNumber(minimum.z);
@@ -19,8 +20,7 @@ namespace Egret3DExportTools
             aabbItem.AddNumber(maximum.y);
             aabbItem.AddNumber(maximum.z);
             
-            compData.props.Add("aabb", aabbItem);
-            return true;
+            compData.properties.Add("aabb", aabbItem);
         }
     }
 }
