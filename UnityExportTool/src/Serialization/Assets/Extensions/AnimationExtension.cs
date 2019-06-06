@@ -44,12 +44,12 @@
             JObject ext = new JObject();
 
             ext.Add(new JProperty(
-                AnimationExtensionFactory.TYPE,
+                "type",
                 type
             ));
 
             ext.Add(new JProperty(
-                AnimationExtensionFactory.PROPERTY,
+                "property",
                 property
             ));
 
@@ -63,12 +63,13 @@
                 needUpdate
             ));
 
-            return new JProperty(AnimationExtensionFactory.EXTENSION_NAME, ext);
+            return new JProperty(AnimationExtension.EXTENSION_NAME, ext);
         }
     }
 
     public class AnimationExtension : IExtension
     {
+        public const string EXTENSION_NAME = "egret";
         public float frameRate;
         public List<AnimationClip> clips = new List<AnimationClip>();
         public List<AnimationFrameEvent> events = new List<AnimationFrameEvent>();
@@ -87,7 +88,7 @@
             JObject ext = new JObject();
 
             ext.Add(new JProperty(
-                    AnimationExtensionFactory.FRAME_RATE,
+                    "frameRate",
                     frameRate
                 ));
 
@@ -97,7 +98,7 @@
                 JsonConvert.DeserializeObject(obj);
 
                 ext.Add(new JProperty(
-                        AnimationExtensionFactory.CLIPS,
+                        "clips",
                         JsonConvert.DeserializeObject(obj)
                     ));
             }
@@ -108,12 +109,12 @@
                 JsonConvert.DeserializeObject(obj);
 
                 ext.Add(new JProperty(
-                        AnimationExtensionFactory.EVENTS,
+                        "events",
                         JsonConvert.DeserializeObject(obj)
                     ));
             }
 
-            return new JProperty(AnimationExtensionFactory.EXTENSION_NAME, ext);
+            return new JProperty(AnimationExtension.EXTENSION_NAME, ext);
         }
     }
 }

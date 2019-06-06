@@ -15,9 +15,9 @@ namespace Egret3DExportTools
         {
             base.InitGLTFRoot();
 
-            this._root.ExtensionsRequired.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME);
+            this._root.ExtensionsRequired.Add(CoordinateSystemExtension.EXTENSION_NAME);
             this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
-            this._root.ExtensionsUsed.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME);
+            this._root.ExtensionsUsed.Add(CoordinateSystemExtension.EXTENSION_NAME);
             this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
 
             this._root.Accessors = new List<Accessor>();
@@ -25,7 +25,7 @@ namespace Egret3DExportTools
             this._root.BufferViews = new List<BufferView>();
             this._root.Meshes = new List<GLTF.Schema.Mesh>();
 
-            this._root.Asset.Extensions.Add(CoordinateSystemExtensionFactory.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
+            this._root.Asset.Extensions.Add(CoordinateSystemExtension.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
             
             
 

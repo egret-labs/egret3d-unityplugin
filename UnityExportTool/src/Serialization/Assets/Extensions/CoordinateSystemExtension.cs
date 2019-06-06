@@ -10,6 +10,7 @@
 
     public class CoordinateSystemExtension : IExtension
     {
+        public const string EXTENSION_NAME = "coordinateSystem";
         public string coordinateDir = CoordinateSystem.leftHand.ToString();
         public float coordinateUnit;
         public CoordinateSystemExtension(string d, float u)
@@ -28,16 +29,16 @@
             JObject ext = new JObject();
 
             ext.Add(new JProperty(
-                    CoordinateSystemExtensionFactory.COORDINATE_DIR,
+                    "dir",
                     coordinateDir.ToString()
                 ));
 
             ext.Add(new JProperty(
-                    CoordinateSystemExtensionFactory.COORDINATE_Unit,
+                    "unit",
                     coordinateUnit
                 ));
 
-            return new JProperty(CoordinateSystemExtensionFactory.EXTENSION_NAME, ext);
+            return new JProperty(CoordinateSystemExtension.EXTENSION_NAME, ext);
         }
     }
 }

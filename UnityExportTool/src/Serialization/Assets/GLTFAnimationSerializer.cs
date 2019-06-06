@@ -186,7 +186,7 @@
                 Samplers = new List<AnimationSampler>(),
                 Extensions = new Dictionary<string, IExtension>() {
                     {
-                        AnimationExtensionFactory.EXTENSION_NAME,
+                        AnimationExtension.EXTENSION_NAME,
                         new AnimationExtension () {
                             frameRate = animationClip.frameRate,
                             clips = new List<AnimationClip>() {
@@ -201,7 +201,7 @@
                     },
                 },
             };
-            var ext = glTFAnimation.Extensions[AnimationExtensionFactory.EXTENSION_NAME] as AnimationExtension;
+            var ext = glTFAnimation.Extensions[AnimationExtension.EXTENSION_NAME] as AnimationExtension;
             this._root.Animations.Add(glTFAnimation);
             // Input.
             var inputAccessor = new Accessor();
@@ -464,7 +464,7 @@
                     // Extensions.
                     animationChannel.Extensions = new Dictionary<string, IExtension>() {
                         {
-                            AnimationExtensionFactory.EXTENSION_NAME,
+                            AnimationExtension.EXTENSION_NAME,
                             new AnimationChannelExtension () {
                                 type = type,
                                 property = property,
