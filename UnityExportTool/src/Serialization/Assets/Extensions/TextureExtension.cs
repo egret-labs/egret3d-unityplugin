@@ -1,44 +1,47 @@
 using GLTF.Schema;
 using Newtonsoft.Json.Linq;
 
-public class TextureExtension : IExtension
+namespace Egret3DExportTools
 {
-    public int anisotropy = 1;
-    public int format = 6408;
-    public int levels = 0;
-
-    public IExtension Clone(GLTFRoot root)
+    public class TextureExtension : IExtension
     {
-        return new TextureExtension
-        {
-            anisotropy = anisotropy,
-            format = format,
-            levels = levels
-        };
-    }
+        public int anisotropy = 1;
+        public int format = 6408;
+        public int levels = 0;
 
-    public JProperty Serialize()
-    {
-        JObject ext = new JObject();
-
-        if (this.anisotropy > 1)
+        public IExtension Clone(GLTFRoot root)
         {
-            ext.Add(new JProperty(
-            "anisotropy",
-            this.anisotropy
-        ));
+            return new TextureExtension
+            {
+                anisotropy = anisotropy,
+                format = format,
+                levels = levels
+            };
         }
 
-        ext.Add(new JProperty(
-            "format",
-            format
-        ));
+        public JProperty Serialize()
+        {
+            JObject ext = new JObject();
 
-        ext.Add(new JProperty(
-            "levels",
-            levels
-        ));
+            if (this.anisotropy > 1)
+            {
+                ext.Add(new JProperty(
+                "anisotropy",
+                this.anisotropy
+            ));
+            }
 
-        return new JProperty("egret", ext);
+            ext.Add(new JProperty(
+                "format",
+                format
+            ));
+
+            ext.Add(new JProperty(
+                "levels",
+                levels
+            ));
+
+            return new JProperty("egret", ext);
+        }
     }
 }

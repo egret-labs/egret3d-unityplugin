@@ -58,7 +58,7 @@ namespace Egret3DExportTools
             writer.WriteStartObject();
 
             writer.WritePropertyName(SerizileData.KEY_UUID);
-            writer.WriteValue(data.GetUUID(this.GetHashCode()));
+            writer.WriteValue(this.uuid);
 
             writer.WritePropertyName(SerizileData.KEY_CLASS);
             writer.WriteValue(this.__class);
@@ -69,7 +69,7 @@ namespace Egret3DExportTools
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName(SerizileData.KEY_UUID);
-                writer.WriteValue(data.GetUUID(comp.GetHashCode()));
+                writer.WriteValue(comp.uuid);
                 writer.WriteEndObject();
             }
             writer.WriteEndArray();
@@ -144,7 +144,7 @@ namespace Egret3DExportTools
             writer.WriteStartObject();
 
             writer.WritePropertyName(KEY_UUID);
-            writer.WriteValue(data.GetUUID(this.GetHashCode()));
+            writer.WriteValue(this.uuid);
 
             writer.WritePropertyName(KEY_CLASS);
             writer.WriteValue(this.__class);

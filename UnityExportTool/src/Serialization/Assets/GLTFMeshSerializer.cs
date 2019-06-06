@@ -27,8 +27,6 @@ namespace Egret3DExportTools
 
             this._root.Asset.Extensions.Add(CoordinateSystemExtension.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
             
-            
-
             this._buffer = new GLTF.Schema.Buffer();
             this._bufferId = new BufferId
             {
