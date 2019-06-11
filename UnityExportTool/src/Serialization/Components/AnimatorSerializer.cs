@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class AnimatorSerializer : AnimationSerializer
     {
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             var aniamtior = component as Animator;
             if (aniamtior.runtimeAnimatorController == null)
@@ -22,12 +22,12 @@ namespace Egret3DExportTools
 
             return true;
         }
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             var aniamtior = component as Animator;
             var clips = aniamtior.runtimeAnimatorController.animationClips;
             compData.properties.SetBool("autoPlay", true); // TODO
-            compData.SetAnimation(component.gameObject, clips);
+            compData.properties.SetAnimation(component.gameObject, clips);
         }
     }
 }

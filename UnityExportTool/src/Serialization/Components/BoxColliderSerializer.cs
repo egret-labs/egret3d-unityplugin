@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class BoxColliderSerializer : ComponentSerializer
     {
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             BoxCollider comp = component as BoxCollider;
 

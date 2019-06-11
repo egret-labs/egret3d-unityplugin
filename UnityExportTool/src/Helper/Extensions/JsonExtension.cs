@@ -18,14 +18,14 @@ namespace Egret3DExportTools
         {
             if (value != defalutValue)
             {
-                jsonNode.Add(new JProperty(key, Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits)));
+                jsonNode.Add(new JProperty(key, Math.Round(value, digits ?? ExportSetting.instance.common.numberDigits)));
             }
         }
         public static void SetNumber(this JContainer jsonNode, string key, double value, float? defalutValue = null, int? digits = null)
         {
             if (value != defalutValue)
             {
-                jsonNode.Add(new JProperty(key, Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits)));
+                jsonNode.Add(new JProperty(key, Math.Round(value, digits ?? ExportSetting.instance.common.numberDigits)));
             }
         }
         public static void SetString(this JContainer jsonNode, string key, string value)
@@ -52,11 +52,11 @@ namespace Egret3DExportTools
         }
         public static void AddNumber(this JArray array, float value, int? digits = null)
         {
-            array.Add(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
+            array.Add(Math.Round(value, digits ?? ExportSetting.instance.common.numberDigits));
         }
         public static void AddNumber(this JArray array, double value, int? digits = null)
         {
-            array.Add(Math.Round(value, digits ?? ExportToolsSetting.instance.floatRoundDigits));
+            array.Add(Math.Round(value, digits ?? ExportSetting.instance.common.numberDigits));
         }
 
         public static void AddAsset(this JArray jsonNode, int assetIndex)
@@ -184,23 +184,76 @@ namespace Egret3DExportTools
             arr.AddNumber(1.0);
             jsonNode.Add(new JProperty(desc, arr));
         }
+        
+        public static void SetAsset(this JContainer jsonNode, string key, int assetIndex)
+        {
+            jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_ASSET, assetIndex))));
+        }
 
         public static void SetTexture(this JContainer jsonNode, string key, Texture value, Texture defalutValue = null)
         {
             if (value != defalutValue)
             {
-                var path = PathHelper.GetTextureDescPath(value);
-                var assetData = SerializeObject.SerializeAsset(value, path, AssetType.Texture);
-
-                var uri = ExportConfig.instance.GetExportPath(assetData.uri);
+                var assetData = SerializeObject.SerializeAsset(value);
+                var uri = ExportSetting.instance.GetExportPath(assetData.uri);
                 jsonNode.Add(new JProperty(key, uri));
-
             }
         }
 
-        public static void SetAsset(this JContainer jsonNode, string key, int assetIndex)
+        public static void SetMesh(this JContainer jsonNode, UnityEngine.GameObject obj, UnityEngine.Mesh mesh)
         {
-            jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_ASSET, assetIndex))));
+            if (mesh == null)
+            {
+                return;
+            }
+
+            var asset = SerializeObject.SerializeAsset(mesh);
+            var assetIndex = SerializeObject.currentData.AddAsset(asset);
+            jsonNode.SetAsset("mesh", assetIndex);
+        }
+
+        public static void SetMaterials(this JObject jsonNode, UnityEngine.GameObject obj, UnityEngine.Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
+        {
+            var materialsItem = new JArray();
+            jsonNode.Add("materials", materialsItem);
+            //写材质
+            foreach (var material in materials)
+            {
+                if (material == null)
+                {
+                    UnityEngine.Debug.LogWarning(obj.gameObject.name + " 材质缺失，请检查资源");
+                    continue;
+                }
+
+                var asset = SerializeObject.SerializeAsset(material);
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                materialsItem.AddAsset(assetIndex);
+            }
+        }
+
+        public static void SetAnimation(this JObject jsonNode, UnityEngine.GameObject obj, UnityEngine.AnimationClip[] animationClips)
+        {
+            var exportAnimations = new JArray();
+            jsonNode.Add("_animations", exportAnimations);
+            foreach (var animationClip in animationClips)
+            {
+                var asset = SerializeObject.SerializeAsset(animationClip);
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                exportAnimations.AddAsset(assetIndex);
+            }
+        }
+
+        public static void SetLightmaps(this JObject jsonNode, string exportPath)
+        {
+            var lightmapsJson = new JArray();
+            jsonNode.Add("lightmaps", lightmapsJson);
+            foreach (var lightmapData in LightmapSettings.lightmaps)
+            {
+                Texture2D lightmap = lightmapData.lightmapColor;
+                var asset = SerializeObject.SerializeAsset(lightmap);
+                var assetIndex = SerializeObject.currentData.AddAsset(asset);
+                lightmapsJson.AddAsset(assetIndex);
+            }
         }
     }
 }

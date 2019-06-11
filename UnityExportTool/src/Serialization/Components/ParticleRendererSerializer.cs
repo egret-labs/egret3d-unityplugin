@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class ParticleRendererSerializer : ComponentSerializer
     {
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             var obj = component.gameObject;
             ParticleSystemRenderer comp = component as ParticleSystemRenderer;
@@ -23,7 +23,7 @@ namespace Egret3DExportTools
 
             return true;
         }
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             var obj = component.gameObject;
             ParticleSystemRenderer comp = component as ParticleSystemRenderer;
@@ -32,9 +32,9 @@ namespace Egret3DExportTools
             compData.properties.SetNumber("lengthScale", comp.lengthScale);
             compData.properties.SetEnum("_renderMode", comp.renderMode);
             //Mesh
-            compData.SetMesh(obj, comp.mesh);
+            compData.properties.SetMesh(obj, comp.mesh);
             //Material粒子系统不支持多材质
-            compData.SetMaterials(obj, new Material[] { comp.sharedMaterial }, true);
+            compData.properties.SetMaterials(obj, new Material[] { comp.sharedMaterial }, true);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Egret3DExportTools
     using Egret3DExportTools;
     using Newtonsoft.Json;
 
-    public class GLTFTextureSerializer : GLTFSerializer
+    public class GLTFTextureSerializer : AssetSerializer
     {
         private UnityEngine.Texture2D texture;
 
@@ -30,24 +30,7 @@ namespace Egret3DExportTools
         {
             var tex = this.texture;
             var path = PathHelper.GetTexturePath(tex);
-            UnityEditor.TextureImporter importer = (UnityEditor.TextureImporter)UnityEditor.TextureImporter.GetAtPath(path);
-            bool isNormal = importer && importer.textureType == UnityEditor.TextureImporterType.NormalMap;
-            string ext = PathHelper.GetTextureExt(tex);
-            byte[] bs;
-
-            var isSupported = PathHelper.IsSupportedExt(tex);
-            //只有jpg、png可以原始图片导出，其他类型不支持
-            var filename = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.dataPath), path);
-            if (ExportToolsSetting.instance.exportOriginalImage && isSupported && System.IO.File.Exists(filename))
-            {
-                MyLog.Log("原始图片:" + filename);
-                bs = System.IO.File.ReadAllBytes(filename);
-            }
-            else
-            {
-                bs = ExportImageTools.EncodeToPNG(tex, ext);
-            }
-
+            byte[] bs = ExportImage.Export(tex);
             if (!SerializeObject.assetsData.ContainsKey(path))
             {
                 var assetData = AssetData.Create(path);
@@ -56,7 +39,7 @@ namespace Egret3DExportTools
             }
         }
 
-        protected override void _Serialize(UnityEngine.Object sourceAsset)
+        protected override void Serialize(UnityEngine.Object sourceAsset)
         {
             this.texture = sourceAsset as UnityEngine.Texture2D;
             //先把原始图片导出来
@@ -66,7 +49,7 @@ namespace Egret3DExportTools
             var mipmap = this.texture.mipmapCount > 1;
             //
             {
-                this._root.Images.Add(new Image() { Uri = ExportConfig.instance.GetExportPath(path) });
+                this._root.Images.Add(new Image() { Uri = ExportSetting.instance.GetExportPath(path) });
             }
             //
             {
@@ -112,7 +95,7 @@ namespace Egret3DExportTools
                 gltfTexture.Source = new ImageId();
                 gltfTexture.Extensions = new Dictionary<string, IExtension>(){
                     {
-                        "egret",
+                        TextureExtension.EXTENSION_NAME,
                         new TextureExtension(){
                             anisotropy = this.texture.anisoLevel,
                             format = GetTextureFormat(),

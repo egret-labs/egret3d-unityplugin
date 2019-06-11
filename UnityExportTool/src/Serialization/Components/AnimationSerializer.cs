@@ -12,7 +12,7 @@ namespace Egret3DExportTools
         {
             return AnimationUtility.GetAnimationClips(component.gameObject);
         }
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             var animation = component as Animation;
             this.animationClips.Clear();
@@ -43,11 +43,11 @@ namespace Egret3DExportTools
             return true;
         }
 
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             var animation = component as Animation;            
             compData.properties.SetBool("autoPlay", animation.playAutomatically);
-            compData.SetAnimation(component.gameObject, this.animationClips.ToArray());
+            compData.properties.SetAnimation(component.gameObject, this.animationClips.ToArray());
         }
     }
 }

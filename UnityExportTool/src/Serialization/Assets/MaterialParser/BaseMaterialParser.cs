@@ -151,7 +151,7 @@ namespace Egret3DExportTools
 
         public virtual void CollectStates()
         {
-            var customConfig = ExportConfig.instance.GetCustomShader(this.shaderName);
+            var customConfig = ExportSetting.instance.GetCustomShader(this.shaderName);
             var isDoubleSide = this.isDoubleSide;
             var isTransparent = this.isTransparent;
 

@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace Egret3DExportTools
 {
-    public class ExportSceneTools
+    public static class ExportScene
     {
-        public static void ExportScene(List<GameObject> roots, string exportPath = "")
+        public static void Export(List<GameObject> roots, string exportPath)
         {
             string sceneName = PathHelper.CurSceneName;
             SerializeObject.Clear();
-
-            SerializeObject.currentData.Clear();
             //路径
             string scenePath = sceneName + ".scene.json";
             PathHelper.SetSceneOrPrefabPath(scenePath);
@@ -32,7 +30,7 @@ namespace Egret3DExportTools
             var sceneLightComp = SerializeObject.currentData.CreateComponent(SerializeClass.SceneLight);
             sceneLightComp.properties.SetColor("ambientColor", RenderSettings.ambientLight);
             sceneLightComp.properties.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
-            sceneLightComp.SetLightmaps(exportPath);
+            sceneLightComp.properties.SetLightmaps(exportPath);
             entity.AddComponent(sceneLightComp);
 
             // 雾
@@ -63,33 +61,7 @@ namespace Egret3DExportTools
                 }
             }
 
-            {
-                var relativePath = ExportConfig.instance.GetExportPath(scenePath);
-                var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(exportPath, relativePath));
-                var fileDirectory = filePath.Substring(0, filePath.LastIndexOf("/") + 1);
-                if (!System.IO.Directory.Exists(fileDirectory))
-                {
-                    System.IO.Directory.CreateDirectory(fileDirectory);
-                }
-                var gltfFile = File.CreateText(filePath);
-                SerializeObject.currentData.Serialize(gltfFile);
-                gltfFile.Close();
-                MyLog.Log("---导出文件:" + relativePath);
-            }
-
-            {
-                foreach (var asset in SerializeObject.assetsData.Values)
-                {
-                    var relativePath = ExportConfig.instance.GetExportPath(asset.uri);
-                    var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(exportPath, relativePath));
-                    var fileDirectory = filePath.Substring(0, filePath.LastIndexOf("/") + 1);
-                    if (!System.IO.Directory.Exists(fileDirectory))
-                    {
-                        System.IO.Directory.CreateDirectory(fileDirectory);
-                    }
-                    System.IO.File.WriteAllBytes(filePath, asset.buffer);
-                }
-            }
+            SerializeContext.Export(exportPath, scenePath);
         }
     }
 }

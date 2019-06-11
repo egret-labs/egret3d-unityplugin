@@ -35,7 +35,7 @@ namespace Egret3DExportTools
         public MaterialAssetExtension asset;
     }
 
-    public class GLTFMaterialSerializer : GLTFSerializer
+    public class GLTFMaterialSerializer : AssetSerializer
     {
         private bool _isParticle = false;
         private UnityEngine.Material _material;
@@ -81,7 +81,7 @@ namespace Egret3DExportTools
             this._root.Materials = new List<GLTF.Schema.Material>();
         }
 
-        protected override void _Serialize(UnityEngine.Object sourceAsset)
+        protected override void Serialize(UnityEngine.Object sourceAsset)
         {
             this._material = sourceAsset as UnityEngine.Material;
 
@@ -119,7 +119,7 @@ namespace Egret3DExportTools
         private MaterialType GetMaterialType()
         {
             var shaderName = this._material.shader.name;
-            var customShaderConfig = ExportConfig.instance.GetCustomShader(shaderName);
+            var customShaderConfig = ExportSetting.instance.GetCustomShader(shaderName);
 
             if (this._isParticle)
             {
@@ -132,7 +132,7 @@ namespace Egret3DExportTools
             }
 
             {
-                var lightType = ExportToolsSetting.instance.lightType;
+                var lightType = ExportSetting.instance.light.type;
                 switch (lightType)
                 {
                     case ExportLightType.Lambert:

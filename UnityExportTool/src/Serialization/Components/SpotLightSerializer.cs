@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class SpotLightSerializer : DirectionalLightSerializer
     {
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             Light comp = component as Light;
             if (comp.type != LightType.Spot)
@@ -15,7 +15,7 @@ namespace Egret3DExportTools
 
             return true;
         }
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             Light comp = component as Light;
             base.Serialize(component, compData);

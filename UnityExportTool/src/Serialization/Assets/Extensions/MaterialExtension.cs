@@ -276,7 +276,7 @@ namespace Egret3DExportTools
             JObject ext = res.First as JObject;
 
             var assets = new JArray();
-            assets.Add(ExportConfig.instance.GetExportPath(this.asset));
+            assets.Add(ExportSetting.instance.GetExportPath(this.asset));
             ext.Add("assets", assets);
 
             var entities = new JArray();

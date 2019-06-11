@@ -11,13 +11,11 @@ namespace Egret3DExportTools
         {
             NONE, PREFAB, SCENE
         }
-        public const string VERSION = "v1.3.9";//版本号
+        private const string VERSION = "v1.3.9";//版本号
         private const float WIN_WIDTH = 500.0f;
         private const float WIN_HEIGHT = 400.0f;
         private const float SMALL_SPACE = 10.0f;
         private const float SPACE = 20.0f;
-
-        private static GUIStyle _showStyle = new GUIStyle();//Label的样式
 
         /**
          * 初始化插件窗口
@@ -41,15 +39,15 @@ namespace Egret3DExportTools
                 //防止egret 序列化报错
                 var saveParent = selectionObj.transform.parent;
                 selectionObj.transform.parent = null;
-                PathHelper.SetOutPutPath(ExportConfig.instance.exportPath, selectionObj.name);
-                ExportPrefabTools.ExportPrefab(selectionObj, PathHelper.OutPath);
+                PathHelper.SetOutPutPath(ExportSetting.instance.exportDir, selectionObj.name);
+                ExportPrefab.Export(selectionObj, PathHelper.OutPath);
                 selectionObj.transform.parent = saveParent;
             }
         }
         /**
          * 导出场景
          */
-        public static void ExportCurScene()
+        public static void ExportScene()
         {
             ExportExtendTools.CleanupMissingScripts();
             //获取场景中的根gameObject
@@ -67,7 +65,7 @@ namespace Egret3DExportTools
                     roots.Add(tempObj);
                 }
             }
-            ExportSceneTools.ExportScene(roots, PathHelper.OutPath);
+            Egret3DExportTools.ExportScene.Export(roots, PathHelper.OutPath);
         }
 
 
@@ -81,24 +79,14 @@ namespace Egret3DExportTools
         /*导出类型的单选框状态*/
         private bool _resourceToolOpen = false;//资源
         private bool _sceneToolOpen = false;//场景
-
         private bool _lightSetting = true;
+        private bool _textureSetting = false;
         private bool _meshSetting = false;
-        private SerializedObject _serializeObject;
-        private SerializedProperty _meshIgnoresProperty;
 
         void OnEnable()
         {
-            _showStyle.fontSize = 15;
-            _showStyle.normal.textColor = new Color(1, 0, 0, 1);
-
-            //
-            _serializeObject = new SerializedObject(ExportToolsSetting.instance);
-            _meshIgnoresProperty = _serializeObject.FindProperty("meshIgnores");
-            //
-
             //加载配置文件
-            ExportConfig.Reload(PathHelper.ConfigPath, PathHelper.SaveRootDirectory);
+            ExportSetting.Reload(PathHelper.ConfigPath, PathHelper.SaveRootDirectory);
             //初始化一些全局的方法
             SerializeObject.Initialize();
         }
@@ -108,34 +96,25 @@ namespace Egret3DExportTools
          */
         void OnGUI()
         {
-            var setting = ExportToolsSetting.instance;
-            this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition, GUILayout.Width(WIN_WIDTH), GUILayout.Height(400));
+            this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition, GUILayout.Width(WIN_WIDTH), GUILayout.Height(WIN_HEIGHT));
             GUILayout.Space(SMALL_SPACE);
             //------------------------目录选择------------------------
             {
-                GUILayout.Label("当前导出路径");
                 GUILayout.BeginHorizontal();
-                GUILayout.TextField(ExportConfig.instance.exportPath);
-                if (GUILayout.Button("选择目录", GUILayout.Width(100)))
+                GUILayout.Label("目录名称");
+                var dir = GUILayout.TextField(ExportSetting.instance.rootName);
+                if (dir != ExportSetting.instance.rootName)
                 {
-                    ExportConfig.instance.exportPath = EditorUtility.OpenFolderPanel("当前要导出的路径", Application.dataPath, "");
-                    ExportConfig.instance.Save(PathHelper.ConfigPath);
-                    AssetDatabase.Refresh();
+                    ExportSetting.instance.rootName = dir;
                 }
                 GUILayout.EndHorizontal();
             }
-            GUILayout.Space(SPACE);
-            //------------------------根目录------------------------
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("根目录");
-                var dir = GUILayout.TextField(ExportConfig.instance.rootDir);
-                if(dir != ExportConfig.instance.rootDir)
+                GUILayout.TextField(ExportSetting.instance.exportDir);
+                if (GUILayout.Button("导出目录", GUILayout.Width(100)))
                 {
-                    ExportConfig.instance.rootDir = dir;
-                    Debug.Log("根目录：" + dir);
-                    ExportConfig.instance.Save(PathHelper.ConfigPath);
-                    AssetDatabase.Refresh();
+                    ExportSetting.instance.exportDir = EditorUtility.OpenFolderPanel("当前要导出的路径", Application.dataPath, "");
                 }
                 GUILayout.EndHorizontal();
             }
@@ -143,44 +122,58 @@ namespace Egret3DExportTools
             //------------------------辅助选项------------------------
             {
                 GUILayout.BeginHorizontal();
-                setting.debugLog = GUILayout.Toggle(setting.debugLog, new GUIContent("输出日志", "勾选后，方便查看输出信息"));
-                setting.prefabResetPos = GUILayout.Toggle(setting.prefabResetPos, new GUIContent("坐标归零", "勾选后，将导出的预制体坐标归零"));
-                setting.exportOriginalImage = GUILayout.Toggle(setting.exportOriginalImage, new GUIContent("导出原始图片", "勾选后，jpg和png会直接使用原始图片导出"));
-                // ExportToolsSetting.unityNormalTexture = GUILayout.Toggle(ExportToolsSetting.unityNormalTexture, new GUIContent("使用Unity法线贴图", "勾选后，时使用Unity转换后的法线贴图导出"));
-
+                var common = ExportSetting.instance.common;
+                common.debugLog = GUILayout.Toggle(common.debugLog, new GUIContent("输出日志", "勾选后，方便查看输出信息"));
+                common.jsonFormatting = GUILayout.Toggle(common.jsonFormatting, new GUIContent("Json格式化", "勾选后，格式化导出的Json文件"));
+                common.posToZero = GUILayout.Toggle(common.posToZero, new GUIContent("坐标归零", "勾选后，将导出的预制体坐标归零"));
                 GUILayout.EndHorizontal();
-            }
-            GUILayout.Space(SPACE);
-            this._lightSetting = EditorGUILayout.Foldout(this._lightSetting, "光照设置");
-            if (this._lightSetting)
-            {
-                GUILayout.BeginVertical();
-                setting.lightType = (ExportLightType)EditorGUILayout.EnumPopup(setting.lightType, GUILayout.MaxWidth(100));
-                GUILayout.EndVertical();
             }
             GUILayout.Space(SMALL_SPACE);
-            this._meshSetting = EditorGUILayout.Foldout(this._meshSetting, "网格设置");
-            if (this._meshSetting)
             {
-                GUILayout.BeginHorizontal();
-                setting.enableNormals = GUILayout.Toggle(setting.enableNormals, new GUIContent("Normals", "取消后，不导出Normals"));
-                setting.enableColors = GUILayout.Toggle(setting.enableColors, new GUIContent("Colors", "取消后，不导出Colors"));
-                setting.enableBones = GUILayout.Toggle(setting.enableBones, new GUIContent("Bones", "取消后，不导出Bones"));
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                this._serializeObject.Update();
-                if (this._meshIgnoresProperty != null)
+                this._lightSetting = EditorGUILayout.Foldout(this._lightSetting, "光照设置");
+                if (this._lightSetting)
                 {
-                    EditorGUI.BeginChangeCheck();
-                    EditorGUILayout.PropertyField(this._meshIgnoresProperty, new GUIContent("忽略对象:", "在忽略列表中的对象网格属性全部导出"), true);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        _serializeObject.ApplyModifiedProperties();
-                    }
+                    GUILayout.BeginVertical();
+                    var lightSetting = ExportSetting.instance.light;
+                    lightSetting.type = (ExportLightType)EditorGUILayout.EnumPopup(lightSetting.type, GUILayout.MaxWidth(100));
+                    GUILayout.EndVertical();
                 }
-                GUILayout.EndHorizontal();
             }
+
+            GUILayout.Space(SMALL_SPACE);
+            {
+                this._textureSetting = EditorGUILayout.Foldout(this._textureSetting, "图片设置");
+                if (this._textureSetting)
+                {
+                    GUILayout.BeginVertical();
+                    var textureSetting = ExportSetting.instance.texture;
+                    textureSetting.useOriginalTexture = GUILayout.Toggle(textureSetting.useOriginalTexture, new GUIContent("导出原始图片", "勾选后，jpg和png会直接使用原始图片导出"));
+                    textureSetting.useNormalTexture = GUILayout.Toggle(textureSetting.useNormalTexture, new GUIContent("使用Unity法线贴图", "勾选后，使用Unity转换后的法线贴图导出"));
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("JPG导出质量:");
+                    textureSetting.jpgQuality = (int)GUILayout.HorizontalSlider(textureSetting.jpgQuality, 0.0f, 100.0f, GUILayout.Width(250));
+                    GUILayout.Label(textureSetting.jpgQuality.ToString());
+                    GUILayout.EndHorizontal();
+                    GUILayout.EndVertical();
+                }
+            }
+
+            GUILayout.Space(SMALL_SPACE);
+            {
+                this._meshSetting = EditorGUILayout.Foldout(this._meshSetting, "网格设置");
+                if (this._meshSetting)
+                {
+                    GUILayout.BeginHorizontal();
+                    var meshSetting = ExportSetting.instance.mesh;
+                    meshSetting.uv2 = GUILayout.Toggle(meshSetting.uv2, new GUIContent("UV2", "取消后，不导出UV2"));
+                    meshSetting.normal = GUILayout.Toggle(meshSetting.normal, new GUIContent("Normals", "取消后，不导出Normals"));
+                    meshSetting.color = GUILayout.Toggle(meshSetting.color, new GUIContent("Colors", "取消后，不导出Colors"));
+                    meshSetting.bone = GUILayout.Toggle(meshSetting.bone, new GUIContent("Bones", "取消后，不导出Bones"));
+                    meshSetting.tangent = GUILayout.Toggle(meshSetting.tangent, new GUIContent("Tangents", "取消后，不导出Tangents"));
+                    GUILayout.EndHorizontal();
+                }
+            }
+
             GUILayout.Space(SPACE);
             //------------------------主功能------------------------
             {
@@ -192,7 +185,7 @@ namespace Egret3DExportTools
                     GUILayout.BeginHorizontal();
                     if (Selection.activeGameObject)
                     {
-                        if (GUILayout.Button("导出当前选中对象"))
+                        if (GUILayout.Button("预制体导出"))
                         {
                             _frameCount = 0;
                             _isBuzy = true;
@@ -202,7 +195,7 @@ namespace Egret3DExportTools
                     }
                     else
                     {
-                        GUILayout.Label("请选中场景中要导出的对象", _showStyle);
+                        GUILayout.Label("请选中场景中要导出的对象");
                     }
                     GUILayout.EndHorizontal();
                     GUILayout.Space(SPACE);
@@ -213,14 +206,16 @@ namespace Egret3DExportTools
                 {
                     GUILayout.Space(SPACE);
                     GUILayout.BeginHorizontal();
-                    if (GUILayout.Button("导出当前场景"))
+                    if (GUILayout.Button("场景导出"))
                     {
-                        PathHelper.SetOutPutPath(ExportConfig.instance.exportPath, PathHelper.CurSceneName);
+                        PathHelper.SetOutPutPath(ExportSetting.instance.exportDir, PathHelper.CurSceneName);
 
                         _frameCount = 0;
                         _info = "导出中...";
                         _isBuzy = true;
                         _curExportType = ExportType.SCENE;
+
+
                     }
                     GUILayout.EndHorizontal();
                     GUILayout.Space(SPACE);
@@ -229,6 +224,11 @@ namespace Egret3DExportTools
 
             GUILayout.EndScrollView();
             GUI.Label(new Rect(0, WIN_HEIGHT - 15, WIN_WIDTH, 15), "状态：" + _info);
+            if (GUI.Button(new Rect(WIN_WIDTH - 65, WIN_HEIGHT - 20, 60, 20), "保存配置"))
+            {
+                ExportSetting.instance.Save(PathHelper.ConfigPath);
+                AssetDatabase.Refresh();
+            }
         }
 
         void OnInspectorUpdate()
@@ -253,7 +253,7 @@ namespace Egret3DExportTools
                         ExportPrefabs();
                         break;
                     case ExportType.SCENE:
-                        ExportCurScene();
+                        ExportScene();
                         break;
                     default:
                         break;
@@ -266,27 +266,5 @@ namespace Egret3DExportTools
                 _info = "就绪";
             }
         }
-
-
-        // public static void BakeSkinnedMeshRenderer()
-        // {
-        //     var selection = Selection.activeGameObject;
-        //     if (selection == null)
-        //     {
-        //         return;
-        //     }
-        //     var skinned = selection.GetComponentInChildren<SkinnedMeshRenderer>();
-        //     if (skinned == null || skinned.sharedMesh == null)
-        //     {
-        //         return;
-        //     }
-        //     //
-        //     var mesh = new Mesh();
-        //     skinned.BakeMesh(mesh);
-        //     var url = UnityEditor.AssetDatabase.GetAssetPath(skinned.sharedMesh);
-        //     string name = selection.name + ".asset";
-        //     url = url.Substring(0, url.LastIndexOf("/") + 1) + name;
-        //     AssetDatabase.CreateAsset(mesh, url);
-        // }
     }
 }

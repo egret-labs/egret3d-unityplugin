@@ -8,7 +8,7 @@ namespace Egret3DExportTools
     using UnityGLTF.Extensions;
     using Egret3DExportTools;
 
-    public class GLTFMeshSerializer : GLTFSerializer
+    public class GLTFMeshSerializer : AssetSerializer
     {
         private UnityEngine.Mesh _mesh;
         protected override void InitGLTFRoot()
@@ -26,7 +26,7 @@ namespace Egret3DExportTools
             this._root.Meshes = new List<GLTF.Schema.Mesh>();
 
             this._root.Asset.Extensions.Add(CoordinateSystemExtension.EXTENSION_NAME, new CoordinateSystemExtension(CoordinateSystem.leftHand.ToString(), 1.0f));
-            
+
             this._buffer = new GLTF.Schema.Buffer();
             this._bufferId = new BufferId
             {
@@ -35,7 +35,7 @@ namespace Egret3DExportTools
             };
             this._root.Buffers.Add(this._buffer);
         }
-        protected override void _Serialize(UnityEngine.Object sourceAsset)
+        protected override void Serialize(UnityEngine.Object sourceAsset)
         {
             this._mesh = sourceAsset as UnityEngine.Mesh;
 
@@ -172,60 +172,58 @@ namespace Egret3DExportTools
             var prims = new MeshPrimitive[meshObj.subMeshCount];
 
             var byteOffset = _bufferWriter.BaseStream.Position;
-            var bufferViewId = ExportBufferView(0, (int)(_bufferWriter.BaseStream.Position - byteOffset));
+            var bufferViewId = this._root.WriteBufferView(this._bufferId, 0, (int)(_bufferWriter.BaseStream.Position - byteOffset));
 
             AccessorId aPosition = null, aNormal = null, aTangent = null,
                 aColor0 = null, aTexcoord0 = null, aTexcoord1 = null,
                 aBlendIndex = null, aBlendWeight = null;
 
-            aPosition = ExportAccessor(SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.vertices, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, false);
+            aPosition = this._root.WriteAccessor(this._bufferId, SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.vertices, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, false, null, this._bufferWriter);
             MyLog.Log("-------vertices:" + meshObj.vertices.Length);
-            var setting = ExportToolsSetting.instance;
-            var isInMeshIgnores = setting.IsInMeshIgnores(this._target.gameObject);
-            if (meshObj.normals.Length != 0 && (isInMeshIgnores || setting.enableNormals))
+            if (meshObj.normals.Length != 0 && (ExportSetting.instance.mesh.normal))
             {
                 MyLog.Log("-------normals:" + meshObj.normals.Length);
-                aNormal = ExportAccessor(SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.normals, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, true);
+                aNormal = this._root.WriteAccessor(this._bufferId, SchemaExtensions.ConvertVector3CoordinateSpaceAndCopy(meshObj.normals, SchemaExtensions.CoordinateSpaceConversionScale), bufferViewId, true, null, this._bufferWriter);
             }
 
-            /*if (meshObj.tangents.Length != 0)
+            if (meshObj.tangents.Length != 0 && (ExportSetting.instance.mesh.tangent))
             {
-                aTangent = ExportAccessor(SchemaExtensions.ConvertVector4CoordinateSpaceAndCopy(meshObj.tangents, SchemaExtensions.TangentSpaceConversionScale), bufferViewId, true);
-            }*/
+                aTangent = this._root.WriteAccessor(this._bufferId, SchemaExtensions.ConvertVector4CoordinateSpaceAndCopy(meshObj.tangents, SchemaExtensions.TangentSpaceConversionScale), bufferViewId, true, this._bufferWriter);
+            }
 
-            if (meshObj.colors.Length != 0 && (isInMeshIgnores || setting.enableColors))
+            if (meshObj.colors.Length != 0 && (ExportSetting.instance.mesh.color))
             {
                 MyLog.Log("-------colors:" + meshObj.colors.Length);
-                aColor0 = ExportAccessor(meshObj.colors, bufferViewId);
+                aColor0 = this._root.WriteAccessor(this._bufferId, meshObj.colors, bufferViewId, this._bufferWriter);
             }
 
             if (meshObj.uv.Length != 0)
             {
                 MyLog.Log("-------uv:" + meshObj.uv.Length);
-                aTexcoord0 = ExportAccessor(SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv), bufferViewId);
+                aTexcoord0 = this._root.WriteAccessor(this._bufferId, SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv), bufferViewId, this._bufferWriter);
             }
 
             var meshRender = this._target.GetComponent<MeshRenderer>();
             if (meshRender != null && meshRender.lightmapIndex >= 0)
             {
                 MyLog.Log("-------uv2:" + meshObj.uv2.Length);
-                aTexcoord1 = ExportAccessor(SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv2.Length > 0 ? meshObj.uv2 : meshObj.uv), bufferViewId);
+                aTexcoord1 = this._root.WriteAccessor(this._bufferId, SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv2.Length > 0 ? meshObj.uv2 : meshObj.uv), bufferViewId, this._bufferWriter);
                 // aTexcoord1 = ExportAccessor(ConvertLightMapUVAndCopy(meshObj.uv2.Length > 0 ? meshObj.uv2 : meshObj.uv, meshRender.lightmapScaleOffset), bufferViewId);
             }
             else
             {
-                if (meshObj.uv2.Length != 0)
+                if (meshObj.uv2.Length != 0 && (ExportSetting.instance.mesh.uv2))
                 {
                     MyLog.Log("-------uv2:" + meshObj.uv2.Length);
-                    aTexcoord1 = ExportAccessor(SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv2), bufferViewId);
+                    aTexcoord1 = this._root.WriteAccessor(this._bufferId, SchemaExtensions.FlipTexCoordArrayVAndCopy(meshObj.uv2), bufferViewId, this._bufferWriter);
                 }
             }
 
-            if (meshObj.boneWeights.Length != 0 && (isInMeshIgnores || setting.enableBones))
+            if (meshObj.boneWeights.Length != 0 && (ExportSetting.instance.mesh.bone))
             {
                 MyLog.Log("-------bones:" + meshObj.boneWeights.Length);
-                aBlendIndex = ExportAccessor(SchemaExtensions.ConvertBlendIndexAndCopy(meshObj.boneWeights));
-                aBlendWeight = ExportAccessor(SchemaExtensions.ConvertBlendWeightAndCopy(meshObj.boneWeights));
+                aBlendIndex = this._root.WriteAccessor(this._bufferId, SchemaExtensions.ConvertBlendIndexAndCopy(meshObj.boneWeights), null, false, this._bufferWriter);
+                aBlendWeight = this._root.WriteAccessor(this._bufferId, SchemaExtensions.ConvertBlendWeightAndCopy(meshObj.boneWeights), null, false, this._bufferWriter);
                 if (skin != null)
                 {
                     /*var index = 0;
@@ -241,7 +239,7 @@ namespace Egret3DExportTools
                         index++;
                     }
                     skin.InverseBindMatrices = ExportAccessor(bindposes);*/
-                    skin.InverseBindMatrices = ExportAccessor(meshObj.bindposes);
+                    skin.InverseBindMatrices = this._root.WriteAccessor(this._bufferId, meshObj.bindposes, null, this._bufferWriter);
                 }
             }
 
@@ -255,7 +253,7 @@ namespace Egret3DExportTools
                 var primitive = new MeshPrimitive();
 
                 var triangles = meshObj.GetTriangles(submesh);
-                primitive.Indices = ExportAccessor(SchemaExtensions.FlipFacesAndCopy(triangles), true);
+                primitive.Indices = this._root.WriteAccessor(this._bufferId, SchemaExtensions.FlipFacesAndCopy(triangles), true, this._bufferWriter);
 
                 primitive.Attributes = new Dictionary<string, AccessorId>();
                 primitive.Attributes.Add(SemanticProperties.POSITION, aPosition);

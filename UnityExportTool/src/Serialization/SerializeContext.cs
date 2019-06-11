@@ -10,6 +10,8 @@ namespace Egret3DExportTools
     {
         string uuid { get; set; }
         string __class { get; set; }
+
+        void Serialize(SerializeContext data, JsonWriter writer);
     }
 
     public abstract class SerizileData : ISerizileData
@@ -21,16 +23,16 @@ namespace Egret3DExportTools
         public const string KEY_ASSET = "__asset";
         public const string KEY_EXTRAS = "__extras";
 
-        public SerializedData data;
-
         protected string _uuid;
         protected string _className;
         public string uuid { get { return this._uuid; } set { this._uuid = value; } }
         public string __class { get { return this._className; } set { this._className = value; } }
+        public JObject properties = new JObject();
+
+        public abstract void Serialize(SerializeContext data, JsonWriter writer);
     }
     public class EntityData : SerizileData
     {
-        public UnityEngine.GameObject unityEntity;
         public ComponentData transform;
         public List<ComponentData> components = new List<ComponentData>();
 
@@ -53,7 +55,7 @@ namespace Egret3DExportTools
             comp.entity = this;
         }
 
-        public void Serizile(SerializedData data, JsonWriter writer)
+        public override void Serialize(SerializeContext data, JsonWriter writer)
         {
             writer.WriteStartObject();
 
@@ -80,7 +82,6 @@ namespace Egret3DExportTools
     public class ComponentData : SerizileData
     {
         public EntityData entity;
-        public JObject properties = new JObject();
         private void SerializeProperty(string name, JToken property, JsonWriter writer)
         {
             // Debug.Log("name:" + name + " value:" + property + " type:" + property.Type);
@@ -139,7 +140,7 @@ namespace Egret3DExportTools
         }
 
 
-        public void Serizile(SerializedData data, JsonWriter writer)
+        public override void Serialize(SerializeContext data, JsonWriter writer)
         {
             writer.WriteStartObject();
 
@@ -159,7 +160,7 @@ namespace Egret3DExportTools
 
     }
 
-    public class AssetData
+    public class AssetData : SerizileData
     {
         public static AssetData Create(string uri)
         {
@@ -169,10 +170,45 @@ namespace Egret3DExportTools
         }
         public string uri = string.Empty;
         public byte[] buffer;
+
+        public override void Serialize(SerializeContext data, JsonWriter writer)
+        {
+            writer.WriteValue(ExportSetting.instance.GetExportPath(this.uri));
+        }
     }
 
-    public class SerializedData
+    public class SerializeContext
     {
+        public static void Export(string baseDir, string exportPath)
+        {
+            {
+                var relativePath = ExportSetting.instance.GetExportPath(exportPath);
+                var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(baseDir, relativePath));
+                var fileDir = PathHelper.GetFileDirectory(filePath);
+                if (!System.IO.Directory.Exists(fileDir))
+                {
+                    System.IO.Directory.CreateDirectory(fileDir);
+                }
+                var gltfFile = File.CreateText(filePath);
+                SerializeObject.currentData.Serialize(gltfFile);
+                gltfFile.Close();
+                MyLog.Log("---导出文件:" + relativePath);
+            }
+
+            {
+                foreach (var asset in SerializeObject.assetsData.Values)
+                {
+                    var relativePath = ExportSetting.instance.GetExportPath(asset.uri);
+                    var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(baseDir, relativePath));
+                    var fileDir = PathHelper.GetFileDirectory(filePath);
+                    if (!System.IO.Directory.Exists(fileDir))
+                    {
+                        System.IO.Directory.CreateDirectory(fileDir);
+                    }
+                    System.IO.File.WriteAllBytes(filePath, asset.buffer);
+                }
+            }
+        }
         public const string VERSION = "5";//资源版本号
         public List<AssetData> assets = new List<AssetData>();
         public List<EntityData> entities = new List<EntityData>();
@@ -180,17 +216,9 @@ namespace Egret3DExportTools
         private int _uuidIndex = 0;
         private readonly Dictionary<int, int> _uuidDic = new Dictionary<int, int>();
 
-        public void Clear()
+        private string GetUUID(System.Object obj)
         {
-            this.assets.Clear();
-            this.entities.Clear();
-
-            this._uuidIndex = 0;
-            this._uuidDic.Clear();
-        }
-
-        public string GetUUID(int unityHash)
-        {
+            int unityHash= obj.GetHashCode();
             int newHash;
             if (this._uuidDic.TryGetValue(unityHash, out newHash))
             {
@@ -201,25 +229,19 @@ namespace Egret3DExportTools
             return newHash.ToString();
         }
 
-        public int GetAssetIndex(string url)
+        public void Clear()
         {
-            for (int i = 0, l = this.assets.Count; i < l; i++)
-            {
-                var asset = this.assets[i];
-                if (asset.uri == url)
-                {
-                    return i;
-                }
-            }
+            this.assets.Clear();
+            this.entities.Clear();
 
-            return -1;
-        }
+            this._uuidIndex = 0;
+            this._uuidDic.Clear();
+        }        
 
         public EntityData CreateEntity()
         {
             var entity = new EntityData();
-            entity.data = this;
-            entity.uuid = this.GetUUID(entity.GetHashCode());
+            entity.uuid = this.GetUUID(entity);
             entity.__class = SerializeClass.GameEntity;
             this.entities.Add(entity);
             return entity;
@@ -227,8 +249,8 @@ namespace Egret3DExportTools
 
         public ComponentData CreateComponent(string className)
         {
-            ComponentData comp = new ComponentData();
-            comp.uuid = this.GetUUID(comp.GetHashCode());
+            var comp = new ComponentData();
+            comp.uuid = this.GetUUID(comp);
             comp.__class = className;
             return comp;
         }
@@ -250,148 +272,51 @@ namespace Egret3DExportTools
             return this.assets.Count - 1;
         }
 
-        public AssetData CreateAsset(string uri)
-        {
-            foreach (var item in this.assets)
-            {
-                if (item.uri == uri)
-                {
-                    return item;
-                }
-            }
-            //
-            var asset = new AssetData();
-            asset.uri = uri;
-            this.assets.Add(asset);
-            return asset;
-        }
-
         public virtual void Serialize(TextWriter textWriter)
         {
             JsonWriter jsonWriter = new JsonTextWriter(textWriter);
-            if (Egret3DExportTools.ExportToolsSetting.instance.jsonFormatting)
-            {
-                jsonWriter.Formatting = Formatting.Indented;
-            }
-            else
-            {
-                jsonWriter.Formatting = Formatting.None;
-            }
+            jsonWriter.Formatting = ExportSetting.instance.common.jsonFormatting ? Formatting.Indented : Formatting.None;
             jsonWriter.WriteStartObject();
-            jsonWriter.WritePropertyName("assets");
-            jsonWriter.WriteStartArray();
-            foreach (var asset in this.assets)
+            // assets
             {
-                jsonWriter.WriteValue(ExportConfig.instance.GetExportPath(asset.uri));
-            }
-            jsonWriter.WriteEndArray();
-
-            jsonWriter.WritePropertyName("entities");
-            jsonWriter.WriteStartArray();
-            foreach (var entity in this.entities)
-            {
-                entity.Serizile(this, jsonWriter);
-            }
-            jsonWriter.WriteEndArray();
-
-            jsonWriter.WritePropertyName("components");
-            jsonWriter.WriteStartArray();
-            foreach (var entity in this.entities)
-            {
-                foreach (var comp in entity.components)
+                jsonWriter.WritePropertyName("assets");
+                jsonWriter.WriteStartArray();
+                foreach (var asset in this.assets)
                 {
-                    comp.Serizile(this, jsonWriter);
+                    asset.Serialize(this, jsonWriter);
                 }
+                jsonWriter.WriteEndArray();
             }
-            jsonWriter.WriteEndArray();
-
-            jsonWriter.WritePropertyName("version");
-            jsonWriter.WriteValue(VERSION);
+            // entities
+            {
+                jsonWriter.WritePropertyName("entities");
+                jsonWriter.WriteStartArray();
+                foreach (var entity in this.entities)
+                {
+                    entity.Serialize(this, jsonWriter);
+                }
+                jsonWriter.WriteEndArray();
+            }
+            // components
+            {
+                jsonWriter.WritePropertyName("components");
+                jsonWriter.WriteStartArray();
+                foreach (var entity in this.entities)
+                {
+                    foreach (var comp in entity.components)
+                    {
+                        comp.Serialize(this, jsonWriter);
+                    }
+                }
+                jsonWriter.WriteEndArray();
+            }
+            // version
+            {
+                jsonWriter.WritePropertyName("version");
+                jsonWriter.WriteValue(VERSION);
+            }
 
             jsonWriter.WriteEndObject();
-        }
-    }
-
-    public static class ComponentDataWriter
-    {
-        public static void SetMesh(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.Mesh mesh)
-        {
-            if (mesh == null)
-            {
-                return;
-            }
-
-            var path = PathHelper.GetMeshPath(mesh);
-            var asset = SerializeObject.SerializeAsset(mesh, path, AssetType.Mesh);
-
-            // comp.props["mesh"] = new MyJson_Asset(path);
-
-            var assetIndex = SerializeObject.currentData.AddAsset(asset);
-            comp.properties.SetAsset("mesh", assetIndex);
-        }
-
-        public static void SetMaterials(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.Material[] materials, bool isParticleMat = false, bool isAnimationMat = false)
-        {
-            var materialsItem = new JArray();
-            comp.properties.Add("materials", materialsItem);
-            // comp.props["materials"] = materialsItem;
-            //写材质
-            foreach (var material in materials)
-            {
-                if (material == null)
-                {
-                    UnityEngine.Debug.LogWarning(obj.gameObject.name + " 材质缺失，请检查资源");
-                    continue;
-                }
-
-                var path = PathHelper.GetMaterialPath(material);
-                var asset = SerializeObject.SerializeAsset(material, path, AssetType.Material);
-
-                // materialsItem.Add(new MyJson_Asset(path));
-                // SerializeObject.currentData.AddAsset(asset);
-
-                var assetIndex = SerializeObject.currentData.AddAsset(asset);
-                materialsItem.AddAsset(assetIndex);
-            }
-        }
-        public static void SetAnimation(this ComponentData comp, UnityEngine.GameObject obj, UnityEngine.AnimationClip[] animationClips)
-        {
-            var exportAnimations = new JArray();
-            comp.properties.Add("_animations", exportAnimations);
-            // comp.props["_animations"] = exportAnimations;
-
-            foreach (var animationClip in animationClips)
-            {
-                var path = PathHelper.GetAnimationClipPath(animationClip);
-                var asset = SerializeObject.SerializeAsset(animationClip, path, AssetType.Animation);
-
-                // exportAnimations.Add(new MyJson_Asset(path));
-                // SerializeObject.currentData.AddAsset(asset);
-
-                var assetIndex = SerializeObject.currentData.AddAsset(asset);
-                exportAnimations.AddAsset(assetIndex);
-            }
-        }
-
-        public static void SetLightmaps(this ComponentData comp, string exportPath)
-        {
-            var lightmapsJson = new JArray();
-            comp.properties.Add("lightmaps", lightmapsJson);
-            // comp.props["lightmaps"] = lightmapsJson;
-            foreach (var lightmapData in LightmapSettings.lightmaps)
-            {
-                Texture2D lightmap = lightmapData.lightmapColor;
-
-                var path = PathHelper.GetTextureDescPath(lightmap);
-                var asset = SerializeObject.SerializeAsset(lightmap, path, AssetType.Texture);
-
-                // lightmapsJson.Add(new MyJson_Asset(path));
-                // SerializeObject.currentData.AddAsset(asset);
-
-                var assetIndex = SerializeObject.currentData.AddAsset(asset);
-                lightmapsJson.AddAsset(assetIndex);
-            }
-
         }
     }
 }

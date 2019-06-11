@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class TransformSerializer : ComponentSerializer
     {
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             var obj = component.gameObject;
             Transform comp = component as Transform;
@@ -33,7 +33,7 @@ namespace Egret3DExportTools
                     if (child.gameObject.activeInHierarchy)
                     {
                         var childEntity = SerializeObject.SerializeEntity(child);
-                        compData.AddChild(childEntity.transform);
+                        (compData as ComponentData).AddChild(childEntity.transform);
                     }
                 }
             }

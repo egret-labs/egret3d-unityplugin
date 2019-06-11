@@ -6,7 +6,7 @@ namespace Egret3DExportTools
 {
     public class ParticleSystemSerializer : ComponentSerializer
     {
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             var obj = component.gameObject;
             ParticleSystem comp = component as ParticleSystem;
@@ -18,7 +18,7 @@ namespace Egret3DExportTools
 
             return true;
         }
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             var obj = component.gameObject;
             ParticleSystem comp = component as ParticleSystem;
@@ -28,10 +28,6 @@ namespace Egret3DExportTools
                 var main = comp.main;
                 var mainItem = new JObject();
                 compData.properties.Add(new JProperty("main", mainItem));
-                //jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_ASSET, assetIndex))));
-
-                // compData.properties.Add("main", mainItem);
-                // compData.props["main"] = mainItem;
                 mainItem.SetNumber("duration", main.duration);
                 mainItem.SetBool("loop", main.loop);
                 this.AddMinMaxCurve(mainItem, "startDelay", main.startDelay);
@@ -71,16 +67,9 @@ namespace Egret3DExportTools
                 mainItem.SetEnum("_simulationSpace", main.simulationSpace);
                 mainItem.SetEnum("scaleMode", main.scalingMode);
                 mainItem.SetBool("playOnAwake", main.playOnAwake);
-                if (ExportToolsSetting.instance.estimateMaxParticles)
-                {
-                    var value = this.EstimateMaxParticles(comp);
-                    mainItem.SetInt("_maxParticles", value);
-                    MyLog.Log(comp.gameObject.name + " 粒子估算:" + value);
-                }
-                else
-                {
-                    mainItem.SetInt("_maxParticles", main.maxParticles);
-                }
+                var value = this.EstimateMaxParticles(comp);
+                mainItem.SetInt("_maxParticles", value);
+                MyLog.Log(comp.gameObject.name + " 粒子估算:" + value);
             }
 
             //emission

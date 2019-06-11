@@ -5,6 +5,7 @@ namespace Egret3DExportTools
 {
     public class TextureExtension : IExtension
     {
+        public const string EXTENSION_NAME = "egret";
         public int anisotropy = 1;
         public int format = 6408;
         public int levels = 0;

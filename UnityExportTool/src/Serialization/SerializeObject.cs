@@ -25,8 +25,13 @@ namespace Egret3DExportTools
         public const string SpotLight = "SpotLight";
         public const string LightShadow = "LightShadow";
         public const string AssetEntity = "AssetEntity";
-        public const string Material = "Material";
         public const string Defines = "Defines";
+
+        //        
+        public const string Texture2D = "Texture2D";
+        public const string Material = "Material";
+        public const string Mesh = "Mesh";
+        public const string AnimationClip = "AnimationClip";
     }
 
     public enum AssetType
@@ -38,31 +43,36 @@ namespace Egret3DExportTools
     }
     public static class SerializeObject
     {
-        public static SerializedData currentData = new SerializedData();
+        public static SerializeContext currentData = new SerializeContext();
         public static Dictionary<string, AssetData> assetsData = new Dictionary<string, AssetData>();
         public static Transform currentTarget;
-        private readonly static Dictionary<string, List<IComponentSerializer>> componentParsers = new Dictionary<string, List<IComponentSerializer>>();
-        private readonly static Dictionary<AssetType, IAssetSerializer> assetParsers = new Dictionary<AssetType, IAssetSerializer>();
+        private readonly static Dictionary<string, List<ISerializer>> componentParsers = new Dictionary<string, List<ISerializer>>();
+        private readonly static Dictionary<string, ISerializer> assetParsers = new Dictionary<string, ISerializer>();
         /**
          * 注册可序列化组件。
          * @param parser 序列化组件实例。
          * @param compType 对应Unity的类型。
          * @param className 对应Egret3d的类名(例如：egret3d.Animation)。
          */
-        private static void RegisterComponent(IComponentSerializer parser, System.Type compType, string className)
+        private static void RegisterComponent(ISerializer parser, System.Type compType, string className)
         {
             parser.compType = compType;
             parser.className = className;
             if (!componentParsers.ContainsKey(compType.Name))
             {
-                componentParsers[compType.Name] = new List<IComponentSerializer>();
+                componentParsers[compType.Name] = new List<ISerializer>();
             }
             componentParsers[compType.Name].Add(parser);
         }
 
-        private static void RegisterAsset(IAssetSerializer parser, AssetType type)
+        private static void RegisterAsset(ISerializer parser, System.Type compType, string className)
         {
-            assetParsers.Add(type, parser);
+            parser.compType = compType;
+            parser.className = className;
+            if(!assetParsers.ContainsKey(compType.Name))
+            {
+                assetParsers.Add(compType.Name, parser);
+            }
         }
         public static void Clear()
         {
@@ -96,15 +106,15 @@ namespace Egret3DExportTools
 
             //初始化资源
             assetParsers.Clear();
-            RegisterAsset(new GLTFTextureSerializer(), AssetType.Texture);
-            RegisterAsset(new GLTFMeshSerializer(), AssetType.Mesh);
-            RegisterAsset(new GLTFMaterialSerializer(), AssetType.Material);
-            RegisterAsset(new GLTFAnimationSerializer(), AssetType.Animation);
+            RegisterAsset(new GLTFTextureSerializer(), typeof(UnityEngine.Texture2D), SerializeClass.Texture2D);
+            RegisterAsset(new GLTFMeshSerializer(), typeof(UnityEngine.Mesh), SerializeClass.Mesh);
+            RegisterAsset(new GLTFMaterialSerializer(), typeof(UnityEngine.Material), SerializeClass.Material);
+            RegisterAsset(new GLTFAnimationClipSerializer(), typeof(UnityEngine.AnimationClip), SerializeClass.AnimationClip);
         }
         public static EntityData SerializeEntity(GameObject obj)
         {
             //未激活的不导出
-            if ((!ExportToolsSetting.instance.exportUnactivatedObject && !obj.activeInHierarchy))
+            if ((!ExportSetting.instance.common.exportUnactivatedObject && !obj.activeInHierarchy))
             {
                 MyLog.Log(obj.name + "对象未激活");
                 return null;
@@ -139,7 +149,7 @@ namespace Egret3DExportTools
                 }
                 string compClass = comp.GetType().Name;
                 MyLog.Log("组件:" + compClass);
-                if (!ExportToolsSetting.instance.exportUnactivatedComp)
+                if (!ExportSetting.instance.common.exportUnactivatedComp)
                 {
                     //利用反射查看组件是否激活，某些组件的enabled不再继承链上，只能用反射，比如BoxCollider
                     var property = comp.GetType().GetProperty("enabled");
@@ -193,8 +203,9 @@ namespace Egret3DExportTools
 
             return null;
         }
-        public static AssetData SerializeAsset(UnityEngine.Object obj, string path, AssetType type)
+        public static AssetData SerializeAsset(UnityEngine.Object obj)
         {
+            var path = PathHelper.GetAssetPath(obj);
             if (assetsData.ContainsKey(path))
             {
                 return assetsData[path];
@@ -202,7 +213,7 @@ namespace Egret3DExportTools
 
             var assetData = AssetData.Create(path);
             assetsData.Add(path, assetData);
-            var parser = assetParsers[type];
+            var parser = assetParsers[obj.GetType().Name];
 
             parser.Serialize(obj, assetData);
             return assetData;

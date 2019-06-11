@@ -1,134 +1,20 @@
-using GLTF.Schema;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using GLTF.Schema;
 using UnityEngine;
 
 namespace Egret3DExportTools
 {
-    /**
-     * 组件管理器接口
-     */
-    public interface IAssetSerializer
+    public static class GLTFExtension
     {
-        void Serialize(UnityEngine.Object sourceAsset, AssetData asset);
-    }
-
-    public abstract class GLTFSerializer : IAssetSerializer
-    {
-        protected GLTFRoot _root;
-        protected BufferId _bufferId;
-        protected GLTF.Schema.Buffer _buffer;
-        protected BinaryWriter _bufferWriter;
-
-        public Transform _target;
-
-        protected virtual void _Serialize(UnityEngine.Object sourceAsset)
-        {
-
-        }
-
-        public virtual void Serialize(UnityEngine.Object sourceAsset, AssetData asset)
-        {
-            this._target = SerializeObject.currentTarget;
-            this.InitGLTFRoot();
-            this._Serialize(sourceAsset);
-
-            if (this._bufferWriter != null)
-            {
-                //二进制数据
-                var ms = this._bufferWriter.BaseStream as MemoryStream;
-                var binBuffer = this.Resize(ms.ToArray());
-                this._bufferWriter.Close();
-
-                this._buffer.Uri = "";
-                this._buffer.ByteLength = binBuffer.Length;
-
-                ms = new MemoryStream();
-                var streamWriter = new StreamWriter(ms);
-                this._root.Serialize(streamWriter);
-                streamWriter.Close();
-                var jsonBuffer = this.Resize(ms.ToArray());
-
-                var writer = new BinaryWriter(new MemoryStream());
-                asset.buffer = this.WriteBinary(jsonBuffer, binBuffer, writer);
-                writer.Close();
-            }
-            else
-            {
-                //JSON数据                
-                var writer = new StringWriter();
-                this._root.Serialize(writer);
-                var jsonBuffer = System.Text.Encoding.UTF8.GetBytes(writer.ToString());
-                asset.buffer = jsonBuffer;
-                writer.Close();
-            }
-
-            this._bufferWriter = null;
-        }
-
-        protected virtual void InitGLTFRoot()
-        {
-            this._root = new GLTFRoot
-            {
-                Accessors = new List<Accessor>(),
-                Asset = new Asset
-                {
-                    Version = "2.0",
-                    Generator = "Unity plugin for egret",
-                    Extensions = new Dictionary<string, IExtension>(),
-                },
-                ExtensionsRequired = new List<string>(),
-                ExtensionsUsed = new List<string>(),
-                Extensions = new Dictionary<string, IExtension>() { { "egret", new AssetVersionExtension() { version = "5.0", minVersion = "5.0" } } },
-            };
-        }
-
-        private byte[] Resize(byte[] buffer)
-        {
-            var l = new List<byte>(buffer);
-            while (l.Count % 4 != 0)
-            {
-                l.Add(0);
-            }
-
-            return l.ToArray();
-        }
-
-        protected byte[] WriteBinary(byte[] json, byte[] bin, BinaryWriter writer)
-        {
-            writer.Write(0x46546c67);
-            writer.Write(2);
-            writer.Write(0);
-            //JSON CHUNK
-            writer.Write(json.Length);
-            writer.Write(0x4e4f534a);
-            writer.Write(json);
-            //BIN CHUNK
-            writer.Write(bin.Length);
-            writer.Write(0x004e4942);
-            writer.Write(bin);
-            //全部写完，长度重写
-            var ms = writer.BaseStream as MemoryStream;
-            var length = (uint)ms.Length;
-            ms.Position = 8;
-            ms.Write(BitConverter.GetBytes((UInt32)length), 0, 4);
-
-            writer.Close();
-
-            var res = ms.ToArray();
-            ms.Dispose();
-
-            return res;
-        }
-
-        protected AccessorId ExportAccessor(int[] arr, bool isIndices = false)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, int[] arr, bool isIndices = false, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -152,7 +38,7 @@ namespace Egret3DExportTools
                 }
             }
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
+            var byteOffset = writer.BaseStream.Position;
 
             if (max <= byte.MaxValue && min >= byte.MinValue && !isIndices)
             {
@@ -160,7 +46,7 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((byte)v);
+                    writer.Write((byte)v);
                 }
             }
             else if (max <= sbyte.MaxValue && min >= sbyte.MinValue && !isIndices)
@@ -169,7 +55,7 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((sbyte)v);
+                    writer.Write((sbyte)v);
                 }
             }
             else if (max <= short.MaxValue && min >= short.MinValue && !isIndices)
@@ -178,7 +64,7 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((short)v);
+                    writer.Write((short)v);
                 }
             }
             else if (max <= ushort.MaxValue && min >= ushort.MinValue)
@@ -187,7 +73,7 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((ushort)v);
+                    writer.Write((ushort)v);
                 }
             }
             else if (min >= uint.MinValue)
@@ -196,7 +82,7 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((uint)v);
+                    writer.Write((uint)v);
                 }
             }
             else
@@ -205,34 +91,35 @@ namespace Egret3DExportTools
 
                 foreach (var v in arr)
                 {
-                    _bufferWriter.Write((float)v);
+                    writer.Write((float)v);
                 }
             }
 
             accessor.Min = new List<double> { min };
             accessor.Max = new List<double> { max };
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
-            accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+            accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected AccessorId ExportAccessor(Vector2[] arr, BufferViewId bufferViewId = null)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, Vector2[] arr, BufferViewId bufferViewId = null, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -270,15 +157,15 @@ namespace Egret3DExportTools
             accessor.Min = new List<double> { minX, minY };
             accessor.Max = new List<double> { maxX, maxY };
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
+            var byteOffset = writer.BaseStream.Position;
 
             foreach (var vec in arr)
             {
-                _bufferWriter.Write(vec.x);
-                _bufferWriter.Write(vec.y);
+                writer.Write(vec.x);
+                writer.Write(vec.y);
             }
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
             if (bufferViewId != null)
             {
@@ -287,27 +174,27 @@ namespace Egret3DExportTools
             }
             else
             {
-                accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+                accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
             }
 
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected AccessorId ExportAccessor(Vector3[] arr, BufferViewId bufferViewId = null, bool normalized = false, Transform root = null)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, Vector3[] arr, BufferViewId bufferViewId = null, bool normalized = false, Transform rootNode = null, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -356,18 +243,18 @@ namespace Egret3DExportTools
             //accessor.Min = new List<double> { minX, minY, minZ };
             //accessor.Max = new List<double> { maxX, maxY, maxZ };
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
-            Matrix4x4 mA = root != null ? root.localToWorldMatrix : new Matrix4x4();
-            Matrix4x4 mB = root != null ? root.parent.worldToLocalMatrix : new Matrix4x4();
+            var byteOffset = writer.BaseStream.Position;
+            Matrix4x4 mA = rootNode != null ? rootNode.localToWorldMatrix : new Matrix4x4();
+            Matrix4x4 mB = rootNode != null ? rootNode.parent.worldToLocalMatrix : new Matrix4x4();
 
             foreach (var vec in arr)
             {
-                _bufferWriter.Write(vec.x);
-                _bufferWriter.Write(vec.y);
-                _bufferWriter.Write(vec.z);
+                writer.Write(vec.x);
+                writer.Write(vec.y);
+                writer.Write(vec.z);
             }
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
             if (bufferViewId != null)
             {
@@ -376,27 +263,27 @@ namespace Egret3DExportTools
             }
             else
             {
-                accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+                accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
             }
 
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected AccessorId ExportAccessor(Vector4[] arr, BufferViewId bufferViewId = null, bool normalized = false)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, Vector4[] arr, BufferViewId bufferViewId = null, bool normalized = false, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -454,17 +341,17 @@ namespace Egret3DExportTools
             accessor.Min = new List<double> { minX, minY, minZ, minW };
             accessor.Max = new List<double> { maxX, maxY, maxZ, maxW };
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
+            var byteOffset = writer.BaseStream.Position;
 
             foreach (var vec in arr)
             {
-                _bufferWriter.Write(vec.x);
-                _bufferWriter.Write(vec.y);
-                _bufferWriter.Write(vec.z);
-                _bufferWriter.Write(vec.w);
+                writer.Write(vec.x);
+                writer.Write(vec.y);
+                writer.Write(vec.z);
+                writer.Write(vec.w);
             }
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
             if (bufferViewId != null)
             {
@@ -473,27 +360,27 @@ namespace Egret3DExportTools
             }
             else
             {
-                accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+                accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
             }
 
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected AccessorId ExportAccessor(Matrix4x4[] arr, BufferViewId bufferViewId = null)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, Matrix4x4[] arr, BufferViewId bufferViewId = null, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -501,29 +388,29 @@ namespace Egret3DExportTools
             accessor.Count = count;
             accessor.Type = GLTFAccessorAttributeType.MAT4;
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
+            var byteOffset = writer.BaseStream.Position;
 
             foreach (var vec in arr)
             {
-                _bufferWriter.Write(vec.m00);
-                _bufferWriter.Write(vec.m10);
-                _bufferWriter.Write(vec.m20);
-                _bufferWriter.Write(vec.m30);
-                _bufferWriter.Write(vec.m01);
-                _bufferWriter.Write(vec.m11);
-                _bufferWriter.Write(vec.m21);
-                _bufferWriter.Write(vec.m31);
-                _bufferWriter.Write(vec.m02);
-                _bufferWriter.Write(vec.m12);
-                _bufferWriter.Write(vec.m22);
-                _bufferWriter.Write(vec.m32);
-                _bufferWriter.Write(vec.m03);
-                _bufferWriter.Write(vec.m13);
-                _bufferWriter.Write(vec.m23);
-                _bufferWriter.Write(vec.m33);
+                writer.Write(vec.m00);
+                writer.Write(vec.m10);
+                writer.Write(vec.m20);
+                writer.Write(vec.m30);
+                writer.Write(vec.m01);
+                writer.Write(vec.m11);
+                writer.Write(vec.m21);
+                writer.Write(vec.m31);
+                writer.Write(vec.m02);
+                writer.Write(vec.m12);
+                writer.Write(vec.m22);
+                writer.Write(vec.m32);
+                writer.Write(vec.m03);
+                writer.Write(vec.m13);
+                writer.Write(vec.m23);
+                writer.Write(vec.m33);
             }
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
             if (bufferViewId != null)
             {
@@ -532,27 +419,27 @@ namespace Egret3DExportTools
             }
             else
             {
-                accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+                accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
             }
 
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected AccessorId ExportAccessor(UnityEngine.Color[] arr, BufferViewId bufferViewId = null)
+        public static AccessorId WriteAccessor(this GLTFRoot root, BufferId bufferId, UnityEngine.Color[] arr, BufferViewId bufferViewId = null, BinaryWriter writer = null)
         {
             var count = arr.Length;
 
             if (count == 0)
             {
-                throw new Exception("Accessors can not have a count of 0.");
+                MyLog.LogError("Accessors can not have a count of 0.");
             }
 
             var accessor = new Accessor();
@@ -611,17 +498,17 @@ namespace Egret3DExportTools
             accessor.Min = new List<double> { minR, minG, minB, minA };
             accessor.Max = new List<double> { maxR, maxG, maxB, maxA };
 
-            var byteOffset = _bufferWriter.BaseStream.Position;
+            var byteOffset = writer.BaseStream.Position;
 
             foreach (var color in arr)
             {
-                _bufferWriter.Write(color.r);
-                _bufferWriter.Write(color.g);
-                _bufferWriter.Write(color.b);
-                _bufferWriter.Write(color.a);
+                writer.Write(color.r);
+                writer.Write(color.g);
+                writer.Write(color.b);
+                writer.Write(color.a);
             }
 
-            var byteLength = _bufferWriter.BaseStream.Position - byteOffset;
+            var byteLength = writer.BaseStream.Position - byteOffset;
 
             if (bufferViewId != null)
             {
@@ -630,37 +517,78 @@ namespace Egret3DExportTools
             }
             else
             {
-                accessor.BufferView = ExportBufferView((int)byteOffset, (int)byteLength);
+                accessor.BufferView = root.WriteBufferView(bufferId, (int)byteOffset, (int)byteLength);
             }
 
             var id = new AccessorId
             {
-                Id = _root.Accessors.Count,
-                Root = _root
+                Id = root.Accessors.Count,
+                Root = root
             };
-            _root.Accessors.Add(accessor);
+            root.Accessors.Add(accessor);
 
             return id;
         }
 
-        protected BufferViewId ExportBufferView(int byteOffset, int byteLength)
+        public static BufferViewId WriteBufferView(this GLTFRoot root, BufferId bufferId, int byteOffset, int byteLength)
         {
             var bufferView = new BufferView
             {
-                Buffer = _bufferId,
+                Buffer = bufferId,
                 ByteOffset = byteOffset,
                 ByteLength = byteLength,
             };
 
             var id = new BufferViewId
             {
-                Id = _root.BufferViews.Count,
-                Root = _root
+                Id = root.BufferViews.Count,
+                Root = root
             };
 
-            _root.BufferViews.Add(bufferView);
+            root.BufferViews.Add(bufferView);
 
             return id;
+        }
+
+        public static byte[] WriteBinary(byte[] json, byte[] bin, BinaryWriter writer)
+        {
+            var resize = new List<byte>(json);
+            while (resize.Count % 4 != 0)
+            {
+                resize.Add(0);
+            }
+            json = resize.ToArray();
+
+            resize = new List<byte>(bin);
+            while (resize.Count % 4 != 0)
+            {
+                resize.Add(0);
+            }
+            bin = resize.ToArray();
+            //
+            writer.Write(0x46546c67);
+            writer.Write(2);
+            writer.Write(0);
+            //JSON CHUNK
+            writer.Write(json.Length);
+            writer.Write(0x4e4f534a);
+            writer.Write(json);
+            //BIN CHUNK
+            writer.Write(bin.Length);
+            writer.Write(0x004e4942);
+            writer.Write(bin);
+            //全部写完，长度重写
+            var ms = writer.BaseStream as MemoryStream;
+            var length = (uint)ms.Length;
+            ms.Position = 8;
+            ms.Write(BitConverter.GetBytes((UInt32)length), 0, 4);
+
+            writer.Close();
+
+            var res = ms.ToArray();
+            ms.Dispose();
+
+            return res;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class DirectionalLightSerializer : ComponentSerializer
     {
-        public override bool Match(Component component)
+        protected override bool Match(Component component)
         {
             Light comp = component as Light;
             if (comp.type != LightType.Directional)
@@ -15,7 +15,7 @@ namespace Egret3DExportTools
 
             return true;
         }
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             Light comp = component as Light;
             compData.properties.SetBool("castShadows", comp.shadows != LightShadows.None);
@@ -32,7 +32,7 @@ namespace Egret3DExportTools
                 shadow.properties.SetNumber("far", 500.0f);
                 shadow.properties.SetNumber("size", comp.cookieSize);
                 // shadow.SetNumber("mapSize", comp.shadowResolution);
-                compData.entity.AddComponent(shadow);
+                (compData as ComponentData).entity.AddComponent(shadow);
             }
         }
     }

@@ -7,7 +7,7 @@
     using UnityEngine;
     using UnityGLTF.Extensions;
 
-    public class GLTFAnimationSerializer : GLTFSerializer
+    public class GLTFAnimationClipSerializer : AssetSerializer
     {
         private UnityEngine.AnimationClip _animationClip;
         private List<Transform> _animationTargets = new List<Transform>(); // TODO 完善 children.
@@ -163,7 +163,7 @@
             return 1;
         }
 
-        protected override void _Serialize(UnityEngine.Object sourceAsset)
+        protected override void Serialize(UnityEngine.Object sourceAsset)
         {
             this._animationClip = sourceAsset as UnityEngine.AnimationClip;
 

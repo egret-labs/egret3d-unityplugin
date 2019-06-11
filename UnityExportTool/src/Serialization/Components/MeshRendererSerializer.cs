@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class MeshRendererSerializer : ComponentSerializer
     {
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             MeshRenderer comp = component as MeshRenderer;
             compData.properties.SetBool("isStatic", component.gameObject.isStatic);
@@ -13,7 +13,7 @@ namespace Egret3DExportTools
             compData.properties.SetVector4("lightmapScaleOffset", comp.lightmapScaleOffset, null, 8);
             compData.properties.SetBool("_castShadows", comp.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off);
             compData.properties.SetBool("_receiveShadows", comp.receiveShadows);
-            compData.SetMaterials(component.gameObject, comp.sharedMaterials);
+            compData.properties.SetMaterials(component.gameObject, comp.sharedMaterials);
         }
     }
 }

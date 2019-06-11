@@ -5,7 +5,7 @@ namespace Egret3DExportTools
 {
     public class CameraSerializer : ComponentSerializer
     {
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             Camera comp = component as Camera;
             if (comp.orthographic)

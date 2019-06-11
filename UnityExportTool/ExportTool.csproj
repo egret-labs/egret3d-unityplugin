@@ -65,11 +65,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="src\ExportTools\ExportExtendTools.cs" />
-    <Compile Include="src\ExportTools\ExportImageTools.cs" />
-    <Compile Include="src\ExportTools\ExportPrefabTools.cs" />
-    <Compile Include="src\ExportTools\ExportSceneTools.cs" />
-    <Compile Include="src\ExportTools\ExportToolsSetting.cs" />
+    <Compile Include="src\ExportTools\ExportImage.cs" />
+    <Compile Include="src\ExportTools\ExportPrefab.cs" />
+    <Compile Include="src\ExportTools\ExportScene.cs" />
+    <Compile Include="src\ExportTools\ExportSetting.cs" />
+    <Compile Include="src\ExportTools\ExtendTools.cs" />
     <Compile Include="src\ExportWindow.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\AttributeAccessor.cs" />
     <Compile Include="src\GLTF\GLTFSerialization\Exceptions.cs" />
@@ -150,17 +150,17 @@
     <Compile Include="src\GLTF\UnityGLTF\UniformMaps\StandardMap.cs" />
     <Compile Include="src\GLTF\UnityGLTF\UniformMaps\UniformMap.cs" />
     <Compile Include="src\GLTF\UnityGLTF\URIHelper.cs" />
+    <Compile Include="src\Helper\Extensions\GLTFExtension.cs" />
     <Compile Include="src\Helper\Extensions\JsonExtension.cs" />
     <Compile Include="src\Helper\Extensions\MaterialExtension.cs" />
     <Compile Include="src\Helper\MyLog.cs" />
     <Compile Include="src\Helper\PathHelper.cs" />
-    <Compile Include="src\Serialization\AssetSerizlize.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AssetVersion.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\MaterialExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\TextureExtension.cs" />
-    <Compile Include="src\Serialization\Assets\GLTFAnimationSerializer.cs" />
+    <Compile Include="src\Serialization\Assets\GLTFAnimationClipSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMaterialSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMeshSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFTextureSerializer.cs" />
@@ -173,7 +173,6 @@
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardRoughnessParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardSpecularParser.cs" />
-    <Compile Include="src\Serialization\ComponentSerizilize.cs" />
     <Compile Include="src\Serialization\Components\AnimationSerializer.cs" />
     <Compile Include="src\Serialization\Components\AnimatorSerializer.cs" />
     <Compile Include="src\Serialization\Components\BoxColliderSerializer.cs" />
@@ -187,8 +186,9 @@
     <Compile Include="src\Serialization\Components\SphereColliderSerializer.cs" />
     <Compile Include="src\Serialization\Components\SpotLightSerializer.cs" />
     <Compile Include="src\Serialization\Components\TransformSerializer.cs" />
-    <Compile Include="src\Serialization\SerializedData.cs" />
+    <Compile Include="src\Serialization\SerializeContext.cs" />
     <Compile Include="src\Serialization\SerializeObject.cs" />
+    <Compile Include="src\Serialization\SerializerBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\Newtonsoft.Json.dll" />

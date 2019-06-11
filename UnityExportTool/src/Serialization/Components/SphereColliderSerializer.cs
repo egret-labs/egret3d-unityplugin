@@ -6,7 +6,7 @@ namespace Egret3DExportTools
     using Newtonsoft.Json.Linq;
     public class SphereColliderSerializer : ComponentSerializer
     {
-        public override void Serialize(Component component, ComponentData compData)
+        protected override void Serialize(Component component, ComponentData compData)
         {
             SphereCollider comp = component as SphereCollider;
             var arr = new JArray();

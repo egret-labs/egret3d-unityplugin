@@ -121,6 +121,33 @@ namespace Egret3DExportTools
             return relPath;
         }
 
+        public static string GetFileDirectory(string filePath)
+        {
+            return filePath.Substring(0, filePath.LastIndexOf("/") + 1);
+        }
+
+        public static string GetAssetPath(UnityEngine.Object asset)
+        {
+            if(asset is UnityEngine.Mesh)
+            {
+                return GetMeshPath(asset as UnityEngine.Mesh);
+            }
+            else if(asset is UnityEngine.Material)
+            {
+                return GetMaterialPath(asset as UnityEngine.Material);
+            }
+            else if(asset is UnityEngine.AnimationClip)
+            {
+                return GetAnimationClipPath(asset as UnityEngine.AnimationClip);
+            }
+            else if(asset is UnityEngine.Texture)
+            {
+                return GetTextureDescPath(asset as UnityEngine.Texture);
+            }
+
+            return "";
+        }
+
         public static string GetMeshPath(UnityEngine.Mesh mesh)
         {
             var path = UnityEditor.AssetDatabase.GetAssetPath(mesh);
@@ -161,7 +188,7 @@ namespace Egret3DExportTools
             path = PathHelper.CheckFileName(path);
             return path;
         }
-        
+
         public static string GetTexturePath(Texture tex)
         {
             var path = AssetDatabase.GetAssetPath(tex);
