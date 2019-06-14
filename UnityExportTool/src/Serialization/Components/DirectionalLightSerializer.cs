@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using System;
 
 namespace Egret3DExportTools
@@ -26,12 +27,28 @@ namespace Egret3DExportTools
             {
                 //
                 var shadow = SerializeObject.currentData.CreateComponent(SerializeClass.LightShadow);
-                shadow.properties.SetNumber("radius", comp.shadowNormalBias); // TODO
-                shadow.properties.SetNumber("bias", comp.shadowBias);
+                shadow.properties.SetNumber("radius", 1.0f); // TODO
+                shadow.properties.SetNumber("bias", -0.0001f);
                 shadow.properties.SetNumber("near", comp.shadowNearPlane);
                 shadow.properties.SetNumber("far", 500.0f);
                 shadow.properties.SetNumber("size", comp.cookieSize);
-                // shadow.SetNumber("mapSize", comp.shadowResolution);
+                if (comp.shadowResolution == LightShadowResolution.Low)
+                {
+                    shadow.properties.SetInt("mapSize", 256);
+                }
+                else if (comp.shadowResolution == LightShadowResolution.Medium)
+                {
+                    shadow.properties.SetInt("mapSize", 512);
+                }
+                else if (comp.shadowResolution == LightShadowResolution.High)
+                {
+                    shadow.properties.SetInt("mapSize", 1024);
+                }
+                else
+                {
+                    shadow.properties.SetInt("mapSize", 2048);
+                }
+
                 (compData as ComponentData).entity.AddComponent(shadow);
             }
         }

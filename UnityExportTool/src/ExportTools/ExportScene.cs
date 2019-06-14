@@ -16,22 +16,23 @@ namespace Egret3DExportTools
 
             var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
 
-            var entity = SerializeObject.currentData.CreateEntity();
-
+            var sceneEntity = SerializeObject.currentData.CreateEntity();
+            
             var sceneComp = SerializeObject.currentData.CreateComponent(SerializeClass.Scene);
             sceneComp.properties.SetString("name", sceneName.Substring(sceneName.LastIndexOf('/') + 1));
-            entity.AddComponent(sceneComp);
-
+            sceneEntity.AddComponent(sceneComp);
+            
             var treeComp = SerializeObject.currentData.CreateComponent(SerializeClass.TreeNode);
             treeComp.properties.SetString("name", "Root");
-            entity.AddComponent(treeComp);
+            treeComp.properties.SetReference("scene", sceneComp.uuid);
+            sceneEntity.AddComponent(treeComp);
 
             // 环境光和光照贴图
             var sceneLightComp = SerializeObject.currentData.CreateComponent(SerializeClass.SceneLight);
             sceneLightComp.properties.SetColor("ambientColor", RenderSettings.ambientLight);
             sceneLightComp.properties.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
             sceneLightComp.properties.SetLightmaps(exportPath);
-            entity.AddComponent(sceneLightComp);
+            sceneEntity.AddComponent(sceneLightComp);
 
             // 雾
             if (RenderSettings.fog)
@@ -49,7 +50,7 @@ namespace Egret3DExportTools
                     fogComp.properties.SetNumber("far", RenderSettings.fogDensity);
                 }
                 fogComp.properties.SetColor("color", RenderSettings.fogColor);
-                entity.AddComponent(fogComp);
+                sceneEntity.AddComponent(fogComp);
             }
 
             foreach (var child in roots)

@@ -184,6 +184,11 @@ namespace Egret3DExportTools
             arr.AddNumber(1.0);
             jsonNode.Add(new JProperty(desc, arr));
         }
+
+        public static void SetReference(this JContainer jsonNode, string key, string uuid)
+        {
+            jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_UUID, uuid))));
+        }
         
         public static void SetAsset(this JContainer jsonNode, string key, int assetIndex)
         {
