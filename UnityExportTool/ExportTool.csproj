@@ -161,8 +161,10 @@
     <Compile Include="src\Serialization\Assets\Extensions\MaterialExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\TextureExtension.cs" />
     <Compile Include="src\Serialization\Assets\GLTFAnimationClipSerializer.cs" />
+    <Compile Include="src\Serialization\Assets\GLTFCubemapSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMaterialSerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFMeshSerializer.cs" />
+    <Compile Include="src\Serialization\Assets\GLTFTextureArraySerializer.cs" />
     <Compile Include="src\Serialization\Assets\GLTFTextureSerializer.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\BaseMaterialParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\CustomParser.cs" />
@@ -170,6 +172,8 @@
     <Compile Include="src\Serialization\Assets\MaterialParser\LambertParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\ParticleParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\PhongParser.cs" />
+    <Compile Include="src\Serialization\Assets\MaterialParser\SkyboxCubedParser.cs" />
+    <Compile Include="src\Serialization\Assets\MaterialParser\SkyboxParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardRoughnessParser.cs" />
     <Compile Include="src\Serialization\Assets\MaterialParser\StandardSpecularParser.cs" />
@@ -183,6 +187,7 @@
     <Compile Include="src\Serialization\Components\ParticleRendererSerializer.cs" />
     <Compile Include="src\Serialization\Components\ParticleSystemSerializer.cs" />
     <Compile Include="src\Serialization\Components\SkinnedMeshRendererSerializer.cs" />
+    <Compile Include="src\Serialization\Components\SkyboxSerializer.cs" />
     <Compile Include="src\Serialization\Components\SphereColliderSerializer.cs" />
     <Compile Include="src\Serialization\Components\SpotLightSerializer.cs" />
     <Compile Include="src\Serialization\Components\TransformSerializer.cs" />

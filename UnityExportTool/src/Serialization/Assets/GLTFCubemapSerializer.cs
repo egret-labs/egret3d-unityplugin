@@ -4,9 +4,9 @@ namespace Egret3DExportTools
     using GLTF.Schema;
     using UnityEngine;
 
-    public class GLTFTextureSerializer : AssetSerializer
+    public class GLTFCubemapSerializer : AssetSerializer
     {
-        private UnityEngine.Texture2D texture;
+        private UnityEngine.Cubemap texture;
 
         protected override void InitGLTFRoot()
         {
@@ -35,7 +35,7 @@ namespace Egret3DExportTools
 
         protected override void Serialize(UnityEngine.Object sourceAsset)
         {
-            this.texture = sourceAsset as UnityEngine.Texture2D;
+            this.texture = sourceAsset as UnityEngine.Cubemap;
             //先把原始图片导出来
             this.ExportTexture();
 

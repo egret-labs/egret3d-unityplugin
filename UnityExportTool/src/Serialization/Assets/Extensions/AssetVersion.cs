@@ -21,16 +21,9 @@ namespace Egret3DExportTools
         public virtual JProperty Serialize()
         {
             JObject ext = new JObject();
-
-            ext.Add(new JProperty(
-                "version",
-                version
-            ));
-
-            ext.Add(new JProperty(
-                "minVersion",
-                minVersion
-            ));
+            
+            ext.SetString("version", version);
+            ext.SetString("minVersion", minVersion);
 
             return new JProperty("egret", ext);
         }

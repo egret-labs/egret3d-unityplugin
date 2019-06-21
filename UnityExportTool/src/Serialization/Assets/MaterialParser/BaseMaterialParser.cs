@@ -307,13 +307,13 @@ namespace Egret3DExportTools
             this.SetBlendFuncSeparate(functions, blendFuncSeparate);
         }
 
-        protected void SetCull(List<EnableState> enables, Functions functions, bool cull)
+        protected void SetCull(List<EnableState> enables, Functions functions, bool cull, FrontFace front = FrontFace.CCW, CullFace face = CullFace.BACK)
         {
             if (cull)
             {
-                int[] frontFace = { (int)FrontFace.CCW };
+                int[] frontFace = { (int)front };
                 this.SetFrontFace(functions, frontFace);
-                int[] cullFace = { (int)CullFace.BACK };
+                int[] cullFace = { (int)face };
                 this.SetCullFace(functions, cullFace);
 
                 enables.Add(EnableState.CULL_FACE);

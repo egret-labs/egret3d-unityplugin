@@ -128,21 +128,25 @@ namespace Egret3DExportTools
 
         public static string GetAssetPath(UnityEngine.Object asset)
         {
-            if(asset is UnityEngine.Mesh)
+            if (asset is UnityEngine.Mesh)
             {
                 return GetMeshPath(asset as UnityEngine.Mesh);
             }
-            else if(asset is UnityEngine.Material)
+            else if (asset is UnityEngine.Material)
             {
                 return GetMaterialPath(asset as UnityEngine.Material);
             }
-            else if(asset is UnityEngine.AnimationClip)
+            else if (asset is UnityEngine.AnimationClip)
             {
                 return GetAnimationClipPath(asset as UnityEngine.AnimationClip);
             }
-            else if(asset is UnityEngine.Texture)
+            else if (asset is UnityEngine.Texture)
             {
                 return GetTextureDescPath(asset as UnityEngine.Texture);
+            }
+            else if (asset is Texture2DArrayData)
+            {
+                return GetTextureDescPath(asset as Texture2DArrayData);
             }
 
             return "";
@@ -205,6 +209,16 @@ namespace Egret3DExportTools
             }
 
             return PathHelper.CheckFileName(path);
+        }
+
+        public static string GetTextureDescPath(Texture2DArrayData tex)
+        {
+            //Texture2DArray 以第一个图片为目录,  以材质名称为名称
+            var path = GetTexturePath(tex.textures[0]);
+            // //相对路径
+            path = path.Substring(0, path.LastIndexOf("/") + 1) + tex.materialName + ".image.json";
+            path = PathHelper.CheckFileName(path);
+            return path;
         }
 
         public static string GetTextureDescPath(UnityEngine.Texture texture)

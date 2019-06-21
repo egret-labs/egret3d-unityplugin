@@ -6,13 +6,16 @@ namespace Egret3DExportTools
 {
     public static class JsonExtension
     {
-        public static void SetBool(this JContainer jsonNode, string key, bool value)
+        public static void SetBool(this JContainer jsonNode, string key, bool value, bool? defalutValue = null)
         {
             jsonNode.Add(new JProperty(key, value));
         }
-        public static void SetInt(this JContainer jsonNode, string key, int value)
+        public static void SetInt(this JContainer jsonNode, string key, int value, int? defalutValue = null)
         {
-            jsonNode.Add(new JProperty(key, value));
+            if (value != defalutValue)
+            {
+                jsonNode.Add(new JProperty(key, value));
+            }
         }
         public static void SetNumber(this JContainer jsonNode, string key, float value, float? defalutValue = null, int? digits = null)
         {
@@ -189,7 +192,7 @@ namespace Egret3DExportTools
         {
             jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_UUID, uuid))));
         }
-        
+
         public static void SetAsset(this JContainer jsonNode, string key, int assetIndex)
         {
             jsonNode.Add(new JProperty(key, new JObject(new JProperty(SerizileData.KEY_ASSET, assetIndex))));
@@ -203,6 +206,23 @@ namespace Egret3DExportTools
                 var uri = ExportSetting.instance.GetExportPath(assetData.uri);
                 jsonNode.Add(new JProperty(key, uri));
             }
+        }
+
+        public static void SetCubemap(this JContainer jsonNode, string key, Cubemap value, Cubemap defalutValue = null)
+        {
+            if (value != defalutValue)
+            {
+                var assetData = SerializeObject.SerializeAsset(value);
+                var uri = ExportSetting.instance.GetExportPath(assetData.uri);
+                jsonNode.Add(new JProperty(key, uri));
+            }
+        }
+
+        public static void SetTextureArray(this JContainer jsonNode, string key, Texture2DArrayData value)
+        {
+            var assetData = SerializeObject.SerializeAsset(value);
+            var uri = ExportSetting.instance.GetExportPath(assetData.uri);
+            jsonNode.Add(new JProperty(key, uri));
         }
 
         public static void SetMesh(this JContainer jsonNode, UnityEngine.GameObject obj, UnityEngine.Mesh mesh)

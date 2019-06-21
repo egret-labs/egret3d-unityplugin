@@ -340,7 +340,7 @@ namespace GLTF.Schema
 		public void Serialize(TextWriter textWriter)
 		{
 			JsonWriter jsonWriter = new JsonTextWriter(textWriter);
-			// Modify by Egret
+			// modify by egret
 			if(Egret3DExportTools.ExportSetting.instance.common.jsonFormatting)
 			{
 				jsonWriter.Formatting = Formatting.Indented;

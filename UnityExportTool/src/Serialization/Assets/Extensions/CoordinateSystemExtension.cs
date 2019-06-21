@@ -28,15 +28,8 @@
         {
             JObject ext = new JObject();
 
-            ext.Add(new JProperty(
-                    "dir",
-                    coordinateDir.ToString()
-                ));
-
-            ext.Add(new JProperty(
-                    "unit",
-                    coordinateUnit
-                ));
+            ext.SetString("dir", coordinateDir.ToString());
+            ext.SetNumber("unit", coordinateUnit);
 
             return new JProperty(CoordinateSystemExtension.EXTENSION_NAME, ext);
         }

@@ -1,98 +1,117 @@
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace GLTF.Schema
 {
-	/// <summary>
-	/// Image data used to create a texture. Image can be referenced by URI or
-	/// `bufferView` index. `mimeType` is required in the latter case.
-	/// </summary>
-	public class Image : GLTFChildOfRootProperty
-	{
-		/// <summary>
-		/// The uri of the image.  Relative paths are relative to the .gltf file.
-		/// Instead of referencing an external file, the uri can also be a data-uri.
-		/// The image format must be jpg, png, bmp, or gif.
-		/// </summary>
-		public string Uri;
+    /// <summary>
+    /// Image data used to create a texture. Image can be referenced by URI or
+    /// `bufferView` index. `mimeType` is required in the latter case.
+    /// </summary>
+    public class Image : GLTFChildOfRootProperty
+    {
+        /// <summary>
+        /// The uri of the image.  Relative paths are relative to the .gltf file.
+        /// Instead of referencing an external file, the uri can also be a data-uri.
+        /// The image format must be jpg, png, bmp, or gif.
+        /// </summary>
+        public string Uri;
 
-		/// <summary>
-		/// The image's MIME type.
-		/// <minLength>1</minLength>
-		/// </summary>
-		public string MimeType;
+        // modify by egret
+        public List<string> Uris;
 
-		/// <summary>
-		/// The index of the bufferView that contains the image.
-		/// Use this instead of the image's uri property.
-		/// </summary>
-		public BufferViewId BufferView;
+        /// <summary>
+        /// The image's MIME type.
+        /// <minLength>1</minLength>
+        /// </summary>
+        public string MimeType;
 
-		public Image()
-		{
-		}
+        /// <summary>
+        /// The index of the bufferView that contains the image.
+        /// Use this instead of the image's uri property.
+        /// </summary>
+        public BufferViewId BufferView;
 
-		public Image(Image image, GLTFRoot gltfRoot) : base(image, gltfRoot)
-		{
-			if (image == null) return;
+        public Image()
+        {
+        }
 
-			Uri = image.Uri;
-			MimeType = image.MimeType;
+        public Image(Image image, GLTFRoot gltfRoot) : base(image, gltfRoot)
+        {
+            if (image == null) return;
 
-			if (image.BufferView != null)
-			{
-				BufferView = new BufferViewId(image.BufferView, gltfRoot);
-			}
-		}
+            Uri = image.Uri;
+            MimeType = image.MimeType;
 
-		public static Image Deserialize(GLTFRoot root, JsonReader reader)
-		{
-			var image = new Image();
+            if (image.BufferView != null)
+            {
+                BufferView = new BufferViewId(image.BufferView, gltfRoot);
+            }
+        }
 
-			while (reader.Read() && reader.TokenType == JsonToken.PropertyName)
-			{
-				var curProp = reader.Value.ToString();
+        public static Image Deserialize(GLTFRoot root, JsonReader reader)
+        {
+            var image = new Image();
 
-				switch (curProp)
-				{
-					case "uri":
-						image.Uri = reader.ReadAsString();
-						break;
-					case "mimeType":
-						image.MimeType = reader.ReadAsString();
-						break;
-					case "bufferView":
-						image.BufferView = BufferViewId.Deserialize(root, reader);
-						break;
-					default:
-						image.DefaultPropertyDeserializer(root, reader);
-						break;
-				}
-			}
+            while (reader.Read() && reader.TokenType == JsonToken.PropertyName)
+            {
+                var curProp = reader.Value.ToString();
 
-			return image;
-		}
+                switch (curProp)
+                {
+                    case "uri":
+                        image.Uri = reader.ReadAsString();
+                        break;
+                    case "mimeType":
+                        image.MimeType = reader.ReadAsString();
+                        break;
+                    case "bufferView":
+                        image.BufferView = BufferViewId.Deserialize(root, reader);
+                        break;
+                    default:
+                        image.DefaultPropertyDeserializer(root, reader);
+                        break;
+                }
+            }
 
-		public override void Serialize(JsonWriter writer) {
-			writer.WriteStartObject();
+            return image;
+        }
 
-			if (Uri != null) {
-				writer.WritePropertyName("uri");
-				writer.WriteValue(Uri);
-			}
+        public override void Serialize(JsonWriter writer)
+        {
+            writer.WriteStartObject();
 
-			if (MimeType != null) {
-				writer.WritePropertyName("mimeType");
-				writer.WriteValue(Newtonsoft.Json.Linq.JValue.CreateString(MimeType).ToString());
-			}
+            if (Uri != null)
+            {
+                writer.WritePropertyName("uri");
+                writer.WriteValue(Uri);
+            }
+            else if (Uris != null)
+            {
+                writer.WritePropertyName("uri");
+                writer.WriteStartArray();
+                foreach (var uri in Uris)
+                {
+                    writer.WriteValue(uri);
+                }
 
-			if (BufferView != null) {
-				writer.WritePropertyName("bufferView");
-				writer.WriteValue(BufferView);
-			}
+                writer.WriteEndArray();
+            }
 
-			base.Serialize(writer);
+            if (MimeType != null)
+            {
+                writer.WritePropertyName("mimeType");
+                writer.WriteValue(Newtonsoft.Json.Linq.JValue.CreateString(MimeType).ToString());
+            }
 
-			writer.WriteEndObject();
-		}
-	}
+            if (BufferView != null)
+            {
+                writer.WritePropertyName("bufferView");
+                writer.WriteValue(BufferView);
+            }
+
+            base.Serialize(writer);
+
+            writer.WriteEndObject();
+        }
+    }
 }

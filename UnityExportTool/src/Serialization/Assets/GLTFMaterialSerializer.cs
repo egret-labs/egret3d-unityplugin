@@ -1,13 +1,8 @@
 namespace Egret3DExportTools
 {
-    using System;
     using System.Collections.Generic;
-    using System.IO;
     using GLTF.Schema;
     using UnityEngine;
-    using UnityGLTF.Extensions;
-
-    using Egret3DExportTools;
     using Newtonsoft.Json.Linq;
 
     public enum MaterialType
@@ -19,6 +14,8 @@ namespace Egret3DExportTools
         StandardSpecular,
         StandardRoughness,
         Particle,
+        Skybox,
+        Skybox_Cubed,
         Custom
     }
 
@@ -54,6 +51,8 @@ namespace Egret3DExportTools
             this.register(MaterialType.StandardRoughness, new StandardRoughnessParser(), "builtin/meshphysical.shader.json");
             this.register(MaterialType.StandardSpecular, new StandardSpecularParser(), "builtin/meshphysical.shader.json");
             this.register(MaterialType.Particle, new ParticleParser(), "builtin/particle.shader.json");
+            this.register(MaterialType.Skybox, new SkyboxParser(), "builtin/cube.shader.json");
+            this.register(MaterialType.Skybox_Cubed, new SkyboxCubedParser(), "builtin/cube.shader.json");
             this.register(MaterialType.Custom, new CustomParser(), "");
         }
 
@@ -90,7 +89,7 @@ namespace Egret3DExportTools
             var data = new MaterialData();
             var technique = new Techniques();
             var materialExtension = new KhrTechniquesWebglMaterialExtension();
-            var assetExtension = new MaterialAssetExtension() { version = "5.0", minVersion = "5.0" };
+            var assetExtension = new MaterialAssetExtension() { version = "5.0", minVersion = "5.0", renderQueue = source.renderQueue };
             //
             data.values = materialExtension.values;
             data.technique = technique;
@@ -107,7 +106,7 @@ namespace Egret3DExportTools
             var techniqueExt = new KhrTechniqueWebglGlTfExtension();
 
             techniqueExt.techniques.Add(technique);
-            if(this._root.Extensions.ContainsKey(AssetVersionExtension.EXTENSION_NAME))
+            if (this._root.Extensions.ContainsKey(AssetVersionExtension.EXTENSION_NAME))
             {
                 this._root.Extensions.Remove(AssetVersionExtension.EXTENSION_NAME);
             }
@@ -120,6 +119,16 @@ namespace Egret3DExportTools
         {
             var shaderName = this._material.shader.name;
             var customShaderConfig = ExportSetting.instance.GetCustomShader(shaderName);
+
+            if (shaderName == "Skybox/6 Sided")
+            {
+                return MaterialType.Skybox;
+            }
+
+            if (shaderName == "Skybox/Cubemap")
+            {
+                return MaterialType.Skybox_Cubed;
+            }
 
             if (this._isParticle)
             {

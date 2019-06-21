@@ -43,25 +43,10 @@
         {
             JObject ext = new JObject();
 
-            ext.Add(new JProperty(
-                "type",
-                type
-            ));
-
-            ext.Add(new JProperty(
-                "property",
-                property
-            ));
-
-            ext.Add(new JProperty(
-                "uri",
-                uri
-            ));
-
-            ext.Add(new JProperty(
-                "needUpdate",
-                needUpdate
-            ));
+            ext.SetString("type", type);
+            ext.SetString("property", property);
+            ext.SetString("uri", uri);
+            ext.SetInt("needUpdate", needUpdate);
 
             return new JProperty(AnimationExtension.EXTENSION_NAME, ext);
         }
@@ -86,11 +71,7 @@
         public JProperty Serialize()
         {
             JObject ext = new JObject();
-
-            ext.Add(new JProperty(
-                    "frameRate",
-                    frameRate
-                ));
+            ext.SetNumber("frameRate", frameRate);
 
             if (clips.Count > 0)
             {

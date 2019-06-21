@@ -4,9 +4,9 @@ namespace Egret3DExportTools
     using GLTF.Schema;
     using UnityEngine;
 
-    public class GLTFTextureSerializer : AssetSerializer
+    public class GLTFTextureArraySerializer : AssetSerializer
     {
-        private UnityEngine.Texture2D texture;
+        private Texture2DArrayData textureArray;
 
         protected override void InitGLTFRoot()
         {
@@ -14,7 +14,7 @@ namespace Egret3DExportTools
 
             this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
             this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
-            
+
             this._root.Images = new List<Image>();
             this._root.Samplers = new List<Sampler>();
             this._root.Textures = new List<GLTF.Schema.Texture>();
@@ -22,33 +22,42 @@ namespace Egret3DExportTools
 
         private void ExportTexture()
         {
-            var tex = this.texture;
-            var path = PathHelper.GetTexturePath(tex);
-            byte[] bs = ExportImage.Export(tex);
-            if (!SerializeObject.assetsData.ContainsKey(path))
+            foreach (var tex in this.textureArray.textures)
             {
-                var assetData = AssetData.Create(path);
-                assetData.buffer = bs;
-                SerializeObject.assetsData.Add(path, assetData);
+                var path = PathHelper.GetTexturePath(tex);
+                byte[] bs = ExportImage.Export(tex);
+                if (!SerializeObject.assetsData.ContainsKey(path))
+                {
+                    var assetData = AssetData.Create(path);
+                    assetData.buffer = bs;
+                    SerializeObject.assetsData.Add(path, assetData);
+                }
             }
         }
 
         protected override void Serialize(UnityEngine.Object sourceAsset)
         {
-            this.texture = sourceAsset as UnityEngine.Texture2D;
+            this.textureArray = sourceAsset as Texture2DArrayData;
+            var firstTexture = this.textureArray.textures[0];
             //先把原始图片导出来
             this.ExportTexture();
 
-            var path = PathHelper.GetTexturePath(this.texture);
-            var mipmap = this.texture.mipmapCount > 1;
+            var mipmap = firstTexture.mipmapCount > 1;
             //
             {
-                this._root.Images.Add(new Image() { Uri = ExportSetting.instance.GetExportPath(path) });
+                var image = new Image();
+                image.Uris = new List<string>();
+                foreach (var tex in this.textureArray.textures)
+                {
+                    image.Uris.Add(ExportSetting.instance.GetExportPath(PathHelper.GetTexturePath(tex)));
+                }
+                this._root.Images.Add(image);
+
             }
             //
             {
-                var filterMode = this.texture.filterMode;
-                var wrapMode = this.texture.wrapMode;
+                var filterMode = firstTexture.filterMode;
+                var wrapMode = firstTexture.wrapMode;
 
                 var sampler = new Sampler();
                 this._root.Samplers.Add(sampler);
@@ -91,9 +100,14 @@ namespace Egret3DExportTools
                     {
                         TextureExtension.EXTENSION_NAME,
                         new TextureExtension(){
-                            anisotropy = this.texture.anisoLevel,
+                            width = firstTexture.width,
+                            height = firstTexture.height,
                             format = GetTextureFormat(),
-                            levels = mipmap ? 0 : 1
+                            levels = mipmap ? 0 : 1,
+                            encoding = 2,
+                            faces = 6,
+                            mapping = 1,
+                            anisotropy = firstTexture.anisoLevel,
                         }
                     }
                 };
@@ -102,8 +116,9 @@ namespace Egret3DExportTools
 
         public int GetTextureFormat()
         {
-            var texExt = PathHelper.GetTextureExt(this.texture);
-            var format = this.texture.format;
+            var firstTexture = this.textureArray.textures[0];
+            var texExt = PathHelper.GetTextureExt(firstTexture);
+            var format = firstTexture.format;
             if (format == TextureFormat.Alpha8)
             {
                 return 6409;

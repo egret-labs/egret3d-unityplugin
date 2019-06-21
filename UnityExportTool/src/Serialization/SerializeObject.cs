@@ -26,21 +26,17 @@ namespace Egret3DExportTools
         public const string LightShadow = "LightShadow";
         public const string AssetEntity = "AssetEntity";
         public const string Defines = "Defines";
+        public const string Skybox = "Skybox";
 
         //        
         public const string Texture2D = "Texture2D";
+        // public const string Texture2DArray = "Texture2DArray";
+        public const string Cubemap = "Cubemap";
         public const string Material = "Material";
         public const string Mesh = "Mesh";
         public const string AnimationClip = "AnimationClip";
     }
 
-    public enum AssetType
-    {
-        Texture,
-        Material,
-        Mesh,
-        Animation
-    }
     public static class SerializeObject
     {
         public static SerializeContext currentData = new SerializeContext();
@@ -69,7 +65,7 @@ namespace Egret3DExportTools
         {
             parser.compType = compType;
             parser.className = className;
-            if(!assetParsers.ContainsKey(compType.Name))
+            if (!assetParsers.ContainsKey(compType.Name))
             {
                 assetParsers.Add(compType.Name, parser);
             }
@@ -103,10 +99,13 @@ namespace Egret3DExportTools
             RegisterComponent(new TransformSerializer(), typeof(UnityEngine.Transform), SerializeClass.Transform);
             RegisterComponent(new DirectionalLightSerializer(), typeof(UnityEngine.Light), SerializeClass.DirectionalLight);
             RegisterComponent(new SpotLightSerializer(), typeof(UnityEngine.Light), SerializeClass.SpotLight);
+            RegisterComponent(new SkyboxSerializer(), typeof(UnityEngine.Skybox), SerializeClass.Skybox);
 
             //初始化资源
             assetParsers.Clear();
             RegisterAsset(new GLTFTextureSerializer(), typeof(UnityEngine.Texture2D), SerializeClass.Texture2D);
+            RegisterAsset(new GLTFTextureArraySerializer(), typeof(Texture2DArrayData), SerializeClass.Texture2D);
+            RegisterAsset(new GLTFCubemapSerializer(), typeof(UnityEngine.Cubemap), SerializeClass.Cubemap);
             RegisterAsset(new GLTFMeshSerializer(), typeof(UnityEngine.Mesh), SerializeClass.Mesh);
             RegisterAsset(new GLTFMaterialSerializer(), typeof(UnityEngine.Material), SerializeClass.Material);
             RegisterAsset(new GLTFAnimationClipSerializer(), typeof(UnityEngine.AnimationClip), SerializeClass.AnimationClip);

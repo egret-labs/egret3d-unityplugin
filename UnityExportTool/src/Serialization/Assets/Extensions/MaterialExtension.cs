@@ -254,7 +254,7 @@ namespace Egret3DExportTools
         {
             JObject ext = new JObject();
 
-            ext.Add(new JProperty("technique", this.technique));
+            ext.SetInt("technique", this.technique);
             if (this.values.Count != 0)
             {
                 ext.Add("values", this.values);
@@ -266,6 +266,7 @@ namespace Egret3DExportTools
 
     public class MaterialAssetExtension : AssetVersionExtension
     {
+        public int renderQueue = 3000;
         public string asset = "";
         public List<Define> defines = new List<Define>();
         public override JProperty Serialize()
@@ -284,7 +285,7 @@ namespace Egret3DExportTools
             assetEntity.Add(new JProperty(SerizileData.KEY_UUID, "0"));
             assetEntity.Add(new JProperty(SerizileData.KEY_CLASS, SerializeClass.AssetEntity));
             var entityComps = new JArray();
-            entityComps.Add(new JObject(new JProperty(SerizileData.KEY_UUID, "1")));
+            entityComps.Add(new JProperty(SerizileData.KEY_UUID, "1"));
             if (hasDefine)
             {
                 entityComps.Add(new JObject(new JProperty(SerizileData.KEY_UUID, "2")));
@@ -297,8 +298,8 @@ namespace Egret3DExportTools
             if (hasDefine)
             {
                 var define = new JObject();
-                define.Add(new JProperty(SerizileData.KEY_UUID, "1"));
-                define.Add(new JProperty(SerizileData.KEY_CLASS, SerializeClass.Defines));
+                define.SetString(SerizileData.KEY_UUID, "1");
+                define.SetString(SerizileData.KEY_CLASS, SerializeClass.Defines);
 
                 var defineData = new JArray();
                 foreach (var d in this.defines)
@@ -312,12 +313,13 @@ namespace Egret3DExportTools
             }
 
             var material = new JObject();
-            material.Add(new JProperty(SerizileData.KEY_UUID, hasDefine ? "2" : "1"));
-            material.Add(new JProperty(SerizileData.KEY_CLASS, SerializeClass.Material));
-            material.Add(new JProperty("glTF", 0));
+            material.SetString(SerizileData.KEY_UUID, hasDefine ? "2" : "1");
+            material.SetString(SerizileData.KEY_CLASS, SerializeClass.Material);
+            material.SetInt("renderQueue", this.renderQueue, 3000);
+            material.SetInt("glTF", 0);
 
             var shader = new JObject();
-            shader.Add(new JProperty(SerizileData.KEY_ASSET, 0));
+            shader.SetInt(SerizileData.KEY_ASSET, 0);
             material.Add(new JProperty("shader", shader));
             components.Add(material);
 

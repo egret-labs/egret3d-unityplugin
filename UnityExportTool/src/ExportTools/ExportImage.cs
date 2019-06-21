@@ -1,12 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace Egret3DExportTools
 {
     public static class ExportImage
     {
+        public static byte[] Export(Cubemap source)
+        {
+            byte[] bs = null;
+
+            return bs;
+        } 
         public static byte[] Export(Texture2D source)
         {
             var path = AssetDatabase.GetAssetPath(source);
