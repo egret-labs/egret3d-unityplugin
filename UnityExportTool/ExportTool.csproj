@@ -222,6 +222,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>E:\Software\Unity5.6.4f1\Editor\Data\MonoBleedingEdge\bin\mono E:\Software\Unity5.6.4f1\Editor\Data\MonoBleedingEdge\lib\mono\4.5\pdb2mdb.exe ExportTool.dll</PostBuildEvent>
+    <PostBuildEvent>E:\Software\Unity\Unity5.6.4f1\Editor\Data\MonoBleedingEdge\bin\mono E:\Software\Unity\Unity5.6.4f1\Editor\Data\MonoBleedingEdge\lib\mono\4.5\pdb2mdb.exe ExportTool.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>

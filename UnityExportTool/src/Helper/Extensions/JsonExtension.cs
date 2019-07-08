@@ -71,57 +71,57 @@ namespace Egret3DExportTools
         /**
          * 组件的公共部分，Vector2
          */
-        public static void SetVector2(this JContainer jsonNode, string desc, Vector2 data, Vector2? defalutValue = null, int? digits = null)
+        public static void SetVector2(this JContainer jsonNode, string desc, Vector2 value, Vector2? defalutValue = null, int? digits = null)
         {
-            if (data != defalutValue)
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
-                arr.AddNumber(data.x, digits);
-                arr.AddNumber(data.y, digits);
+                arr.AddNumber(value.x, digits);
+                arr.AddNumber(value.y, digits);
                 jsonNode.Add(new JProperty(desc, arr));
             }
         }
         /**
          * 组件的公共部分，Vector3
          */
-        public static void SetVector3(this JContainer jsonNode, string desc, Vector3 data, Vector3? defalutValue = null, int? digits = null)
+        public static void SetVector3(this JContainer jsonNode, string desc, Vector3 value, Vector3? defalutValue = null, int? digits = null)
         {
-            if (data != defalutValue)
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
-                arr.AddNumber(data.x, digits);
-                arr.AddNumber(data.y, digits);
-                arr.AddNumber(data.z, digits);
+                arr.AddNumber(value.x, digits);
+                arr.AddNumber(value.y, digits);
+                arr.AddNumber(value.z, digits);
                 jsonNode.Add(new JProperty(desc, arr));
             }
         }
         /**
          * 组件的公共部分 Vector4
          */
-        public static void SetVector4(this JContainer jsonNode, string desc, Vector4 data, Vector4? defalutValue = null, int? digits = null)
+        public static void SetVector4(this JContainer jsonNode, string desc, Vector4 value, Vector4? defalutValue = null, int? digits = null)
         {
-            if (data != defalutValue)
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
-                arr.AddNumber(data.x, digits);
-                arr.AddNumber(data.y, digits);
-                arr.AddNumber(data.z, digits);
-                arr.AddNumber(data.w, digits);
+                arr.AddNumber(value.x, digits);
+                arr.AddNumber(value.y, digits);
+                arr.AddNumber(value.z, digits);
+                arr.AddNumber(value.w, digits);
                 jsonNode.Add(new JProperty(desc, arr));
             }
         }
         /**
          * 组件的公共部分 Quaternion
          */
-        public static void SetQuaternion(this JContainer jsonNode, string desc, Quaternion data, Quaternion? defalutValue = null, int? digits = null)
+        public static void SetQuaternion(this JContainer jsonNode, string desc, Quaternion value, Quaternion? defalutValue = null, int? digits = null)
         {
-            if (data != defalutValue)
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
-                arr.AddNumber(data.x, digits);
-                arr.AddNumber(data.y, digits);
-                arr.AddNumber(data.z, digits);
-                arr.AddNumber(data.w, digits);
+                arr.AddNumber(value.x, digits);
+                arr.AddNumber(value.y, digits);
+                arr.AddNumber(value.z, digits);
+                arr.AddNumber(value.w, digits);
                 jsonNode.Add(new JProperty(desc, arr));
             }
         }
@@ -130,7 +130,7 @@ namespace Egret3DExportTools
          */
         public static void SetColor(this JContainer jsonNode, string desc, Color value, Color? defalutValue = null, int? digits = null)
         {
-            if (value != defalutValue)
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
                 arr.AddNumber(value.r, digits);
@@ -141,8 +141,8 @@ namespace Egret3DExportTools
             }
         }
         public static void SetColor3(this JContainer jsonNode, string desc, Color value, Color? defalutValue = null, int? digits = null)
-        {
-            if (value != defalutValue)
+        {            
+            if (defalutValue == null || (defalutValue != null && !value.Equals(defalutValue)))
             {
                 JArray arr = new JArray();
                 arr.AddNumber(value.r, digits);

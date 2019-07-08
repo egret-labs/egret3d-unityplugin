@@ -12,11 +12,20 @@ namespace Egret3DExportTools
             SerializeObject.Clear();
             string prefabPath = "Assets/" + curObj.name + ".prefab.json";
             //如果是Unity预制体那么就导出所在目录，如果是场景的一个普通GameObject,那么导出Assets下
-            if (UnityEditor.PrefabUtility.GetPrefabType(curObj) == UnityEditor.PrefabType.PrefabInstance)
-            {
-                UnityEngine.Object parentObject = UnityEditor.PrefabUtility.GetPrefabParent(curObj);
-                prefabPath = UnityEditor.AssetDatabase.GetAssetPath(parentObject) + ".json";
-            }
+
+            #if UNITY_2018_4_OR_NEWER
+                if (UnityEditor.PrefabUtility.GetPrefabAssetType(curObj) == UnityEditor.PrefabAssetType.Variant)
+                {
+                    UnityEngine.Object parentObject = UnityEditor.PrefabUtility.GetPrefabInstanceHandle(curObj);
+                    prefabPath = UnityEditor.AssetDatabase.GetAssetPath(parentObject) + ".json";
+                }
+            #else
+                if (UnityEditor.PrefabUtility.GetPrefabType(curObj) == UnityEditor.PrefabType.PrefabInstance)
+                {
+                    UnityEngine.Object parentObject = UnityEditor.PrefabUtility.GetPrefabParent(curObj);
+                    prefabPath = UnityEditor.AssetDatabase.GetAssetPath(parentObject) + ".json";
+                }
+            #endif
             //保存路径
             PathHelper.SetSceneOrPrefabPath(prefabPath);
             //预制体坐标归零，直接改坐标

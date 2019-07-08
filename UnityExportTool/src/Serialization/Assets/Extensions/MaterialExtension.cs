@@ -285,7 +285,7 @@ namespace Egret3DExportTools
             assetEntity.Add(new JProperty(SerizileData.KEY_UUID, "0"));
             assetEntity.Add(new JProperty(SerizileData.KEY_CLASS, SerializeClass.AssetEntity));
             var entityComps = new JArray();
-            entityComps.Add(new JProperty(SerizileData.KEY_UUID, "1"));
+            entityComps.Add(new JObject(new JProperty(SerizileData.KEY_UUID, "1")));
             if (hasDefine)
             {
                 entityComps.Add(new JObject(new JProperty(SerizileData.KEY_UUID, "2")));

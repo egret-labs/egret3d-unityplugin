@@ -8,12 +8,7 @@ namespace Egret3DExportTools
         protected override bool Match(Component component)
         {
             Light comp = component as Light;
-            if (comp.type != LightType.Spot)
-            {
-                return false;
-            }
-
-            return true;
+            return comp.type == LightType.Spot;
         }
         protected override void Serialize(Component component, ComponentData compData)
         {

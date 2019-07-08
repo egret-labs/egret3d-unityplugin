@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 
 namespace Egret3DExportTools
 {
@@ -14,17 +13,19 @@ namespace Egret3DExportTools
             Quaternion localRotation = comp.localRotation;
             Vector3 localScale = comp.localScale;
 
-            compData.properties.SetString("name", obj.name);
-            compData.properties.SetString("tag", obj.tag);
-            compData.properties.SetInt("layer", 1 << obj.layer);
             compData.properties.SetBool("isStatic", obj.isStatic);
             //localPosition
             compData.properties.SetVector3("_localPosition", localPosition);
             //localRotation
             compData.properties.SetQuaternion("_localRotation", localRotation);
             //localScale
-            compData.properties.SetVector3("_localScale", localScale);
+            compData.properties.SetVector3("_localScale", localScale);            
 
+            //
+            var treeNode = SerializeObject.currentData.CreateComponent(SerializeClass.TreeNode);
+            treeNode.properties.SetString("name", obj.name);
+            treeNode.properties.SetString("tag", obj.tag);
+            treeNode.properties.SetInt("layer", 1 << obj.layer);
             if (comp.childCount > 0)
             {
                 for (int i = 0; i < comp.childCount; i++)
@@ -33,10 +34,13 @@ namespace Egret3DExportTools
                     if (child.gameObject.activeInHierarchy)
                     {
                         var childEntity = SerializeObject.SerializeEntity(child);
-                        (compData as ComponentData).AddChild(childEntity.transform);
+                        treeNode.AddChild(childEntity.treeNode);
                     }
                 }
             }
+
+            compData.entity.AddComponent(treeNode);
+
         }
     }
 }

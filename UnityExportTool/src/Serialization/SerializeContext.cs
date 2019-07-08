@@ -4,7 +4,6 @@ namespace Egret3DExportTools
     using System.IO;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using UnityEngine;
 
     public interface ISerizileData
     {
@@ -33,7 +32,7 @@ namespace Egret3DExportTools
     }
     public class EntityData : SerizileData
     {
-        public ComponentData transform;
+        public ComponentData treeNode;
         public List<ComponentData> components = new List<ComponentData>();
 
         public void AddComponent(ComponentData comp)
@@ -43,13 +42,13 @@ namespace Egret3DExportTools
                 this.components.Add(comp);
             }
 
-            if (comp.__class == SerializeClass.Transform || comp.__class == SerializeClass.TreeNode)
+            if (comp.__class == SerializeClass.TreeNode)
             {
-                if (this.transform != null)
+                if (this.treeNode != null)
                 {
                     MyLog.LogWarning("一个实体多个transform组件");
                 }
-                this.transform = comp;
+                this.treeNode = comp;
             }
 
             comp.entity = this;

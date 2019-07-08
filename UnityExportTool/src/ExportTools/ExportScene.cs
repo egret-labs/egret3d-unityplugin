@@ -58,7 +58,7 @@ namespace Egret3DExportTools
                 var childEntity = SerializeObject.SerializeEntity(child);
                 if (childEntity != null)
                 {
-                    treeComp.AddChild(childEntity.transform);
+                    treeComp.AddChild(childEntity.treeNode);
                 }
             }
 

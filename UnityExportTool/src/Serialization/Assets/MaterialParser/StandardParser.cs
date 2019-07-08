@@ -8,9 +8,9 @@ namespace Egret3DExportTools
         {
             var roughness = 1.0f - this.source.GetFloat("_Glossiness", 0.0f);
             var metalness = this.source.GetFloat("_Metallic", 0.0f);
-            var emissive = this.source.GetColor("_EmissionColor", Color.black);
+            var emissive = this.source.GetColor("_EmissionColor", Color.clear);
 
-            this.data.values.SetColor3("emissive", emissive, Color.black);
+            this.data.values.SetColor3("emissive", emissive, Color.clear);
             this.data.values.SetNumber("roughness", roughness, 0.5f);
             this.data.values.SetNumber("metalness", metalness, 0.5f);
 
@@ -26,6 +26,11 @@ namespace Egret3DExportTools
             base.CollectUniformValues();
             var source = this.source;
             this.StandardBegin();
+            var color = this.source.GetColor("_Color", Color.white);
+            if (color != null)
+            {
+                this.data.values.SetColor3("diffuse", color, Color.white);
+            }
             var map = this.source.GetTexture("_MainTex", null);
             if (map != null)
             {
@@ -66,7 +71,7 @@ namespace Egret3DExportTools
                 this.data.values.SetTexture("displacementMap", displacementMap);
                 this.data.values.SetNumber("displacementScale", this.source.GetFloat("_Parallax", 1.0f), 1.0f);
                 this.data.values.SetNumber("displacementBias", 0.0f, 0.0f);
-            }            
+            }
         }
 
         public override void CollectDefines()
