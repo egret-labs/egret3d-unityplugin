@@ -53,10 +53,10 @@ namespace Egret3DExportTools
                     {
                         bs = exportTexture.EncodeToJPG(textureSetting.jpgQuality);
                     }
-                    else if (ext == "exr")
-                    {
-                        bs = exportTexture.EncodeToEXR();
-                    }
+                    // else if (ext == "exr")
+                    // {
+                    //     bs = exportTexture.EncodeToEXR();
+                    // }
                     else
                     {
                         bs = exportTexture.EncodeToPNG();
