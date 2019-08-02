@@ -41,8 +41,28 @@ namespace Egret3DExportTools
     }
     [JsonObject(MemberSerialization.OptOut)]
     public class LightSetting
-    {
+    {   
+        /**
+        *光照类型
+        */
         public ExportLightType type = ExportLightType.None;
+    }
+
+    [JsonObject(MemberSerialization.OptOut)]
+    public class SceneSetting
+    {
+        /**
+        *导出光照贴图
+        */
+        public bool lightmap = true;
+        /**
+        *开启场景静态合并
+        */
+        public bool staticBatching = true;
+        /**
+        *场景雾
+        */
+        public bool fog = true;
     }
 
     [JsonObject(MemberSerialization.OptOut)]
@@ -125,6 +145,8 @@ namespace Egret3DExportTools
         public string rootName = "Assets";
         public CommonSetting common = new CommonSetting();
         public LightSetting light = new LightSetting();
+
+        public SceneSetting scene = new SceneSetting();
         public TextureSetting texture = new TextureSetting();
         public MeshSetting mesh = new MeshSetting();
         public Dictionary<string, ShaderSetting> shader = new Dictionary<string, ShaderSetting>();

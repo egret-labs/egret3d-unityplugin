@@ -27,15 +27,26 @@ namespace Egret3DExportTools
             treeComp.properties.SetReference("scene", sceneComp.uuid);
             sceneEntity.AddComponent(treeComp);
 
+            var sceneSetting = ExportSetting.instance.scene;
             // 环境光和光照贴图
             var sceneLightComp = SerializeObject.currentData.CreateComponent(SerializeClass.SceneLight);
             sceneLightComp.properties.SetColor("ambientColor", RenderSettings.ambientLight);
-            sceneLightComp.properties.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
-            sceneLightComp.properties.SetLightmaps(exportPath);
+            if(sceneSetting.lightmap)
+            {
+                sceneLightComp.properties.SetNumber("lightmapIntensity", UnityEditor.Lightmapping.indirectOutputScale);
+                sceneLightComp.properties.SetLightmaps(exportPath);
+            }
+            
             sceneEntity.AddComponent(sceneLightComp);
 
+            if(sceneSetting.staticBatching)
+            {
+                var staticBatching = SerializeObject.currentData.CreateComponent(SerializeClass.StaticBatching);
+                sceneEntity.AddComponent(staticBatching);
+            }
+
             // 雾
-            if (RenderSettings.fog)
+            if (RenderSettings.fog && sceneSetting.fog)
             {
                 var fogComp = SerializeObject.currentData.CreateComponent(SerializeClass.Fog);
                 if (RenderSettings.fogMode == FogMode.Linear)

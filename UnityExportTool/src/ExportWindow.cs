@@ -80,6 +80,7 @@ namespace Egret3DExportTools
         private bool _resourceToolOpen = false;//资源
         private bool _sceneToolOpen = false;//场景
         private bool _lightSetting = true;
+        private bool _sceneSetting = false;
         private bool _textureSetting = false;
         private bool _meshSetting = false;
 
@@ -137,6 +138,20 @@ namespace Egret3DExportTools
                     var lightSetting = ExportSetting.instance.light;
                     lightSetting.type = (ExportLightType)EditorGUILayout.EnumPopup(lightSetting.type, GUILayout.MaxWidth(100));
                     GUILayout.EndVertical();
+                }
+            }
+
+            GUILayout.Space(SMALL_SPACE);
+            {
+                this._sceneSetting = EditorGUILayout.Foldout(this._sceneSetting, "场景设置");
+                if (this._sceneSetting)
+                {
+                    GUILayout.BeginHorizontal();
+                    var sceneSetting = ExportSetting.instance.scene;
+                    sceneSetting.lightmap = GUILayout.Toggle(sceneSetting.lightmap, new GUIContent("光照贴图", "勾选后，如果场景有光照贴图，就会导出光照贴图"));
+                    sceneSetting.staticBatching = GUILayout.Toggle(sceneSetting.staticBatching, new GUIContent("静态合并", "勾选后，场景加载完毕后会尝试静态合并。"));
+                    sceneSetting.fog = GUILayout.Toggle(sceneSetting.fog, new GUIContent("雾", "勾选后，如果场景开启了雾，则会导出对应的参数。"));
+                    GUILayout.EndHorizontal();
                 }
             }
 

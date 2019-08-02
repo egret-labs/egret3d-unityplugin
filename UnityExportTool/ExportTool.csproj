@@ -157,7 +157,6 @@
     <Compile Include="src\Helper\PathHelper.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AnimationExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\AssetVersion.cs" />
-    <Compile Include="src\Serialization\Assets\Extensions\CoordinateSystemExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\MaterialExtension.cs" />
     <Compile Include="src\Serialization\Assets\Extensions\TextureExtension.cs" />
     <Compile Include="src\Serialization\Assets\GLTFAnimationClipSerializer.cs" />

@@ -27,6 +27,7 @@ namespace Egret3DExportTools
         public const string AssetEntity = "AssetEntity";
         public const string Defines = "Defines";
         public const string Skybox = "Skybox";
+        public const string StaticBatching = "StaticBatching";
 
         //        
         public const string Texture2D = "Texture2D";
