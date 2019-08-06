@@ -30,7 +30,7 @@ namespace Egret3DExportTools
             ParticleSystem c = obj.GetComponent<ParticleSystem>();
             compData.properties.SetNumber("velocityScale", comp.velocityScale);
             compData.properties.SetNumber("lengthScale", comp.lengthScale);
-            compData.properties.SetEnum("_renderMode", comp.renderMode);
+            compData.properties.SetEnum("renderMode", comp.renderMode);
             //Mesh
             compData.properties.SetMesh(obj, comp.mesh);
             //Material粒子系统不支持多材质
