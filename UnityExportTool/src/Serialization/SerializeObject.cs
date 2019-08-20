@@ -124,7 +124,7 @@ namespace Egret3DExportTools
             {
                 return null;
             }
-
+            MyLog.Log("对象:" + obj.name);
             var entityData = currentData.CreateEntity();
             var components = obj.GetComponents<Component>();
 
@@ -148,7 +148,7 @@ namespace Egret3DExportTools
                     continue;
                 }
                 string compClass = comp.GetType().Name;
-                MyLog.Log("组件:" + compClass);
+                // MyLog.Log("组件:" + compClass);
                 if (!ExportSetting.instance.common.exportUnactivatedComp)
                 {
                     //利用反射查看组件是否激活，某些组件的enabled不再继承链上，只能用反射，比如BoxCollider
