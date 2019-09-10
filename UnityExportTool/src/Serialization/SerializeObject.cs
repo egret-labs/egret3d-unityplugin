@@ -6,36 +6,36 @@ namespace Egret3DExportTools
 {
     public static class SerializeClass
     {
-        public const string GameEntity = "GameEntity";
-        public const string Scene = "Scene";
-        public const string Fog = "Fog";
-        public const string SceneLight = "SceneLight";
-        public const string Animation = "Animation";
-        public const string BoxCollider = "BoxCollider";
-        public const string SphereCollider = "SphereCollider";
-        public const string Camera = "Camera";
-        public const string MeshFilter = "MeshFilter";
-        public const string MeshRenderer = "MeshRenderer";
-        public const string ParticleComponent = "ParticleComponent";
-        public const string ParticleRenderer = "ParticleRenderer";
-        public const string SkinnedMeshRenderer = "SkinnedMeshRenderer";
-        public const string TreeNode = "TreeNode";
-        public const string Transform = "Transform";
-        public const string DirectionalLight = "DirectionalLight";
-        public const string SpotLight = "SpotLight";
-        public const string LightShadow = "LightShadow";
-        public const string AssetEntity = "AssetEntity";
-        public const string Defines = "Defines";
-        public const string Skybox = "Skybox";
-        public const string StaticBatching = "StaticBatching";
+        public const string GameEntity = "@egret/engine/GameEntity";
+        public const string Scene = "@egret/engine/Scene";
+        public const string Fog = "@egret/render/Fog";
+        public const string SceneLight = "@egret/render/SceneLight";
+        public const string Animation = "@egret/animation/Animation";
+        public const string BoxCollider = "@egret/collision/BoxCollider";
+        public const string SphereCollider = "@egret/collision/SphereCollider";
+        public const string Camera = "@egret/render/Camera";
+        public const string MeshFilter = "@egret/render/MeshFilter";
+        public const string MeshRenderer = "@egret/render/MeshRenderer";
+        public const string ParticleComponent = "@egret/particle/ParticleComponent";
+        public const string ParticleRenderer = "@egret/particle/ParticleRenderer";
+        public const string SkinnedMeshRenderer = "@egret/render/SkinnedMeshRenderer";
+        public const string TreeNode = "@egret/engine/TreeNode";
+        public const string Transform = "@egret/engine/Transform";
+        public const string DirectionalLight = "@egret/render/DirectionalLight";
+        public const string SpotLight = "@egret/render/SpotLight";
+        public const string LightShadow = "@egret/render/LightShadow";
+        public const string AssetEntity = "@egret/core/AssetEntity";
+        public const string Defines = "@egret/render/Defines";
+        public const string Skybox = "@egret/render/Skybox";
+        public const string StaticBatching = "@egret/render/StaticBatching";
 
-        //        
-        public const string Texture2D = "Texture2D";
+        // asset  
+        public const string Texture2D = "@egret/render/Texture2D";
         // public const string Texture2DArray = "Texture2DArray";
-        public const string Cubemap = "Cubemap";
-        public const string Material = "Material";
-        public const string Mesh = "Mesh";
-        public const string AnimationClip = "AnimationClip";
+        public const string Cubemap = "@egret/render/Cubemap";
+        public const string Material = "@egret/render/Material";
+        public const string Mesh = "@egret/render/Mesh";
+        public const string AnimationClip = "@egret/render/AnimationClip";
     }
 
     public static class SerializeObject
