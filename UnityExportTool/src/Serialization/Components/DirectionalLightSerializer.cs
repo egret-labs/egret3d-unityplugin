@@ -17,6 +17,7 @@ namespace Egret3DExportTools
             compData.properties.SetBool("castShadows", comp.shadows != LightShadows.None);
             compData.properties.SetNumber("intensity", comp.intensity);
             compData.properties.SetColor("color", comp.color);
+            compData.properties.SetInt("cullingMask", comp.cullingMask);
 
             if (comp.shadows != LightShadows.None)
             {
