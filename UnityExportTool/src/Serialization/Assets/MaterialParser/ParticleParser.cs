@@ -1,6 +1,7 @@
 namespace Egret3DExportTools
 {
     using System.Collections.Generic;
+    using UnityEditor;
     using UnityEngine;
     public class ParticleParser : BaseMaterialParser
     {
@@ -11,6 +12,10 @@ namespace Egret3DExportTools
             var values = this.data.values;
 
             var tex = this.source.GetTexture("_MainTex", null);
+            if(tex == null)
+            {
+                tex = this.MainText;
+            }
             if (tex != null)
             {
                 this.data.values.SetTexture("map", tex);
@@ -35,6 +40,33 @@ namespace Egret3DExportTools
             }
             this.data.values.SetColor3("diffuse", color, Color.white);
             this.data.values.SetNumber("opacity", color.a, Color.white.a);
+        }
+
+        public override void CollectDefines()
+        {
+            base.CollectDefines();
+            this.data.asset.defines.Add(new Define() { name = "USE_COLOR" });
+        }
+
+        protected UnityEngine.Texture MainText
+        {
+            get
+            {
+                var orginmps = MaterialEditor.GetMaterialProperties(new UnityEngine.Object[] { source });
+                foreach (var mp in orginmps)
+                {
+                    if (mp.type.ToString() == "Texture")
+                    {
+                        var tex = source.GetTexture(mp.name);
+                        if (tex != null)
+                        {
+                            return tex;
+                        }
+                    }
+                }
+
+                return null;
+            }
         }
 
         protected override bool isDoubleSide

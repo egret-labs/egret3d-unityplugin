@@ -315,7 +315,7 @@ namespace Egret3DExportTools
             var material = new JObject();
             material.SetString(SerizileData.KEY_UUID, hasDefine ? "2" : "1");
             material.SetString(SerizileData.KEY_CLASS, SerializeClass.Material);
-            material.SetInt("renderQueue", this.renderQueue, 3000);
+            material.SetInt("renderQueue", this.renderQueue, 2000);
             material.SetInt("glTF", 0);
 
             var shader = new JObject();
