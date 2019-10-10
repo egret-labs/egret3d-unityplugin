@@ -11,7 +11,7 @@ namespace Egret3DExportTools
         {
             NONE, PREFAB, SCENE
         }
-        private const string VERSION = "v1.3.9";//版本号
+        private const string VERSION = "v1.4.0";//版本号
         private const float WIN_WIDTH = 500.0f;
         private const float WIN_HEIGHT = 400.0f;
         private const float SMALL_SPACE = 10.0f;
@@ -99,10 +99,10 @@ namespace Egret3DExportTools
         {
             this._scrollPosition = GUILayout.BeginScrollView(this._scrollPosition, GUILayout.Width(WIN_WIDTH), GUILayout.Height(WIN_HEIGHT));
             GUILayout.Space(SMALL_SPACE);
-            //------------------------目录选择------------------------
+            //------------------------路径选择------------------------
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("目录名称");
+                GUILayout.Label("根目录");
                 var dir = GUILayout.TextField(ExportSetting.instance.rootName);
                 if (dir != ExportSetting.instance.rootName)
                 {
@@ -113,7 +113,7 @@ namespace Egret3DExportTools
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.TextField(ExportSetting.instance.exportDir);
-                if (GUILayout.Button("导出目录", GUILayout.Width(100)))
+                if (GUILayout.Button("导出路径", GUILayout.Width(100)))
                 {
                     ExportSetting.instance.exportDir = EditorUtility.OpenFolderPanel("当前要导出的路径", Application.dataPath, "");
                 }
