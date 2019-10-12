@@ -58,7 +58,7 @@ namespace Egret3DExportTools
                 else
                 {
                     fogComp.properties.SetInt("mode", 1);
-                    fogComp.properties.SetNumber("far", RenderSettings.fogDensity);
+                    fogComp.properties.SetNumber("density", RenderSettings.fogDensity);
                 }
                 fogComp.properties.SetColor("color", RenderSettings.fogColor);
                 sceneEntity.AddComponent(fogComp);

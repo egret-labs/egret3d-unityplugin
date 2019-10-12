@@ -142,7 +142,7 @@ namespace Egret3DExportTools
         }
 
         public string exportDir = "";
-        public string rootName = "Assets";
+        public string rootName = "assets";
         public CommonSetting common = new CommonSetting();
         public LightSetting light = new LightSetting();
 
