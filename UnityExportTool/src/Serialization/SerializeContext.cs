@@ -4,6 +4,7 @@ namespace Egret3DExportTools
     using System.IO;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using UnityEngine;
 
     public interface ISerizileData
     {
@@ -197,6 +198,11 @@ namespace Egret3DExportTools
             {
                 foreach (var asset in SerializeObject.assetsData.Values)
                 {
+                    if (asset == null || asset.buffer == null)
+                    {
+                        Debug.Log("资源为空，跳过:" + asset.uri);
+                        continue;
+                    }
                     var relativePath = ExportSetting.instance.GetExportPath(asset.uri);
                     var filePath = PathHelper.CheckFileName(System.IO.Path.Combine(baseDir, relativePath));
                     var fileDir = PathHelper.GetFileDirectory(filePath);
@@ -217,7 +223,7 @@ namespace Egret3DExportTools
 
         private string GetUUID(System.Object obj)
         {
-            int unityHash= obj.GetHashCode();
+            int unityHash = obj.GetHashCode();
             int newHash;
             if (this._uuidDic.TryGetValue(unityHash, out newHash))
             {
@@ -235,7 +241,7 @@ namespace Egret3DExportTools
 
             this._uuidIndex = 0;
             this._uuidDic.Clear();
-        }        
+        }
 
         public EntityData CreateEntity()
         {
@@ -256,6 +262,11 @@ namespace Egret3DExportTools
 
         public int AddAsset(AssetData asset)
         {
+            if (asset == null || asset.buffer == null)
+            {
+                return this.assets.Count - 1;
+            }
+
             for (int i = 0, l = this.assets.Count; i < l; i++)
             {
                 var item = this.assets[i];

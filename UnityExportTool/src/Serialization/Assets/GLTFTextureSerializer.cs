@@ -14,7 +14,7 @@ namespace Egret3DExportTools
 
             this._root.ExtensionsRequired.Add(AssetVersionExtension.EXTENSION_NAME);
             this._root.ExtensionsUsed.Add(AssetVersionExtension.EXTENSION_NAME);
-            
+
             this._root.Images = new List<Image>();
             this._root.Samplers = new List<Sampler>();
             this._root.Textures = new List<GLTF.Schema.Texture>();

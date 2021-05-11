@@ -206,16 +206,25 @@ namespace Egret3DExportTools
         public static AssetData SerializeAsset(UnityEngine.Object obj)
         {
             var path = PathHelper.GetAssetPath(obj);
+            MyLog.Log("SerializeAsset path:" + path);
             if (assetsData.ContainsKey(path))
             {
+                MyLog.Log("has key:" + path);
                 return assetsData[path];
             }
 
             var assetData = AssetData.Create(path);
             assetsData.Add(path, assetData);
-            var parser = assetParsers[obj.GetType().Name];
-
-            parser.Serialize(obj, assetData);
+            var parserType = obj.GetType().Name;
+            if (!assetParsers.ContainsKey(parserType))
+            {
+                MyLog.Log("AssetData SerializeAsset 找不到该类型:" + parserType);
+            }
+            else
+            {
+                var parser = assetParsers[obj.GetType().Name];
+                parser.Serialize(obj, assetData);
+            }
             return assetData;
         }
     }

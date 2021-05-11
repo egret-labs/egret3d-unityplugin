@@ -10,7 +10,7 @@ namespace Egret3DExportTools
             byte[] bs = null;
 
             return bs;
-        } 
+        }
         public static byte[] Export(Texture2D source)
         {
             var path = AssetDatabase.GetAssetPath(source);
@@ -39,19 +39,19 @@ namespace Egret3DExportTools
                     }
                 }
 
-                var renderTexture = RenderTexture.GetTemporary(source.width, source.height);
-                Graphics.Blit(source, renderTexture);
-                RenderTexture.active = renderTexture;
-                var exportTexture = new Texture2D(source.width, source.height);
-                exportTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
-                exportTexture.Apply();
-
+                //var renderTexture = RenderTexture.GetTemporary(source.width, source.height);
+                //Graphics.Blit(source, renderTexture);
+                //RenderTexture.active = renderTexture;
+                //var exportTexture = new Texture2D(source.width, source.height);
+                //exportTexture.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+                //exportTexture.Apply();
+                var couldExportTex = DeCompress(source);
                 try
                 {
                     string ext = PathHelper.GetTextureExt(source);
                     if (ext == "jpg" || ext == "jpeg")
                     {
-                        bs = exportTexture.EncodeToJPG(textureSetting.jpgQuality);
+                        bs = couldExportTex.EncodeToJPG(textureSetting.jpgQuality);
                     }
                     // else if (ext == "exr")
                     // {
@@ -59,7 +59,7 @@ namespace Egret3DExportTools
                     // }
                     else
                     {
-                        bs = exportTexture.EncodeToPNG();
+                        bs = couldExportTex.EncodeToPNG();
                     }
                 }
                 catch (System.Exception e)
@@ -77,5 +77,29 @@ namespace Egret3DExportTools
 
             return bs;
         }
+        public static Texture2D DeCompress(Texture2D source)
+        {
+            MyLog.Log("DeCompress: " + source.name);
+            RenderTexture renderTex = RenderTexture.GetTemporary(
+                        source.width,
+                        source.height,
+                        0,
+                        RenderTextureFormat.Default,
+                        RenderTextureReadWrite.Linear);
+
+            Graphics.Blit(source, renderTex);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture.active = renderTex;
+            Texture2D readableText = new Texture2D(source.width, source.height);
+            readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
+            readableText.Apply();
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(renderTex);
+            return readableText;
+        }
     }
+
+
+
+
 }
